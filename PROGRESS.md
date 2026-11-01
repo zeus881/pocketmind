@@ -73,9 +73,18 @@ Detekt 1.23.8. Full list: `gradle/libs.versions.toml`.
 - Phase 8: env-var signing, release.yml, network security config, biometric lock, AboutLibraries licences, Hindi,
   privacy policy, README, CHANGELOG, final review fixes (see docs/learn/phase-8.md → Review fixes).
 
+## Real-device verification (2026-11-02)
+
+- iQOO Neo 10R (I2221, SM8635 Snapdragon 8s Gen 3, 8 GB, Android 16), debug APK installed over wireless adb.
+- Onboarding → model screen recommended Gemma 4 E2B (8 GB) ✓. Gemma 4 E2B + EmbeddingGemma downloaded,
+  exact byte sizes, SHA-256 verified (renamed to model.litertlm) ✓.
+- Chat: model loaded on **GPU in 13.3 s**; streamed Markdown answer; auto-title ✓; **21.7 tok/s · GPU** ✓. No crashes.
+- Still to check on device: offline/airplane mode, history, summarize, Ask-your-PDF, translate, benchmark,
+  app lock, and the R8 release build.
+
 ## Open issues
 
-- Real-device verification pending (see above).
+- Remaining real-device checks listed above.
 - `docs/benchmarks.md` and README benchmark table are empty until measured on phones (by design: no invented numbers).
 
 ## BLOCKERS

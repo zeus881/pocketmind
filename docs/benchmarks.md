@@ -15,6 +15,19 @@ Empty cells mean "not measured yet" — never estimate them.
 How to fill a row: run the benchmark, tap Share, copy the numbers from the shared text. Values marked
 `*` in the shared text are estimates (the runtime's counters were unavailable) — mark them the same way here.
 
+## First real-device observations (single chat answer, not the benchmark screen)
+
+Measured 2026-11-02 on an iQOO Neo 10R (model I2221, Qualcomm SM8635 / Snapdragon 8s Gen 3, 8 GB RAM,
+Android 16), debug build, Gemma 4 E2B:
+
+| Metric | Value | Source |
+|---|---|---|
+| Model load (first, cold) | 13.3 s on GPU | app log `Model loaded on GPU in 13282 ms` |
+| Decode speed, one chat answer | 21.7 tok/s · GPU | label under the answer |
+
+These are single observations from a debug build; use the benchmark screen (3 fixed prompts, greedy
+decoding) for the comparable numbers in the table above.
+
 ## Startup (Macrobenchmark, `./gradlew :benchmark:connectedBenchmarkReleaseAndroidTest`)
 
 | Phone | Cold start, no profile (median ms) | Cold start, Baseline Profile (median ms) | Improvement |
