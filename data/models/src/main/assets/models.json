@@ -1,0 +1,46 @@
+[
+  {
+    "id": "gemma-4-e2b",
+    "displayName": "Gemma 4 E2B",
+    "description": "Google's best small model. Strongest answers. Needs a phone with 8 GB RAM.",
+    "kind": "CHAT",
+    "url": "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/1caa527c1e88b55f046fcd8d2b4265606680663d/gemma-4-E2B-it.litertlm",
+    "sizeBytes": 2588147712,
+    "sha256": "181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c",
+    "minRamGb": 8,
+    "license": "Apache-2.0"
+  },
+  {
+    "id": "qwen3.5-0.8b",
+    "displayName": "Qwen3.5 0.8B",
+    "description": "Balanced size and quality for phones with 6 GB RAM.",
+    "kind": "CHAT",
+    "url": "https://huggingface.co/litert-community/Qwen3.5-0.8B/resolve/0edf7e8cac6bbd035b4516c4303e2c0518391e4b/Qwen3.5-0.8B_int8.litertlm",
+    "sizeBytes": 964566992,
+    "sha256": "25447e2550082aed6145bbc755ec4da5d535f98f6a0c386865fdae2ccb88aed1",
+    "minRamGb": 6,
+    "license": "Apache-2.0"
+  },
+  {
+    "id": "qwen3-0.6b",
+    "displayName": "Qwen3 0.6B (lite)",
+    "description": "Smallest and fastest. Works on phones with 4 GB RAM; simpler answers.",
+    "kind": "CHAT",
+    "url": "https://huggingface.co/litert-community/Qwen3-0.6B/resolve/2670e142a0d16a1b685be6604e5b4f2b31a826d7/Qwen3-0.6B.litertlm",
+    "sizeBytes": 613722264,
+    "sha256": "c5f39b4191926786c3e6668b62af4d6eb15248dfc7a5348252a9b406f33f2108",
+    "minRamGb": 4,
+    "license": "Apache-2.0"
+  },
+  {
+    "id": "embeddinggemma-2-270m",
+    "displayName": "EmbeddingGemma 2 (270M)",
+    "description": "Turns text into vectors so you can ask questions about your PDFs.",
+    "kind": "EMBEDDING",
+    "url": "https://huggingface.co/litert-community/embeddinggemma-2-text-270m-litert-lm/resolve/9be6e8b90982095dc05c2bd162e4b954ee4dbac7/embeddinggemma-2-text-270m.litertlm",
+    "sizeBytes": 164626432,
+    "sha256": "2d079ee2f6f066b1f368e8d7c819f55214eaef1d0513b312321901f30ab286fb",
+    "minRamGb": 4,
+    "license": "Apache-2.0"
+  }
+]

@@ -5,3 +5,11 @@ plugins {
 android {
     namespace = "com.manjit.pocketmind.feature.onboarding"
 }
+
+dependencies {
+    implementation(projects.data.models)
+    implementation(projects.core.datastore)
+
+    testImplementation(projects.core.testing)
+    testImplementation(libs.androidx.datastore.preferences)
+}

@@ -2,6 +2,8 @@ package com.manjit.pocketmind
 
 import android.app.Application
 import android.content.ComponentCallbacks2
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import com.manjit.pocketmind.core.common.dispatchers.ApplicationScope
 import com.manjit.pocketmind.core.llm.LlmEngine
 import dagger.hilt.android.HiltAndroidApp
@@ -13,16 +15,25 @@ import timber.log.Timber
 /**
  * The Application object: Android creates exactly one per app process, before any screen.
  *
- * `@HiltAndroidApp` makes Hilt generate the app-wide dependency container here. Every
- * `@Inject` in the app is ultimately served from this container.
+ * - `@HiltAndroidApp` generates the app-wide dependency container.
+ * - `Configuration.Provider` lets WorkManager create our workers through Hilt
+ *   ([HiltWorkerFactory]), so `ModelDownloadWorker` can get its dependencies injected.
+ *   (WorkManager's automatic start-up is disabled in the manifest for this to work.)
  */
 @HiltAndroidApp
-class PocketMindApp : Application() {
+class PocketMindApp :
+    Application(),
+    Configuration.Provider {
 
     @Inject lateinit var llmEngine: LlmEngine
 
     @Inject @ApplicationScope
     lateinit var appScope: CoroutineScope
+
+    @Inject lateinit var workerFactory: HiltWorkerFactory
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
     override fun onCreate() {
         super.onCreate()

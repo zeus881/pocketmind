@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_onboarding_title">Welcome</string>
+    <string name="feature_onboarding_what_title">An AI assistant that lives on your phone</string>
+    <string name="feature_onboarding_what_body">Chat, summarize PDFs, ask questions about documents and translate — all powered by a language model running on this phone.</string>
+    <string name="feature_onboarding_privacy_title">Private by design</string>
+    <string name="feature_onboarding_privacy_body">No account. No cloud. No analytics. Your chats never leave this phone. The only internet use is the one-time model download.</string>
+    <string name="feature_onboarding_model_title">One download, then fully offline</string>
+    <string name="feature_onboarding_model_body">Your phone has %1$d GB of RAM. We recommend %2$s (%3$s). You can download it on Wi-Fi in the next step.</string>
+    <string name="feature_onboarding_model_body_generic">You will choose a model in the next step. Models are between 0.6 and 2.6 GB.</string>
+    <string name="feature_onboarding_disclaimer_title">Answers can be wrong</string>
+    <string name="feature_onboarding_disclaimer_body">Small on-device models make mistakes and can sound confident when they are wrong. Check important facts, and do not rely on PocketMind for medical, legal or financial decisions.</string>
+    <string name="feature_onboarding_skip">Skip</string>
+    <string name="feature_onboarding_next">Next</string>
+    <string name="feature_onboarding_get_started">I understand — get started</string>
+    <string name="feature_onboarding_page_of">Page %1$d of %2$d</string>
 </resources>

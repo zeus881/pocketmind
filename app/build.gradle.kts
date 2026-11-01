@@ -35,7 +35,9 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.designsystem)
     implementation(projects.core.llm)
+    implementation(projects.core.datastore)
     implementation(projects.data.chat)
+    implementation(projects.data.models)
 
     implementation(projects.feature.chat)
     implementation(projects.feature.history)
@@ -52,6 +54,8 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.work.runtime)
+    implementation(libs.androidx.hilt.work)
 
     testImplementation(projects.core.testing)
     testImplementation(libs.turbine)

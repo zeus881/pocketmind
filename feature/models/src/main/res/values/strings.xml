@@ -1,4 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feature_models_title">Models</string>
+    <string name="feature_models_back">Back</string>
+    <string name="feature_models_device_ram">Your phone has %1$d GB of RAM</string>
+    <string name="feature_models_recommended_for_you">Recommended for this phone: %1$s</string>
+    <string name="feature_models_offline_note">A model is downloaded once. After that, everything works without internet.</string>
+    <string name="feature_models_mobile_data">Allow downloads on mobile data</string>
+    <string name="feature_models_mobile_data_hint">Off by default: models are large and use a lot of data.</string>
+    <string name="feature_models_chat_section">Chat models</string>
+    <string name="feature_models_embedding_section">For “Ask your PDF”</string>
+    <string name="feature_models_recommended">Recommended</string>
+    <string name="feature_models_in_use">In use</string>
+    <string name="feature_models_facts">%1$s · needs %2$d GB RAM · %3$s licence</string>
+    <string name="feature_models_download">Download</string>
+    <string name="feature_models_pause">Pause</string>
+    <string name="feature_models_resume">Resume</string>
+    <string name="feature_models_cancel">Cancel</string>
+    <string name="feature_models_retry">Try again</string>
+    <string name="feature_models_use">Use this model</string>
+    <string name="feature_models_delete">Delete</string>
+    <string name="feature_models_keep">Keep</string>
+    <string name="feature_models_delete_title">Delete %1$s?</string>
+    <string name="feature_models_delete_body">This frees %1$s. You can download it again later.</string>
+    <string name="feature_models_needs_ram">This phone needs at least %1$d GB of RAM for this model.</string>
+    <string name="feature_models_waiting_network">Waiting for Wi-Fi…</string>
+    <string name="feature_models_progress">%1$s of %2$s (%3$d%%)</string>
+    <string name="feature_models_failed_storage">Not enough free storage.</string>
+    <string name="feature_models_failed_checksum">The file was damaged during download and was deleted. Please try again.</string>
+    <string name="feature_models_failed_network">Download stopped: check your connection.</string>
+    <string name="feature_models_error_storage">Not enough space. Free up at least %1$s and try again.</string>
+    <string name="feature_models_error_generic">Something went wrong. Please try again.</string>
 </resources>

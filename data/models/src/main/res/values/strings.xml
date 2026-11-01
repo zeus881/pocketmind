@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_models_notification_channel">Model downloads</string>
+    <string name="data_models_notification_title">Downloading %1$s</string>
+    <string name="data_models_notification_progress">%1$d%% complete</string>
+    <string name="data_models_notification_pause">Pause</string>
+</resources>

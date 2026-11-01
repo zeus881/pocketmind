@@ -6,17 +6,4 @@
     <string name="nav_documents">Docs</string>
     <string name="nav_translate">Translate</string>
     <string name="nav_settings">Settings</string>
-
-    <!-- Temporary engine debug screen (phases 2–3, removed in phase 4) -->
-    <string name="debug_title">Engine test</string>
-    <string name="debug_load">Load model</string>
-    <string name="debug_prompt">Prompt</string>
-    <string name="debug_send">Send</string>
-    <string name="debug_stop">Stop</string>
-    <string name="debug_engine_idle">Model not loaded</string>
-    <string name="debug_engine_loading">Loading model… (can take 10–20 s)</string>
-    <string name="debug_engine_ready">Ready on %1$s, loaded in %2$d ms</string>
-    <string name="debug_engine_no_file">Model file not found: %1$s</string>
-    <string name="debug_engine_failed">The model could not be loaded on GPU or CPU.</string>
-    <string name="debug_stats">%1$.1f tok/s · %2$s · first token %3$d ms</string>
 </resources>
