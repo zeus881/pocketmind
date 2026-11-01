@@ -8,7 +8,7 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 |---|---|---|
 | 1 Skeleton, build, theme, nav, CI | DONE | feat(phase-1) |
 | 2 core:llm engine + debug screen | DONE | feat(phase-2) |
-| 3 Room, chat, history | in progress | |
+| 3 Room, chat, history | DONE | feat(phase-3) |
 | 4 Model manager, onboarding | pending | |
 | 5 Settings, benchmark, macrobenchmark | pending | |
 | 6 PDF summarize, translate | pending | |
@@ -58,7 +58,21 @@ Spotless 8.10.4 / ktlint 1.8.0 · Detekt 1.23.8. Full list: `gradle/libs.version
 - Phase 2: +17 tests (core:llm EngineMath/TokenEstimator/HistoryTrimmer, app DebugLlmViewModel with
   FakeLlmEngine, MemoryPressure). LiteRtLmEngine compiles against the real LiteRT-LM 0.19.0 API.
   NOT verified on a phone yet (no device attached to this PC).
+- Phase 3: 58 unit tests total, 0 failures (ChatDao, OfflineChatRepository, ChatTitles, ChatViewModel,
+  ChatContent Compose UI, HistoryViewModel). Full pipeline GREEN.
 - Full pipeline `spotlessApply detekt lint testDebugUnitTest assembleDebug`: GREEN.
+
+## Phase 3 notes
+
+- New modules: `core:database` (Room v1: chats, messages; FK cascade; schemas in `core/database/schemas`),
+  `data:chat` (OfflineChatRepository keeps the native conversation in sync with Room).
+- `InferenceSettingsSource` (core:llm) decouples "which model / prompt / sampling" from storage.
+  Phase 3 binds `AdbModelSettingsSource` (app/di) → `/data/local/tmp/llm/model.litertlm`.
+- Debug "Engine test" screen is still registered but no longer the start screen (removed in phase 4).
+- **JDK 21 added (2026-11-01)** at `C:\Program Files\Eclipse Adoptium\jdk-21.0.13.9-hotspot`: unit tests RUN on
+  JDK 21 via a Gradle toolchain (Robolectric's Android 36 image + markdown-renderer 0.46 Java-21 bytecode need it).
+  Code still compiles to Java 17 bytecode; Gradle itself still runs on JDK 17. CI installs both.
+- Robolectric test JVM flags: `--add-opens java.base/java.io|java.lang|java.util`, `--add-exports java.base/jdk.internal.access`.
 
 ## Open issues
 
@@ -82,5 +96,6 @@ Spotless 8.10.4 / ktlint 1.8.0 · Detekt 1.23.8. Full list: `gradle/libs.version
 
 ## Next step
 
-Phase 2: `core:llm` (LlmEngine, EngineState, LiteRtLmEngine, FakeLlmEngine in core:testing), GPU manifest
-entries, debug screen loading `/data/local/tmp/llm/model.litertlm`.
+Phase 4: model catalog (assets/models.json with the verified HF values above), core:datastore (selected model,
+onboarding done, mobile data), data:models (ModelRepository, ModelDownloadWorker, Sha256, RamChecker, storage
+check), feature:models picker, feature:onboarding; replace AdbModelSettingsSource; remove debug screen.

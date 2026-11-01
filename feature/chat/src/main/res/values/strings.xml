@@ -1,4 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="feature_chat_title">Chat</string>
+    <string name="feature_chat_new_chat">New chat</string>
+    <string name="feature_chat_input_hint">Ask anything — it stays on your phone</string>
+    <string name="feature_chat_send">Send message</string>
+    <string name="feature_chat_stop">Stop generating</string>
+    <string name="feature_chat_copy">Copy answer</string>
+    <string name="feature_chat_regenerate">Regenerate answer</string>
+    <string name="feature_chat_retry">Retry</string>
+    <string name="feature_chat_thinking">Thinking…</string>
+    <string name="feature_chat_stats">%1$.1f tok/s · %2$s</string>
+    <string name="feature_chat_status_stopped">Stopped</string>
+    <string name="feature_chat_status_failed">Answer failed</string>
+    <string name="feature_chat_loading_model">Loading the model… the first time can take up to 20 seconds.</string>
+    <string name="feature_chat_empty_title">Start a private conversation</string>
+    <string name="feature_chat_empty_body">Answers are generated on this phone. Nothing you type is sent anywhere.</string>
+    <string name="feature_chat_no_model_title">No model yet</string>
+    <string name="feature_chat_no_model_body">Download a model once, then chat offline.</string>
+    <string name="feature_chat_get_model">Get a model</string>
+    <string name="feature_chat_model_failed">The model could not be loaded on this phone.</string>
+    <string name="feature_chat_generation_failed">Something went wrong while generating the answer.</string>
 </resources>

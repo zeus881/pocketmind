@@ -1,4 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feature_history_title">History</string>
+    <string name="feature_history_search">Search chats</string>
+    <string name="feature_history_clear_search">Clear search</string>
+    <string name="feature_history_empty_title">No chats yet</string>
+    <string name="feature_history_empty_body">Your conversations are saved on this phone only.</string>
+    <string name="feature_history_no_results">No chats match “%1$s”</string>
+    <string name="feature_history_error">Your chats could not be loaded.</string>
+    <string name="feature_history_untitled">New chat</string>
+    <string name="feature_history_more">More options for %1$s</string>
+    <string name="feature_history_rename">Rename</string>
+    <string name="feature_history_delete">Delete</string>
+    <string name="feature_history_save">Save</string>
+    <string name="feature_history_cancel">Cancel</string>
+    <string name="feature_history_deleted">Chat deleted</string>
+    <string name="feature_history_undo">Undo</string>
 </resources>

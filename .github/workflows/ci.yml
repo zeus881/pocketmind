@@ -19,10 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # JDK 21 runs the unit tests (Gradle toolchain); JDK 17 (listed last = default) runs Gradle.
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: 17
+          java-version: |
+            21
+            17
 
       # Caches Gradle downloads and build outputs between CI runs.
       - uses: gradle/actions/setup-gradle@v6

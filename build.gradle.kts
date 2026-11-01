@@ -21,13 +21,14 @@ spotless {
     // Explicit LF endings (matches .editorconfig). The default "read .gitattributes" policy
     // cannot be cached by Gradle 9 and fails the build.
     lineEndings = com.diffplug.spotless.LineEnding.UNIX
+    // Only source folders: scanning build/ folders races with tasks writing into them.
     kotlin {
-        target("**/*.kt")
+        target("**/src/**/*.kt")
         targetExclude("**/build/**")
         ktlint(libs.versions.ktlint.get())
     }
     kotlinGradle {
-        target("**/*.kts")
+        target("*.gradle.kts", "*/*.gradle.kts", "*/*/*.gradle.kts", "build-logic/**/*.kts")
         targetExclude("**/build/**")
         ktlint(libs.versions.ktlint.get())
     }

@@ -34,6 +34,9 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                     targetCompatibility = PocketMindJavaVersion
                 }
                 testOptions {
+                    // Robolectric simulates this Android version. Without it, libraries would use
+                    // compileSdk (37). Only affects JVM unit tests, never the shipped app.
+                    targetSdk = libs.intVersion("targetSdk")
                     unitTests {
                         // Robolectric tests need merged resources (strings, themes).
                         isIncludeAndroidResources = true

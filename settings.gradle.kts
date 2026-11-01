@@ -44,6 +44,9 @@ include(":core:common")
 include(":core:designsystem")
 include(":core:llm")
 include(":core:testing")
+include(":core:database")
+
+include(":data:chat")
 
 include(":feature:chat")
 include(":feature:history")

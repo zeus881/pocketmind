@@ -8,17 +8,19 @@ import com.manjit.pocketmind.feature.chat.ChatScreen
 import kotlinx.serialization.Serializable
 
 /**
- * Type-safe route for the Chat screen. Navigation Compose turns this @Serializable
- * object into a URL-like route string for us, so we never type route strings by hand.
+ * Type-safe route for the chat screen. [chatId] = null means "a new, not-yet-saved chat".
+ * Navigation stores the argument in the ViewModel's SavedStateHandle under the key "chatId",
+ * so it survives process death (Android killing the app in the background).
  */
 @Serializable
-data object ChatRoute
+data class ChatRoute(val chatId: String? = null)
 
-fun NavController.navigateToChat(navOptions: NavOptions? = null) = navigate(ChatRoute, navOptions)
+fun NavController.navigateToChat(chatId: String?, navOptions: NavOptions? = null) =
+    navigate(ChatRoute(chatId), navOptions)
 
-/** Registers the screen in the app's NavHost. The app module calls this. */
-fun NavGraphBuilder.chatScreen() {
+/** Registers the chat screen. Navigation to other features is passed in as callbacks. */
+fun NavGraphBuilder.chatScreen(onOpenModels: () -> Unit) {
     composable<ChatRoute> {
-        ChatScreen()
+        ChatScreen(onOpenModels = onOpenModels)
     }
 }

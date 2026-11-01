@@ -5,3 +5,9 @@ plugins {
 android {
     namespace = "com.manjit.pocketmind.feature.history"
 }
+
+dependencies {
+    implementation(projects.data.chat)
+
+    testImplementation(projects.core.testing)
+}

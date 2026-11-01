@@ -16,6 +16,9 @@ aboutlibraries = "15.3.0"
 compileSdk = "37"
 targetSdk = "36"
 minSdk = "26"
+# JDK that RUNS the JVM unit tests (Robolectric's Android 35+ images and some libraries,
+# e.g. the Markdown renderer, need Java 21). Code is still compiled to Java 17 bytecode.
+testJdk = "21"
 
 # AndroidX
 androidx-core = "1.19.1"

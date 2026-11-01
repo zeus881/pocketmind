@@ -1,5 +1,7 @@
 package com.manjit.pocketmind.ui
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -18,13 +20,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
-import com.manjit.pocketmind.debug.navigation.DebugLlmRoute
 import com.manjit.pocketmind.debug.navigation.debugLlmScreen
 import com.manjit.pocketmind.feature.benchmark.navigation.benchmarkScreen
+import com.manjit.pocketmind.feature.chat.navigation.ChatRoute
 import com.manjit.pocketmind.feature.chat.navigation.chatScreen
+import com.manjit.pocketmind.feature.chat.navigation.navigateToChat
 import com.manjit.pocketmind.feature.documents.navigation.documentsScreen
 import com.manjit.pocketmind.feature.history.navigation.historyScreen
 import com.manjit.pocketmind.feature.models.navigation.modelsScreen
+import com.manjit.pocketmind.feature.models.navigation.navigateToModels
 import com.manjit.pocketmind.feature.onboarding.navigation.onboardingScreen
 import com.manjit.pocketmind.feature.settings.navigation.settingsScreen
 import com.manjit.pocketmind.feature.translate.navigation.translateScreen
@@ -42,6 +46,9 @@ fun PocketMindAppUi(navController: NavHostController = rememberNavController()) 
     val currentDestination = backStackEntry?.destination
 
     Scaffold(
+        // Each screen draws its own top bar (which handles the status bar). The outer frame
+        // only reserves room for the bottom navigation bar.
+        contentWindowInsets = WindowInsets(0),
         bottomBar = {
             NavigationBar {
                 TopLevelDestination.entries.forEach { destination ->
@@ -58,19 +65,22 @@ fun PocketMindAppUi(navController: NavHostController = rememberNavController()) 
     ) { padding ->
         NavHost(
             navController = navController,
-            // Phase 2: start on the engine test screen so the model can be tried on a phone.
-            startDestination = DebugLlmRoute,
-            modifier = Modifier.padding(padding),
+            startDestination = ChatRoute(),
+            modifier = Modifier
+                .padding(padding)
+                // Tell inner screens the bottom-bar space is already handled, so the chat's
+                // imePadding() doesn't add it a second time when the keyboard opens.
+                .consumeWindowInsets(padding),
         ) {
-            debugLlmScreen()
-            chatScreen()
-            historyScreen()
+            chatScreen(onOpenModels = { navController.navigateToModels() })
+            historyScreen(onOpenChat = { chatId -> navController.navigateToChat(chatId) })
             documentsScreen()
             translateScreen()
             settingsScreen()
             modelsScreen()
             benchmarkScreen()
             onboardingScreen()
+            debugLlmScreen()
         }
     }
 }

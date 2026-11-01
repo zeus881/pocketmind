@@ -26,7 +26,7 @@ enum class TopLevelDestination(
     val route: Any,
     val routeClass: KClass<*>,
 ) {
-    CHAT(Icons.AutoMirrored.Outlined.Chat, R.string.nav_chat, ChatRoute, ChatRoute::class),
+    CHAT(Icons.AutoMirrored.Outlined.Chat, R.string.nav_chat, ChatRoute(), ChatRoute::class),
     HISTORY(Icons.Outlined.History, R.string.nav_history, HistoryRoute, HistoryRoute::class),
     DOCUMENTS(Icons.Outlined.Description, R.string.nav_documents, DocumentsRoute, DocumentsRoute::class),
     TRANSLATE(Icons.Outlined.Translate, R.string.nav_translate, TranslateRoute, TranslateRoute::class),

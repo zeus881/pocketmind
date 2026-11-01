@@ -7,18 +7,18 @@ import androidx.navigation.compose.composable
 import com.manjit.pocketmind.feature.history.HistoryScreen
 import kotlinx.serialization.Serializable
 
-/**
- * Type-safe route for the History screen. Navigation Compose turns this @Serializable
- * object into a URL-like route string for us, so we never type route strings by hand.
- */
+/** Type-safe route for the history screen. */
 @Serializable
 data object HistoryRoute
 
 fun NavController.navigateToHistory(navOptions: NavOptions? = null) = navigate(HistoryRoute, navOptions)
 
-/** Registers the screen in the app's NavHost. The app module calls this. */
-fun NavGraphBuilder.historyScreen() {
+/**
+ * [onOpenChat] is how history asks to show a chat. The history module doesn't know the chat
+ * module exists; the app module turns this callback into navigation.
+ */
+fun NavGraphBuilder.historyScreen(onOpenChat: (String) -> Unit) {
     composable<HistoryRoute> {
-        HistoryScreen()
+        HistoryScreen(onOpenChat = onOpenChat)
     }
 }

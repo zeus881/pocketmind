@@ -35,6 +35,7 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.designsystem)
     implementation(projects.core.llm)
+    implementation(projects.data.chat)
 
     implementation(projects.feature.chat)
     implementation(projects.feature.history)
