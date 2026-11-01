@@ -1,0 +1,53 @@
+# Continuous Integration: every push and pull request must pass formatting, static analysis,
+# Android Lint, unit tests and a debug build. A red CI blocks the merge.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Cancel an older run of the same branch when a newer commit arrives (saves CI minutes).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 17
+
+      # Caches Gradle downloads and build outputs between CI runs.
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Formatting and static analysis
+        run: ./gradlew spotlessCheck detekt
+
+      - name: Android Lint
+        run: ./gradlew lint
+
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest
+
+      - name: Debug build
+        run: ./gradlew assembleDebug
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: reports
+          path: |
+            **/build/reports/
+          retention-days: 7

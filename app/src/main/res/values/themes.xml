@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      This XML theme only styles the window BEFORE Compose draws its first frame (no action
+      bar, matching background). All real styling comes from PocketMindTheme in Compose.
+    -->
+    <style name="Theme.PocketMind" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/window_background</item>
+    </style>
+</resources>

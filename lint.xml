@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Android Lint configuration shared by all modules. Lint runs with warningsAsErrors = true.
+  We disable ONLY checks whose result depends on the date or the network rather than on our
+  code. Otherwise CI would turn red the day a new library version is published, even though
+  nothing in the repo changed. Version upgrades are a deliberate, reviewed change instead.
+-->
+<lint>
+    <!-- "A newer version of X is available": time-dependent, not a code problem. -->
+    <issue id="GradleDependency" severity="ignore" />
+    <issue id="NewerVersionAvailable" severity="ignore" />
+    <issue id="AndroidGradlePluginVersion" severity="ignore" />
+    <!-- Compares targetSdk with the newest SDK, which changes every year. We target the level
+         Google Play currently requires (see libs.versions.toml). -->
+    <issue id="OldTargetApi" severity="ignore" />
+    <!-- A LIBRARY's bundled lint.jar (androidx.lifecycle) was compiled against an older Lint
+         API. Lint then skips that library's extra checks and reports it as an error. It says
+         nothing about our code, and we cannot fix it except by waiting for a new release. -->
+    <issue id="ObsoleteLintCustomCheck" severity="ignore" />
+</lint>
