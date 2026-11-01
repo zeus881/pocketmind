@@ -18,8 +18,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.manjit.pocketmind.debug.navigation.DebugLlmRoute
+import com.manjit.pocketmind.debug.navigation.debugLlmScreen
 import com.manjit.pocketmind.feature.benchmark.navigation.benchmarkScreen
-import com.manjit.pocketmind.feature.chat.navigation.ChatRoute
 import com.manjit.pocketmind.feature.chat.navigation.chatScreen
 import com.manjit.pocketmind.feature.documents.navigation.documentsScreen
 import com.manjit.pocketmind.feature.history.navigation.historyScreen
@@ -57,9 +58,11 @@ fun PocketMindAppUi(navController: NavHostController = rememberNavController()) 
     ) { padding ->
         NavHost(
             navController = navController,
-            startDestination = ChatRoute,
+            // Phase 2: start on the engine test screen so the model can be tried on a phone.
+            startDestination = DebugLlmRoute,
             modifier = Modifier.padding(padding),
         ) {
+            debugLlmScreen()
             chatScreen()
             historyScreen()
             documentsScreen()

@@ -18,6 +18,9 @@ plugins {
 
 // ---------- Spotless: one formatting style for every Kotlin file ----------
 spotless {
+    // Explicit LF endings (matches .editorconfig). The default "read .gitattributes" policy
+    // cannot be cached by Gradle 9 and fails the build.
+    lineEndings = com.diffplug.spotless.LineEnding.UNIX
     kotlin {
         target("**/*.kt")
         targetExclude("**/build/**")

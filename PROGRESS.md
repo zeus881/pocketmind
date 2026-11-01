@@ -7,8 +7,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | Phase | State | Commit |
 |---|---|---|
 | 1 Skeleton, build, theme, nav, CI | DONE | feat(phase-1) |
-| 2 core:llm engine + debug screen | next | |
-| 3 Room, chat, history | pending | |
+| 2 core:llm engine + debug screen | DONE | feat(phase-2) |
+| 3 Room, chat, history | in progress | |
 | 4 Model manager, onboarding | pending | |
 | 5 Settings, benchmark, macrobenchmark | pending | |
 | 6 PDF summarize, translate | pending | |
@@ -55,6 +55,9 @@ Spotless 8.10.4 / ktlint 1.8.0 · Detekt 1.23.8. Full list: `gradle/libs.version
 ## Test results
 
 - Phase 1: 5 unit tests, all passing (`core:common`: throttleLatest, AppResult).
+- Phase 2: +17 tests (core:llm EngineMath/TokenEstimator/HistoryTrimmer, app DebugLlmViewModel with
+  FakeLlmEngine, MemoryPressure). LiteRtLmEngine compiles against the real LiteRT-LM 0.19.0 API.
+  NOT verified on a phone yet (no device attached to this PC).
 - Full pipeline `spotlessApply detekt lint testDebugUnitTest assembleDebug`: GREEN.
 
 ## Open issues
@@ -69,7 +72,13 @@ Spotless 8.10.4 / ktlint 1.8.0 · Detekt 1.23.8. Full list: `gradle/libs.version
 
 1. Create a GitHub repo `pocketmind`, then: `git remote add origin <url>` and `git push -u origin main`.
    CI (`.github/workflows/ci.yml`) runs automatically.
-2. (Phase 2) Push a model for the debug screen — see phase 2 notes.
+2. (Phase 2/3 testing, optional — phase 4 adds in-app download) Push a model for the engine test screen:
+   - `pip install -U huggingface_hub` then
+     `huggingface-cli download litert-community/gemma-4-E2B-it-litert-lm gemma-4-E2B-it.litertlm --local-dir .`
+     (or Qwen3-0.6B.litertlm from litert-community/Qwen3-0.6B for a quick 600 MB test)
+   - `adb shell mkdir -p /data/local/tmp/llm`
+   - `adb push gemma-4-E2B-it.litertlm /data/local/tmp/llm/model.litertlm`
+   - Install the debug APK, open the app → "Engine test" → Load model → Send. Note tok/s + backend.
 
 ## Next step
 

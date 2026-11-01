@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+      LiteRT-LM's GPU backend talks to the phone's OpenCL driver. Since Android 12, an app may
+      only load such vendor libraries if it declares them. required="false" means the app
+      still installs on phones without them; the engine then falls back to CPU.
+
+      These entries live in core:llm (not in :app) so the requirement travels with the code
+      that needs it. Gradle's manifest merger copies them into the final app manifest.
+    -->
+    <application>
+        <uses-native-library
+            android:name="libvndksupport.so"
+            android:required="false" />
+        <uses-native-library
+            android:name="libOpenCL.so"
+            android:required="false" />
+    </application>
+</manifest>
