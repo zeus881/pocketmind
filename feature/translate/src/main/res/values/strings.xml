@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feature_translate_title">Translate</string>
+    <string name="feature_translate_from">From</string>
+    <string name="feature_translate_to">To</string>
+    <string name="feature_translate_swap">Swap languages</string>
+    <string name="feature_translate_input">Text to translate</string>
+    <string name="feature_translate_action">Translate</string>
+    <string name="feature_translate_stop">Stop</string>
+    <string name="feature_translate_copy">Copy translation</string>
+    <string name="feature_translate_error_no_model">Download and select a model first (Settings → Model).</string>
+    <string name="feature_translate_error">The translation failed. Please try again.</string>
 </resources>

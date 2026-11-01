@@ -7,16 +7,12 @@ import androidx.navigation.compose.composable
 import com.manjit.pocketmind.feature.documents.DocumentsScreen
 import kotlinx.serialization.Serializable
 
-/**
- * Type-safe route for the Documents screen. Navigation Compose turns this @Serializable
- * object into a URL-like route string for us, so we never type route strings by hand.
- */
+/** Type-safe route for the documents tab (summarize; "Ask your PDF" from phase 7). */
 @Serializable
 data object DocumentsRoute
 
 fun NavController.navigateToDocuments(navOptions: NavOptions? = null) = navigate(DocumentsRoute, navOptions)
 
-/** Registers the screen in the app's NavHost. The app module calls this. */
 fun NavGraphBuilder.documentsScreen() {
     composable<DocumentsRoute> {
         DocumentsScreen()

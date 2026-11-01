@@ -17,4 +17,11 @@
          API. Lint then skips that library's extra checks and reports it as an error. It says
          nothing about our code, and we cannot fix it except by waiting for a new release. -->
     <issue id="ObsoleteLintCustomCheck" severity="ignore" />
+    <!-- PdfBox-Android depends on Bouncy Castle (bcpkix) to decrypt protected PDFs. That jar
+         contains a permissive X509TrustManager used by Bouncy Castle's own TLS utilities, which
+         PocketMind never calls (our only network client is OkHttp with the system trust store,
+         HTTPS-only and host-allowlisted). The check stays ACTIVE for all of our own code. -->
+    <issue id="TrustAllX509TrustManager">
+        <ignore path="**/bcpkix-jdk15to18-*.jar" />
+    </issue>
 </lint>

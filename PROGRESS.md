@@ -1,4 +1,4 @@
-﻿# PocketMind — Build Progress
+# PocketMind — Build Progress
 
 Read this file and CLAUDE.md first when a session restarts. Never redo finished phases.
 
@@ -11,8 +11,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 3 Room, chat, history | DONE | feat(phase-3) |
 | 4 Model manager, onboarding | DONE | feat(phase-4) |
 | 5 Settings, benchmark, macrobenchmark | DONE | feat(phase-5) |
-| 6 PDF summarize, translate | next | |
-| 7 RAG (ask your PDF) | pending | |
+| 6 PDF summarize, translate | DONE | feat(phase-6) |
+| 7 RAG (ask your PDF) | next | |
 | 8 Release, a11y, Hindi, README | pending | |
 
 ## Environment (set up 2026-11-01)
@@ -59,7 +59,7 @@ Benchmark/Baseline Profile 1.5.0 · Spotless 8.10.4 / ktlint 1.8.0 · Detekt 1.2
 
 ## Test results
 
-- Phase 1: 5 unit tests. Phase 2: 22. Phase 3: 58. Phase 4: 83. **Phase 5: 98 unit tests, 0 failures.**
+- Phase 1: 5 unit tests. Phase 2: 22. Phase 3: 58. Phase 4: 83. Phase 5: 98. **Phase 6: 122 unit tests, 0 failures.**
 - Full pipeline `spotlessApply detekt lint testDebugUnitTest assembleDebug`: GREEN after every phase.
 - NOT verified on a phone yet (no device attached to this PC). Macrobenchmark/Baseline Profile need a phone.
 
@@ -71,6 +71,7 @@ Benchmark/Baseline Profile 1.5.0 · Spotless 8.10.4 / ktlint 1.8.0 · Detekt 1.2
 - Phase 4: `core:datastore`, `data:models` (catalog, downloader, worker, repository, SettingsInferenceSource).
   Debug screen removed. Only network code: `data:models` OkHttpClient with `HostAllowlist`.
   Unit tests use `InMemoryPreferencesDataStore` (Windows JVM can't replace DataStore files).
+- Phase 6: `data:documents` (PdfBox extractor, TextChunker, map-reduce Summarizer, Translator), `LlmTask` helper in core:llm. Lint ignore for Bouncy Castle's TrustAllX509TrustManager (library jar only).
 - Phase 5: Room v2 (AutoMigration 1→2, `benchmark_runs`), tested by building a real v1 DB from `schemas/1.json`.
   `data:benchmark`, `feature:benchmark`, `feature:settings`, `:benchmark` (Macrobenchmark + Baseline Profile).
 
@@ -97,5 +98,4 @@ Benchmark/Baseline Profile 1.5.0 · Spotless 8.10.4 / ktlint 1.8.0 · Detekt 1.2
 
 ## Next step
 
-Phase 6: PDF text extraction (PdfBox-Android), token-aware chunker, map-reduce summarizer with progress/cancel,
-documents screen (summarize), translate screen with fresh session per request.
+Phase 7: TextEmbedder (LiteRT-LM EmbeddingEngine), Room v3 documents + chunks, VectorStore (cosine top-k), grounded prompt with [p. N] citations, Ask tab with source chips.

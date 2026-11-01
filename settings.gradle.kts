@@ -50,6 +50,7 @@ include(":core:datastore")
 include(":data:chat")
 include(":data:models")
 include(":data:benchmark")
+include(":data:documents")
 
 include(":feature:chat")
 include(":feature:history")

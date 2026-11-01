@@ -5,3 +5,9 @@ plugins {
 android {
     namespace = "com.manjit.pocketmind.feature.translate"
 }
+
+dependencies {
+    implementation(projects.data.documents)
+
+    testImplementation(projects.core.testing)
+}
