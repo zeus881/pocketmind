@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_models_notification_channel">मॉडल डाउनलोड</string>
+    <string name="data_models_notification_title">%1$s डाउनलोड हो रहा है</string>
+    <string name="data_models_notification_progress">%1$d%% पूरा</string>
+    <string name="data_models_notification_pause">रोकें</string>
+</resources>

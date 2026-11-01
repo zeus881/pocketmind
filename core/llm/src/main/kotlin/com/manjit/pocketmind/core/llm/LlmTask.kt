@@ -35,8 +35,8 @@ class LlmTask @Inject constructor(private val engine: LlmEngine, private val set
     /** Streams the answer to [prompt] in a brand-new session. Call [ensureLoaded] first. */
     fun stream(systemPrompt: String, prompt: String, sampling: SamplingParams = SamplingParams.Precise): Flow<String> =
         flow {
-            engine.newSession(systemPrompt, emptyList(), sampling)
-            emitAll(engine.generate(prompt))
+            val session = engine.newSession(systemPrompt, emptyList(), sampling)
+            emitAll(engine.generate(prompt, session))
         }
 
     /** Like [stream] but waits for the whole answer. */

@@ -141,7 +141,7 @@ class LiteRtLmEngine @Inject constructor(
         }
     }
 
-    override suspend fun newSession(systemPrompt: String, history: List<ChatTurn>, sampling: SamplingParams) =
+    override suspend fun newSession(systemPrompt: String, history: List<ChatTurn>, sampling: SamplingParams): Long =
         withContext(io) {
             lock.withLock {
                 val loaded = checkNotNull(engine) { "load() must succeed before newSession()" }
@@ -164,6 +164,7 @@ class LiteRtLmEngine @Inject constructor(
                         thinkingConfig = ThinkingConfig(enableThinking = false),
                     ),
                 )
+                sessionId
             }
         }
 
@@ -174,8 +175,13 @@ class LiteRtLmEngine @Inject constructor(
      *   `withContext` inside `flow {}` — that breaks the Flow's "context preservation" rule
      *   and throws at runtime.
      */
-    override fun generate(prompt: String): Flow<String> = flow {
+    override fun generate(prompt: String, sessionId: Long): Flow<String> = flow {
         lock.withLock {
+            // Checked while holding the lock: nobody can replace the session between this check
+            // and the generation below.
+            if (sessionId != this@LiteRtLmEngine.sessionId) {
+                throw SessionReplacedException(sessionId, this@LiteRtLmEngine.sessionId)
+            }
             val conv = checkNotNull(conversation) { "newSession() must be called before generate()" }
             val start = SystemClock.elapsedRealtime()
             var firstPieceAt = -1L

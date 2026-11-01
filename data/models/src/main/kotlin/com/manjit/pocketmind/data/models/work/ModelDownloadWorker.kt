@@ -29,6 +29,7 @@ import com.manjit.pocketmind.data.models.R
 import com.manjit.pocketmind.data.models.download.ModelDownloader
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import timber.log.Timber
 
 /**
  * Downloads one model in the background with WorkManager.
@@ -63,7 +64,14 @@ class ModelDownloadWorker @AssistedInject constructor(
         if (deviceInfo.freeStorageBytes() < needed) return fail(ErrorKind.NOT_ENOUGH_STORAGE)
 
         // Promote to a foreground service: Android won't kill it while the notification shows.
-        setForeground(foregroundInfo(model, files.partialBytes(model.id)))
+        // Android 12+ forbids starting a foreground service while the app is in the background
+        // (e.g. a retry after a network drop): then we continue as normal background work —
+        // the .part file keeps progress even if the system stops us later.
+        try {
+            setForeground(foregroundInfo(model, files.partialBytes(model.id)))
+        } catch (e: IllegalStateException) {
+            Timber.w(e, "Foreground not allowed now; continuing in the background")
+        }
 
         val result = downloader.download(model) { downloaded, total ->
             setProgress(workDataOf(KEY_DOWNLOADED to downloaded, KEY_TOTAL to total))

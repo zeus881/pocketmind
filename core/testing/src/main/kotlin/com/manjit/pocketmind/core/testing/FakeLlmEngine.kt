@@ -6,6 +6,7 @@ import com.manjit.pocketmind.core.llm.GenerationStats
 import com.manjit.pocketmind.core.llm.LlmBackend
 import com.manjit.pocketmind.core.llm.LlmEngine
 import com.manjit.pocketmind.core.llm.SamplingParams
+import com.manjit.pocketmind.core.llm.SessionReplacedException
 import com.manjit.pocketmind.core.model.ChatTurn
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -57,13 +58,19 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
         }
     }
 
-    override suspend fun newSession(systemPrompt: String, history: List<ChatTurn>, sampling: SamplingParams) {
+    override suspend fun newSession(systemPrompt: String, history: List<ChatTurn>, sampling: SamplingParams): Long {
         check(state.value is EngineState.Ready) { "load() must succeed before newSession()" }
         sessions += Session(systemPrompt, history, sampling)
-        sessionId++
+        return ++sessionId
     }
 
-    override fun generate(prompt: String): Flow<String> = flow {
+    override fun generate(prompt: String, sessionId: Long): Flow<String> = flow {
+        // Same ownership rule as the real engine.
+        if (sessionId !=
+            this@FakeLlmEngine.sessionId
+        ) {
+            throw SessionReplacedException(sessionId, this@FakeLlmEngine.sessionId)
+        }
         prompts += prompt
         for (piece in responsePieces) {
             if (pieceDelayMs > 0) delay(pieceDelayMs)

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="nav_chat">चैट</string>
+    <string name="nav_history">इतिहास</string>
+    <string name="nav_documents">दस्तावेज़</string>
+    <string name="nav_translate">अनुवाद</string>
+    <string name="nav_settings">सेटिंग्स</string>
+
+    <string name="lock_title">PocketMind लॉक है</string>
+    <string name="lock_unlock">अनलॉक करें</string>
+    <string name="lock_prompt_title">PocketMind अनलॉक करें</string>
+    <string name="lock_prompt_subtitle">आपकी चैट सुरक्षित हैं</string>
+
+    <string name="licenses_title">ओपन-सोर्स लाइसेंस</string>
+    <string name="licenses_back">वापस</string>
+    <string name="licenses_models">मॉडल: Gemma 4 E2B और EmbeddingGemma 2 — Google, Apache License 2.0। Qwen3 और Qwen3.5 — Qwen टीम (Alibaba Cloud), Apache License 2.0। मॉडल फ़ाइलें huggingface.co/litert-community से। ऑन-डिवाइस रनटाइम: LiteRT-LM — Google, Apache License 2.0।</string>
+</resources>

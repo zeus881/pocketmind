@@ -1,5 +1,8 @@
 package com.manjit.pocketmind.feature.settings
 
+import androidx.biometric.BiometricManager
+import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
+import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -98,11 +102,24 @@ private fun SettingsContent(state: SettingsUiState, vm: SettingsViewModel, navig
                 onChange = vm::setAllowMobileData,
             )
 
+            Section(R.string.feature_settings_section_privacy)
+            AppLockRow(s.appLockEnabled, vm::setAppLock)
+            Text(
+                text = stringResource(R.string.feature_settings_privacy_statement),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            )
+
             Section(R.string.feature_settings_section_tools)
             NavRow(
                 title = stringResource(R.string.feature_settings_benchmark),
                 subtitle = stringResource(R.string.feature_settings_benchmark_hint),
                 onClick = navigation.onOpenBenchmark,
+            )
+            NavRow(
+                title = stringResource(R.string.feature_settings_licenses),
+                subtitle = stringResource(R.string.feature_settings_licenses_hint),
+                onClick = navigation.onOpenLicenses,
             )
         }
     }
@@ -208,6 +225,32 @@ private fun SystemPromptRow(current: String, isCustom: Boolean, vm: SettingsView
                     }
                 }
             },
+        )
+    }
+}
+
+/**
+ * App lock can only be turned on if the phone has a fingerprint/face OR a screen lock;
+ * otherwise nobody could unlock the app again.
+ */
+@Composable
+private fun AppLockRow(enabled: Boolean, onChange: (Boolean) -> Unit) {
+    val context = LocalContext.current
+    val available = remember {
+        BiometricManager.from(context).canAuthenticate(BIOMETRIC_WEAK or DEVICE_CREDENTIAL) ==
+            BiometricManager.BIOMETRIC_SUCCESS
+    }
+    if (available || enabled) {
+        SwitchRow(
+            title = stringResource(R.string.feature_settings_app_lock),
+            subtitle = stringResource(R.string.feature_settings_app_lock_hint),
+            checked = enabled,
+            onChange = onChange,
+        )
+    } else {
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.feature_settings_app_lock)) },
+            supportingContent = { Text(stringResource(R.string.feature_settings_app_lock_unavailable)) },
         )
     }
 }

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_documents_title">दस्तावेज़</string>
+    <string name="feature_documents_summarize_empty_title">PDF का सारांश बनाएँ</string>
+    <string name="feature_documents_summarize_empty_body">अपने फ़ोन से एक PDF चुनें। इसे इसी डिवाइस पर पढ़ा और सारांशित किया जाता है — फ़ाइल कहीं नहीं जाती।</string>
+    <string name="feature_documents_choose_pdf">PDF चुनें</string>
+    <string name="feature_documents_choose_another">दूसरी PDF चुनें</string>
+    <string name="feature_documents_reading_pdf">PDF पढ़ी जा रही है…</string>
+    <string name="feature_documents_preparing">तैयारी हो रही है…</string>
+    <string name="feature_documents_part_x_of_y">भाग %1$d / %2$d का सारांश बन रहा है</string>
+    <string name="feature_documents_combining">सभी भागों को एक सारांश में जोड़ा जा रहा है…</string>
+    <plurals name="feature_documents_pages">
+        <item quantity="one">टेक्स्ट वाला %1$d पेज</item>
+        <item quantity="other">टेक्स्ट वाले %1$d पेज</item>
+    </plurals>
+    <plurals name="feature_documents_parts">
+        <item quantity="one">%1$d भाग में सारांशित</item>
+        <item quantity="other">%1$d भागों में सारांशित</item>
+    </plurals>
+    <string name="feature_documents_cancel">रद्द करें</string>
+    <string name="feature_documents_copy">सारांश कॉपी करें</string>
+    <string name="feature_documents_share">सारांश शेयर करें</string>
+    <string name="feature_documents_check_facts">सारांश फ़ोन पर चलने वाले एक छोटे मॉडल से बनते हैं। ज़रूरी तथ्य मूल दस्तावेज़ में जाँच लें।</string>
+    <string name="feature_documents_error_no_text">कोई टेक्स्ट नहीं मिला। यह स्कैन की गई PDF (सिर्फ़ तस्वीरें) लगती है, जो अभी समर्थित नहीं है।</string>
+    <string name="feature_documents_error_unreadable">यह PDF नहीं खुल सकी। यह खराब या पासवर्ड से सुरक्षित हो सकती है।</string>
+    <string name="feature_documents_error_no_model">पहले कोई मॉडल डाउनलोड करें और चुनें (सेटिंग्स → मॉडल)।</string>
+    <string name="feature_documents_error_generic">कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।</string>
+
+    <string name="feature_documents_tab_summarize">सारांश</string>
+    <string name="feature_documents_tab_ask">PDF से पूछें</string>
+    <string name="feature_documents_ask_need_model_title">एक और छोटा डाउनलोड</string>
+    <string name="feature_documents_ask_need_model_body">PDF से सवाल पूछने के लिए सर्च मॉडल EmbeddingGemma (लगभग 165 MB) चाहिए। यह सही पेज ढूँढता है; चैट मॉडल जवाब लिखता है।</string>
+    <string name="feature_documents_ask_get_model">सर्च मॉडल लें</string>
+    <string name="feature_documents_ask_empty_title">PDF के बारे में सवाल पूछें</string>
+    <string name="feature_documents_ask_empty_body">एक PDF जोड़ें। PocketMind इसे इसी फ़ोन पर इंडेक्स करता है और इस्तेमाल किए गए पेज नंबरों के साथ जवाब देता है।</string>
+    <string name="feature_documents_add_pdf">PDF जोड़ें</string>
+    <string name="feature_documents_indexing">अंश %1$d / %2$d इंडेक्स हो रहा है…</string>
+    <string name="feature_documents_ask_question">आपका सवाल</string>
+    <string name="feature_documents_ask_action">पूछें</string>
+    <string name="feature_documents_searching">दस्तावेज़ में खोज रहा है…</string>
+    <string name="feature_documents_sources">स्रोत (पढ़ने के लिए टैप करें)</string>
+    <string name="feature_documents_close">बंद करें</string>
+    <string name="feature_documents_delete">%1$s हटाएँ</string>
+</resources>

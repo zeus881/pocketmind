@@ -18,6 +18,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.runningFold
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -70,18 +71,24 @@ class AskViewModel @Inject constructor(private val repository: DocumentRepositor
 
     fun addPdf(uri: Uri) {
         viewModelScope.launch {
-            repository.index(uri).collect { progress ->
-                _uiState.update { s ->
-                    when (progress) {
-                        is IndexProgress.Done ->
-                            s.copy(indexing = null, selectedId = progress.document.id, error = null)
+            repository.index(uri)
+                // A native embedding error or a broken PDF becomes a message, never a crash.
+                .catch { e ->
+                    Timber.e(e, "Indexing failed")
+                    emit(IndexProgress.Failed(ErrorKind.FILE_UNREADABLE))
+                }
+                .collect { progress ->
+                    _uiState.update { s ->
+                        when (progress) {
+                            is IndexProgress.Done ->
+                                s.copy(indexing = null, selectedId = progress.document.id, error = null)
 
-                        is IndexProgress.Failed -> s.copy(indexing = null, error = progress.kind)
+                            is IndexProgress.Failed -> s.copy(indexing = null, error = progress.kind)
 
-                        else -> s.copy(indexing = progress, error = null)
+                            else -> s.copy(indexing = progress, error = null)
+                        }
                     }
                 }
-            }
         }
     }
 

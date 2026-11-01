@@ -122,9 +122,10 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
         generationJob = viewModelScope.launch {
             val id = chatId.value ?: repository.createChat().also { chatId.value = it }
             streaming.value = "" // shows the "thinking" bubble immediately
-            when (val result = repository.sendMessage(id, prompt)) {
+            when (val result = guarded { repository.sendMessage(id, prompt) }) {
                 is AppResult.Success -> collectAnswer(id, result.value)
                 is AppResult.Failure -> fail(result.kind)
+                null -> Unit // already reported by guarded()
             }
         }
     }
@@ -135,12 +136,28 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
         if (generationJob?.isActive == true) return
         generationJob = viewModelScope.launch {
             streaming.value = ""
-            when (val result = repository.regenerateLastAnswer(id)) {
+            when (val result = guarded { repository.regenerateLastAnswer(id) }) {
                 is AppResult.Success -> collectAnswer(id, result.value)
                 is AppResult.Failure -> fail(result.kind)
-                null -> streaming.value = null
+                null -> streaming.value = null // nothing to regenerate, or already reported
             }
         }
+    }
+
+    /**
+     * Runs a repository call that may throw from native code (e.g. the model was unloaded for
+     * memory between loading and starting the session). Turns the exception into an error event
+     * instead of crashing the app; returns null in that case.
+     */
+    @Suppress("TooGenericExceptionCaught")
+    private suspend fun <T> guarded(block: suspend () -> T): T? = try {
+        block()
+    } catch (e: CancellationException) {
+        throw e
+    } catch (e: Exception) {
+        Timber.e(e, "Chat request failed")
+        fail(ErrorKind.GENERATION_FAILED)
+        null
     }
 
     /** The Stop button. Cancellation travels down to the engine, which stops native generation. */

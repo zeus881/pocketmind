@@ -103,7 +103,7 @@ internal class OfflineChatRepository @Inject constructor(
             is AppResult.Failure -> return loaded
             is AppResult.Success -> loaded.value
         }
-        sessionLock.withLock {
+        val session = sessionLock.withLock {
             // History BEFORE the new message: the new message is sent as the prompt itself.
             val history = messageDao.getAll(chatId).map { it.asModel() }
             prepareSessionLocked(chatId, settings, history, prompt = text)
@@ -115,8 +115,10 @@ internal class OfflineChatRepository @Inject constructor(
             } else {
                 chatDao.touch(chatId, now)
             }
+            ownedSessionId
         }
-        return AppResult.Success(engine.generate(text))
+        // The engine refuses to run this prompt if another feature replaced our session meanwhile.
+        return AppResult.Success(engine.generate(text, session))
     }
 
     override suspend fun regenerateLastAnswer(chatId: String): AppResult<Flow<String>>? {
@@ -132,9 +134,9 @@ internal class OfflineChatRepository @Inject constructor(
             messages.drop(lastUserIndex + 1).forEach { messageDao.delete(it.id) }
             sessionInSync = false // the model still remembers the old answer
             prepareSessionLocked(chatId, settings, messages.take(lastUserIndex), messages[lastUserIndex].text)
-            messages[lastUserIndex].text
+            messages[lastUserIndex].text to ownedSessionId
         }
-        return AppResult.Success(engine.generate(prompt))
+        return AppResult.Success(engine.generate(prompt.first, prompt.second))
     }
 
     override suspend fun saveAssistantMessage(
@@ -216,9 +218,10 @@ internal class OfflineChatRepository @Inject constructor(
 
         val trimmed = HistoryTrimmer.trim(turns, budget)
         val systemPrompt = listOfNotNull(settings.systemPrompt, trimmed.summaryNote).joinToString("\n\n")
-        engine.newSession(systemPrompt, trimmed.turns, settings.sampling)
+        // Use the id RETURNED by newSession (reading engine.sessionId afterwards could already
+        // see another feature's newer session).
+        ownedSessionId = engine.newSession(systemPrompt, trimmed.turns, settings.sampling)
         session = key
-        ownedSessionId = engine.sessionId
         sessionInSync = true
     }
 

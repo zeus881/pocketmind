@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_benchmark_title">बेंचमार्क</string>
+    <string name="feature_benchmark_back">वापस</string>
+    <string name="feature_benchmark_intro">चुने गए मॉडल के साथ इस फ़ोन को मापता है: मॉडल लोड होने का समय, पहले टोकन तक का समय, जनरेशन की गति और अधिकतम मेमोरी — 3 तय प्रॉम्प्ट पर। 1–3 मिनट लगते हैं।</string>
+    <string name="feature_benchmark_run">बेंचमार्क चलाएँ</string>
+    <string name="feature_benchmark_cancel">रद्द करें</string>
+    <string name="feature_benchmark_loading">मॉडल शुरू से लोड हो रहा है…</string>
+    <string name="feature_benchmark_running_prompt">प्रॉम्प्ट %1$d / %2$d (%3$s)…</string>
+    <string name="feature_benchmark_empty_title">अभी कोई नतीजा नहीं</string>
+    <string name="feature_benchmark_empty_body">यह देखने के लिए बेंचमार्क चलाएँ कि इस फ़ोन पर मॉडल कितना तेज़ है।</string>
+    <string name="feature_benchmark_share">नतीजे शेयर करें</string>
+    <string name="feature_benchmark_delete">नतीजा हटाएँ</string>
+    <string name="feature_benchmark_metric_speed">जनरेशन की गति</string>
+    <string name="feature_benchmark_metric_ttft">पहले टोकन तक का समय</string>
+    <string name="feature_benchmark_metric_load">मॉडल लोड होने का समय</string>
+    <string name="feature_benchmark_metric_memory">अधिकतम मेमोरी</string>
+    <string name="feature_benchmark_error_no_model">पहले कोई मॉडल डाउनलोड करें और चुनें।</string>
+    <string name="feature_benchmark_error">बेंचमार्क पूरा नहीं हो सका।</string>
+</resources>

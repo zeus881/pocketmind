@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_onboarding_what_title">एक AI सहायक जो आपके फ़ोन में रहता है</string>
+    <string name="feature_onboarding_what_body">चैट करें, PDF का सारांश बनाएँ, दस्तावेज़ों से सवाल पूछें और अनुवाद करें — सब इसी फ़ोन पर चलने वाले भाषा मॉडल से।</string>
+    <string name="feature_onboarding_privacy_title">पूरी तरह निजी</string>
+    <string name="feature_onboarding_privacy_body">कोई अकाउंट नहीं। कोई क्लाउड नहीं। कोई एनालिटिक्स नहीं। आपकी चैट कभी इस फ़ोन से बाहर नहीं जातीं। इंटरनेट का इस्तेमाल सिर्फ़ एक बार मॉडल डाउनलोड करने के लिए होता है।</string>
+    <string name="feature_onboarding_model_title">एक डाउनलोड, फिर पूरी तरह ऑफ़लाइन</string>
+    <string name="feature_onboarding_model_body">आपके फ़ोन में %1$d GB RAM है। हम %2$s (%3$s) सुझाते हैं। अगले कदम में आप इसे Wi-Fi पर डाउनलोड कर सकते हैं।</string>
+    <string name="feature_onboarding_model_body_generic">अगले कदम में आप एक मॉडल चुनेंगे। मॉडल 0.6 से 2.6 GB के होते हैं।</string>
+    <string name="feature_onboarding_disclaimer_title">जवाब गलत हो सकते हैं</string>
+    <string name="feature_onboarding_disclaimer_body">फ़ोन पर चलने वाले छोटे मॉडल गलतियाँ करते हैं और गलत होने पर भी भरोसे से बोल सकते हैं। ज़रूरी तथ्य जाँचें, और चिकित्सा, कानूनी या वित्तीय फ़ैसलों के लिए PocketMind पर निर्भर न रहें।</string>
+    <string name="feature_onboarding_skip">छोड़ें</string>
+    <string name="feature_onboarding_next">आगे</string>
+    <string name="feature_onboarding_get_started">मैं समझ गया/गई — शुरू करें</string>
+    <string name="feature_onboarding_page_of">पेज %1$d / %2$d</string>
+</resources>

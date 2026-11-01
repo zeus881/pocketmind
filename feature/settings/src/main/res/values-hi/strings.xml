@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_settings_title">सेटिंग्स</string>
+    <string name="feature_settings_section_model">मॉडल</string>
+    <string name="feature_settings_section_answers">जवाब</string>
+    <string name="feature_settings_section_appearance">दिखावट</string>
+    <string name="feature_settings_section_downloads">डाउनलोड</string>
+    <string name="feature_settings_section_tools">टूल</string>
+    <string name="feature_settings_model">मॉडल</string>
+    <string name="feature_settings_no_model">कोई मॉडल नहीं चुना गया — चुनने के लिए टैप करें</string>
+    <string name="feature_settings_gpu">GPU इस्तेमाल करें</string>
+    <string name="feature_settings_gpu_hint">आमतौर पर तेज़। GPU समर्थित न होने पर अपने-आप CPU पर चला जाता है।</string>
+    <string name="feature_settings_gpu_active">अभी इस पर चल रहा है: %1$s</string>
+    <string name="feature_settings_temperature">रचनात्मकता (temperature): %1$s</string>
+    <string name="feature_settings_temperature_hint">कम = केंद्रित और अनुमानित। ज़्यादा = अधिक विविध, अधिक गलतियाँ।</string>
+    <string name="feature_settings_top_k">Top-K: %1$d</string>
+    <string name="feature_settings_top_k_hint">मॉडल अगले कितने संभावित शब्दों में से चुनता है।</string>
+    <string name="feature_settings_system_prompt">सिस्टम प्रॉम्प्ट</string>
+    <string name="feature_settings_save">सेव करें</string>
+    <string name="feature_settings_reset">डिफ़ॉल्ट पर वापस</string>
+    <string name="feature_settings_cancel">रद्द करें</string>
+    <string name="feature_settings_theme_system">सिस्टम के अनुसार</string>
+    <string name="feature_settings_theme_light">लाइट</string>
+    <string name="feature_settings_theme_dark">डार्क</string>
+    <string name="feature_settings_mobile_data">मोबाइल डेटा पर डाउनलोड की अनुमति दें</string>
+    <string name="feature_settings_mobile_data_hint">मॉडल बड़े होते हैं। बंद = सिर्फ़ Wi-Fi।</string>
+    <string name="feature_settings_benchmark">बेंचमार्क</string>
+    <string name="feature_settings_benchmark_hint">इस फ़ोन पर गति और मेमोरी मापें</string>
+    <string name="feature_settings_section_privacy">निजता</string>
+    <string name="feature_settings_app_lock">ऐप लॉक</string>
+    <string name="feature_settings_app_lock_hint">PocketMind खोलते समय फ़िंगरप्रिंट, चेहरा या स्क्रीन लॉक माँगें</string>
+    <string name="feature_settings_app_lock_unavailable">इसे इस्तेमाल करने के लिए अपने फ़ोन पर स्क्रीन लॉक या फ़िंगरप्रिंट सेट करें।</string>
+    <string name="feature_settings_privacy_statement">PocketMind में कोई अकाउंट, एनालिटिक्स या विज्ञापन नहीं है। चैट, दस्तावेज़ और सेटिंग्स इसी फ़ोन पर रहती हैं और बैकअप में शामिल नहीं होतीं। इंटरनेट का इकलौता इस्तेमाल Hugging Face से HTTPS पर मॉडल डाउनलोड करना है।</string>
+    <string name="feature_settings_licenses">ओपन-सोर्स लाइसेंस</string>
+    <string name="feature_settings_licenses_hint">PocketMind में इस्तेमाल लाइब्रेरी और मॉडल</string>
+</resources>

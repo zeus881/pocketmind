@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network security: HTTPS only, and only the phone's built-in certificate authorities
+  (user-installed CAs are NOT trusted, so a proxy installed on the phone can't intercept the
+  model download). Combined with OkHttp's HostAllowlist (huggingface.co only) and the SHA-256
+  check of every model file, a tampered download cannot reach the app.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -79,10 +79,10 @@ class BenchmarkRunner @Inject constructor(
         val results = BenchmarkPrompts.all.mapIndexed { index, prompt ->
             send(BenchmarkProgress.RunningPrompt(index + 1, BenchmarkPrompts.all.size, prompt.name))
             // A fresh session per prompt: no previous answer influences the next measurement.
-            engine.newSession(BenchmarkPrompts.SYSTEM_PROMPT, emptyList(), GREEDY)
+            val session = engine.newSession(BenchmarkPrompts.SYSTEM_PROMPT, emptyList(), GREEDY)
             val start = metrics.elapsedMs()
             var pieces = 0
-            engine.generate(prompt.text).collect { pieces++ }
+            engine.generate(prompt.text, session).collect { pieces++ }
             val totalMs = metrics.elapsedMs() - start
             val stats = engine.lastStats
             BenchmarkPromptResult(

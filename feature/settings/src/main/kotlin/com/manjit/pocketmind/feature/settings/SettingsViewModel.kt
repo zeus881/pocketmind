@@ -69,6 +69,8 @@ class SettingsViewModel @Inject constructor(
 
     fun setAllowMobileData(value: Boolean) = save { settings.setAllowMobileData(value) }
 
+    fun setAppLock(enabled: Boolean) = save { settings.setAppLockEnabled(enabled) }
+
     private fun save(block: suspend () -> Unit) {
         viewModelScope.launch { block() }
     }

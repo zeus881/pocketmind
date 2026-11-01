@@ -41,16 +41,30 @@ interface LlmEngine {
     /** Loads the model, trying GPU first when [preferGpu] and falling back to CPU. No-op if already loaded. */
     suspend fun load(modelPath: String, preferGpu: Boolean)
 
-    /** Starts a fresh conversation. [history] restores earlier turns when a saved chat is reopened. */
+    /**
+     * Starts a fresh conversation. [history] restores earlier turns when a saved chat is reopened.
+     * Returns the new session's id: pass it to [generate] so the prompt can only run in THIS session.
+     */
     suspend fun newSession(
         systemPrompt: String,
         history: List<ChatTurn> = emptyList(),
         sampling: SamplingParams = SamplingParams(),
-    )
+    ): Long
 
-    /** Sends [prompt] in the current conversation and streams the answer piece by piece. */
-    fun generate(prompt: String): Flow<String>
+    /**
+     * Sends [prompt] in session [sessionId] and streams the answer piece by piece.
+     * Throws [SessionReplacedException] if another feature replaced that session in the meantime
+     * (checked under the engine lock, so there is no gap between the check and the generation).
+     */
+    fun generate(prompt: String, sessionId: Long): Flow<String>
 
     /** Frees the model's memory (also called when Android is low on memory). */
     suspend fun unload()
 }
+
+/**
+ * The conversation a caller prepared was replaced (by another feature, a model reload or
+ * memory-pressure unload) before its prompt could run. Callers rebuild the session and retry.
+ */
+class SessionReplacedException(expected: Long, actual: Long) :
+    IllegalStateException("Session $expected was replaced by session $actual")

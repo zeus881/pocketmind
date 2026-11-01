@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_translate_title">अनुवाद</string>
+    <string name="feature_translate_from">से</string>
+    <string name="feature_translate_to">में</string>
+    <string name="feature_translate_swap">भाषाएँ बदलें</string>
+    <string name="feature_translate_input">अनुवाद के लिए टेक्स्ट</string>
+    <string name="feature_translate_action">अनुवाद करें</string>
+    <string name="feature_translate_stop">रोकें</string>
+    <string name="feature_translate_copy">अनुवाद कॉपी करें</string>
+    <string name="feature_translate_error_no_model">पहले कोई मॉडल डाउनलोड करें और चुनें (सेटिंग्स → मॉडल)।</string>
+    <string name="feature_translate_error">अनुवाद नहीं हो सका। कृपया फिर से कोशिश करें।</string>
+</resources>

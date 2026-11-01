@@ -35,7 +35,9 @@ import com.manjit.pocketmind.feature.onboarding.navigation.onboardingScreen
 import com.manjit.pocketmind.feature.settings.SettingsNavigation
 import com.manjit.pocketmind.feature.settings.navigation.settingsScreen
 import com.manjit.pocketmind.feature.translate.navigation.translateScreen
+import com.manjit.pocketmind.navigation.LicensesRoute
 import com.manjit.pocketmind.navigation.TopLevelDestination
+import com.manjit.pocketmind.navigation.licensesScreen
 
 /**
  * The app's outer frame: bottom navigation bar + the NavHost that swaps screens.
@@ -87,8 +89,10 @@ fun PocketMindAppUi(startDestination: Any, navController: NavHostController = re
                 SettingsNavigation(
                     onOpenModels = { navController.navigateToModels() },
                     onOpenBenchmark = { navController.navigateToBenchmark() },
+                    onOpenLicenses = { navController.navigate(LicensesRoute) },
                 ),
             )
+            licensesScreen(onBack = { navController.popBackStack() })
             modelsScreen(onBack = { navController.popBackStack() })
             benchmarkScreen(onBack = { navController.popBackStack() })
         }

@@ -9,6 +9,7 @@ import com.manjit.pocketmind.core.database.PocketMindDatabase
 import com.manjit.pocketmind.core.llm.InferenceSettings
 import com.manjit.pocketmind.core.llm.InferenceSettingsSource
 import com.manjit.pocketmind.core.llm.SamplingParams
+import com.manjit.pocketmind.core.llm.SessionReplacedException
 import com.manjit.pocketmind.core.model.ChatTurn
 import com.manjit.pocketmind.core.model.MessageStatus
 import com.manjit.pocketmind.core.model.TurnRole
@@ -147,6 +148,19 @@ class OfflineChatRepositoryTest {
         assertEquals(3, engine.sessions.size)
         assertEquals("SYS", engine.sessions.last().systemPrompt)
         assertEquals(2, engine.sessions.last().history.size)
+    }
+
+    @Test
+    fun answerRefusesToRunIfTheSessionWasReplacedAfterPreparing() = runTest {
+        val chatId = repository.createChat()
+        val answer = (repository.sendMessage(chatId, "hello") as AppResult.Success).value
+        // Another feature grabs the engine between "prepare" and "collect".
+        engine.newSession("Translate only.", emptyList(), SamplingParams())
+
+        val failure = runCatching { answer.toList() }.exceptionOrNull()
+
+        assertTrue(failure is SessionReplacedException)
+        assertTrue(engine.prompts.isEmpty()) // the chat prompt never ran in the wrong session
     }
 
     @Test

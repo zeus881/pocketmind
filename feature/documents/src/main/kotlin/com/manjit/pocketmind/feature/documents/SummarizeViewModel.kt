@@ -10,11 +10,13 @@ import com.manjit.pocketmind.data.documents.Summarizer
 import com.manjit.pocketmind.data.documents.SummaryProgress
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 /** Every state of the "Summarize a PDF" screen. */
 sealed interface SummarizeUiState {
@@ -49,25 +51,38 @@ class SummarizeViewModel @Inject constructor(
     private var job: Job? = null
     private var lastUri: Uri? = null
 
+    @Suppress("TooGenericExceptionCaught") // malformed PDFs / engine failures must not crash the app
     fun onPdfPicked(uri: Uri) {
         lastUri = uri
         job?.cancel()
         job = viewModelScope.launch {
             _uiState.value = SummarizeUiState.ReadingPdf
-            when (val extracted = extractor.extract(uri)) {
-                is AppResult.Failure -> _uiState.value = SummarizeUiState.Error(extracted.kind)
+            try {
+                summarize(uri)
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                // e.g. the model was unloaded for memory mid-summary, or PdfBox hit a broken file.
+                Timber.e(e, "Summarizing failed")
+                _uiState.value = SummarizeUiState.Error(ErrorKind.GENERATION_FAILED)
+            }
+        }
+    }
 
-                is AppResult.Success -> {
-                    val doc = extracted.value
-                    summarizer.summarize(doc.pages).collect { progress ->
-                        _uiState.value = when (progress) {
-                            is SummaryProgress.Done ->
-                                SummarizeUiState.Done(doc.name, doc.pageCount, progress.summary, progress.parts)
+    private suspend fun summarize(uri: Uri) {
+        when (val extracted = extractor.extract(uri)) {
+            is AppResult.Failure -> _uiState.value = SummarizeUiState.Error(extracted.kind)
 
-                            is SummaryProgress.Failed -> SummarizeUiState.Error(progress.kind)
+            is AppResult.Success -> {
+                val doc = extracted.value
+                summarizer.summarize(doc.pages).collect { progress ->
+                    _uiState.value = when (progress) {
+                        is SummaryProgress.Done ->
+                            SummarizeUiState.Done(doc.name, doc.pageCount, progress.summary, progress.parts)
 
-                            else -> SummarizeUiState.Summarizing(doc.name, doc.pageCount, progress)
-                        }
+                        is SummaryProgress.Failed -> SummarizeUiState.Error(progress.kind)
+
+                        else -> SummarizeUiState.Summarizing(doc.name, doc.pageCount, progress)
                     }
                 }
             }
