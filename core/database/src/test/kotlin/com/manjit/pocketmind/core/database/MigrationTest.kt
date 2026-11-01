@@ -19,14 +19,15 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 /**
- * Proves that an existing user's database survives an app update (v1 → v2).
+ * Proves that existing users' databases survive app updates, from EVERY older version to the
+ * current one (a user may skip updates and jump from v1 straight to v3).
  *
- * 1. Build a REAL version-1 database from the committed `schemas/.../1.json` — the exact SQL
- *    Room generated in phase 3, including Room's identity hash.
- * 2. Insert data the way a phase-3 user would have it.
- * 3. Open it with today's [PocketMindDatabase] (version 2). Room runs the AutoMigration and
- *    then VALIDATES every table against what the code expects; a wrong migration throws.
- * 4. Check the old chat is still there and the new table works.
+ * 1. Build a REAL old database from the committed `schemas/.../<version>.json` — the exact SQL
+ *    Room generated back then, including Room's identity hash.
+ * 2. Insert data the way an old version would have it.
+ * 3. Open it with today's [PocketMindDatabase]. Room runs the AutoMigrations in order and then
+ *    VALIDATES every table against what the code expects; a wrong migration throws.
+ * 4. Check the old data is still there and the new tables work.
  *
  * (Room's MigrationTestHelper does steps 1–3 too, but its SQLite driver rejects Robolectric's
  * Windows file paths, so we do it explicitly — which also shows what a migration really is.)
@@ -34,26 +35,32 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class MigrationTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val dbName = "migration-test.db"
 
     @Test
-    fun migrate1To2KeepsChatsAndAddsBenchmarkTable() = runTest {
-        createVersion1Database()
+    fun migrateFrom1KeepsChats() = runTest { migrateAndCheck(fromVersion = 1) }
 
-        val db = Room.databaseBuilder(context, PocketMindDatabase::class.java, dbName)
+    @Test
+    fun migrateFrom2KeepsChats() = runTest { migrateAndCheck(fromVersion = 2) }
+
+    private suspend fun migrateAndCheck(fromVersion: Int) {
+        val name = "migration-from-$fromVersion.db"
+        createOldDatabase(name, fromVersion)
+
+        val db = Room.databaseBuilder(context, PocketMindDatabase::class.java, name)
             .allowMainThreadQueries()
             .build()
         val chats = db.chatDao().observeSummaries("").first() // opening triggers migrate + validate
         assertEquals(listOf("Old chat"), chats.map { it.title })
         assertEquals("hello", chats.single().lastMessage)
         assertTrue(db.benchmarkDao().observeAll().first().isEmpty())
+        assertTrue(db.documentDao().observeAll().first().isEmpty())
         db.close()
     }
 
-    private fun createVersion1Database() {
-        val schema = Json.parseToJsonElement(File(SCHEMA_DIR, "1.json").readText()).jsonObject
+    private fun createOldDatabase(name: String, version: Int) {
+        val schema = Json.parseToJsonElement(File(SCHEMA_DIR, "$version.json").readText()).jsonObject
         val database = schema.getValue("database").jsonObject
-        val file = context.getDatabasePath(dbName).apply { parentFile?.mkdirs() }
+        val file = context.getDatabasePath(name).apply { parentFile?.mkdirs() }
         SQLiteDatabase.openOrCreateDatabase(file, null).use { sqlite ->
             database.getValue("entities").jsonArray.forEach { entity ->
                 val table = entity.jsonObject.string("tableName")
@@ -62,9 +69,9 @@ class MigrationTest {
                     sqlite.execSQL(index.jsonObject.string("createSql").replace("\${TABLE_NAME}", table))
                 }
             }
-            // Room's bookkeeping table + the v1 identity hash, exactly as Room wrote them.
+            // Room's bookkeeping table + that version's identity hash, exactly as Room wrote them.
             database.getValue("setupQueries").jsonArray.forEach { sqlite.execSQL(it.jsonPrimitive.content) }
-            sqlite.version = 1
+            sqlite.version = version
             sqlite.execSQL("INSERT INTO chats (id, title, createdAt, updatedAt) VALUES ('c1', 'Old chat', 1, 1)")
             sqlite.execSQL(
                 "INSERT INTO messages (id, chatId, role, text, createdAt, status, tokensPerSecond, backend) " +

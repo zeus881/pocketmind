@@ -13,4 +13,6 @@ dependencies {
 
     testImplementation(projects.core.testing)
     testImplementation(libs.androidx.test.core)
+    testImplementation(projects.core.database)
+    testImplementation(libs.androidx.room.runtime)
 }

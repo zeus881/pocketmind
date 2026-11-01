@@ -12,8 +12,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 4 Model manager, onboarding | DONE | feat(phase-4) |
 | 5 Settings, benchmark, macrobenchmark | DONE | feat(phase-5) |
 | 6 PDF summarize, translate | DONE | feat(phase-6) |
-| 7 RAG (ask your PDF) | next | |
-| 8 Release, a11y, Hindi, README | pending | |
+| 7 RAG (ask your PDF) | DONE | feat(phase-7) |
+| 8 Release, a11y, Hindi, README | next | |
 
 ## Environment (set up 2026-11-01)
 
@@ -59,7 +59,7 @@ Benchmark/Baseline Profile 1.5.0 · Spotless 8.10.4 / ktlint 1.8.0 · Detekt 1.2
 
 ## Test results
 
-- Phase 1: 5 unit tests. Phase 2: 22. Phase 3: 58. Phase 4: 83. Phase 5: 98. **Phase 6: 122 unit tests, 0 failures.**
+- Phase 1: 5 unit tests. Phase 2: 22. Phase 3: 58. Phase 4: 83. Phase 5: 98. Phase 6: 122. **Phase 7: 138 unit tests, 0 failures.**
 - Full pipeline `spotlessApply detekt lint testDebugUnitTest assembleDebug`: GREEN after every phase.
 - NOT verified on a phone yet (no device attached to this PC). Macrobenchmark/Baseline Profile need a phone.
 
@@ -72,6 +72,7 @@ Benchmark/Baseline Profile 1.5.0 · Spotless 8.10.4 / ktlint 1.8.0 · Detekt 1.2
   Debug screen removed. Only network code: `data:models` OkHttpClient with `HostAllowlist`.
   Unit tests use `InMemoryPreferencesDataStore` (Windows JVM can't replace DataStore files).
 - Phase 6: `data:documents` (PdfBox extractor, TextChunker, map-reduce Summarizer, Translator), `LlmTask` helper in core:llm. Lint ignore for Bouncy Castle's TrustAllX509TrustManager (library jar only).
+- Phase 7: Room v3 (documents, chunks; AutoMigration 2→3, tested 1→3 and 2→3). `TextEmbedder`/`LiteRtLmEmbedder` (EmbeddingEngine, CPU) in core:llm; RAG in `data:documents/rag`. Q&A chunks never cross pages (exact citations).
 - Phase 5: Room v2 (AutoMigration 1→2, `benchmark_runs`), tested by building a real v1 DB from `schemas/1.json`.
   `data:benchmark`, `feature:benchmark`, `feature:settings`, `:benchmark` (Macrobenchmark + Baseline Profile).
 
@@ -98,4 +99,4 @@ Benchmark/Baseline Profile 1.5.0 · Spotless 8.10.4 / ktlint 1.8.0 · Detekt 1.2
 
 ## Next step
 
-Phase 7: TextEmbedder (LiteRT-LM EmbeddingEngine), Room v3 documents + chunks, VectorStore (cosine top-k), grounded prompt with [p. N] citations, Ask tab with source chips.
+Phase 8: release signing from env vars, release.yml, network security config, biometric app lock, OSS licenses, privacy policy, Hindi strings, accessibility pass, README, CHANGELOG, assembleRelease, final review.

@@ -81,7 +81,7 @@ fun PocketMindAppUi(startDestination: Any, navController: NavHostController = re
             )
             chatScreen(onOpenModels = { navController.navigateToModels() })
             historyScreen(onOpenChat = { chatId -> navController.navigateToChat(chatId) })
-            documentsScreen()
+            documentsScreen(onOpenModels = { navController.navigateToModels() })
             translateScreen()
             settingsScreen(
                 SettingsNavigation(

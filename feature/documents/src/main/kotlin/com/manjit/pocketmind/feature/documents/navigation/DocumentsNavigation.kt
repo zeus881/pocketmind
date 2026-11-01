@@ -13,8 +13,8 @@ data object DocumentsRoute
 
 fun NavController.navigateToDocuments(navOptions: NavOptions? = null) = navigate(DocumentsRoute, navOptions)
 
-fun NavGraphBuilder.documentsScreen() {
+fun NavGraphBuilder.documentsScreen(onOpenModels: () -> Unit) {
     composable<DocumentsRoute> {
-        DocumentsScreen()
+        DocumentsScreen(onOpenModels = onOpenModels)
     }
 }

@@ -26,4 +26,20 @@
     <string name="feature_documents_error_unreadable">This PDF could not be opened. It may be damaged or password-protected.</string>
     <string name="feature_documents_error_no_model">Download and select a model first (Settings → Model).</string>
     <string name="feature_documents_error_generic">Something went wrong. Please try again.</string>
+
+    <string name="feature_documents_tab_summarize">Summarize</string>
+    <string name="feature_documents_tab_ask">Ask your PDF</string>
+    <string name="feature_documents_ask_need_model_title">One more small download</string>
+    <string name="feature_documents_ask_need_model_body">Asking questions about PDFs needs the search model EmbeddingGemma (about 165 MB). It finds the right pages; the chat model writes the answer.</string>
+    <string name="feature_documents_ask_get_model">Get the search model</string>
+    <string name="feature_documents_ask_empty_title">Ask questions about a PDF</string>
+    <string name="feature_documents_ask_empty_body">Add a PDF. PocketMind indexes it on this phone and answers with the page numbers it used.</string>
+    <string name="feature_documents_add_pdf">Add PDF</string>
+    <string name="feature_documents_indexing">Indexing passage %1$d of %2$d…</string>
+    <string name="feature_documents_ask_question">Your question</string>
+    <string name="feature_documents_ask_action">Ask</string>
+    <string name="feature_documents_searching">Searching the document…</string>
+    <string name="feature_documents_sources">Sources (tap to read)</string>
+    <string name="feature_documents_close">Close</string>
+    <string name="feature_documents_delete">Delete %1$s</string>
 </resources>

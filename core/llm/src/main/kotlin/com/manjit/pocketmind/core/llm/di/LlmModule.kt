@@ -1,7 +1,9 @@
 package com.manjit.pocketmind.core.llm.di
 
+import com.manjit.pocketmind.core.llm.LiteRtLmEmbedder
 import com.manjit.pocketmind.core.llm.LiteRtLmEngine
 import com.manjit.pocketmind.core.llm.LlmEngine
+import com.manjit.pocketmind.core.llm.TextEmbedder
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,4 +19,7 @@ import dagger.hilt.components.SingletonComponent
 internal abstract class LlmModule {
     @Binds
     abstract fun bindsLlmEngine(engine: LiteRtLmEngine): LlmEngine
+
+    @Binds
+    abstract fun bindsTextEmbedder(embedder: LiteRtLmEmbedder): TextEmbedder
 }

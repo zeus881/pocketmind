@@ -2,8 +2,10 @@ package com.manjit.pocketmind.data.models.di
 
 import android.content.Context
 import androidx.work.WorkManager
+import com.manjit.pocketmind.core.llm.EmbeddingModelSource
 import com.manjit.pocketmind.core.llm.InferenceSettingsSource
 import com.manjit.pocketmind.data.models.AndroidDeviceInfo
+import com.manjit.pocketmind.data.models.CatalogEmbeddingModelSource
 import com.manjit.pocketmind.data.models.DeviceInfo
 import com.manjit.pocketmind.data.models.ModelRepository
 import com.manjit.pocketmind.data.models.SettingsInferenceSource
@@ -30,6 +32,9 @@ internal abstract class ModelsDataModule {
 
     @Binds
     abstract fun bindsInferenceSettingsSource(source: SettingsInferenceSource): InferenceSettingsSource
+
+    @Binds
+    abstract fun bindsEmbeddingModelSource(source: CatalogEmbeddingModelSource): EmbeddingModelSource
 
     companion object {
         /** The app's ONLY HTTP client. HostAllowlist blocks every host except Hugging Face. */
