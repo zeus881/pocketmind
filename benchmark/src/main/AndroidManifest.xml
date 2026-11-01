@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Lets the benchmark see and launch the app under test (Android 11+ package visibility). -->
+    <queries>
+        <package android:name="com.manjit.pocketmind" />
+    </queries>
+</manifest>

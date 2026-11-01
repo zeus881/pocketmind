@@ -136,6 +136,20 @@ class OfflineChatRepositoryTest {
     }
 
     @Test
+    fun sessionReplacedByAnotherFeatureIsRebuilt() = runTest {
+        val chatId = repository.createChat()
+        sendAndFinish(chatId, "one")
+        // e.g. the benchmark or translate screen used the shared engine meanwhile:
+        engine.newSession("Translate only.", emptyList(), SamplingParams())
+
+        sendAndFinish(chatId, "two")
+
+        assertEquals(3, engine.sessions.size)
+        assertEquals("SYS", engine.sessions.last().systemPrompt)
+        assertEquals(2, engine.sessions.last().history.size)
+    }
+
+    @Test
     fun regenerateReplacesTheLastAnswer() = runTest {
         val chatId = repository.createChat()
         sendAndFinish(chatId, "question")

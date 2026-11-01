@@ -10,6 +10,9 @@ data class InferenceSettings(
     val preferGpu: Boolean,
     val systemPrompt: String,
     val sampling: SamplingParams,
+    /** Catalog id and display name, e.g. for labelling benchmark results. */
+    val modelId: String = "",
+    val modelName: String = "",
 )
 
 /**

@@ -31,6 +31,13 @@ interface LlmEngine {
     /** Maximum tokens (prompt + history + answer) one conversation can hold. */
     val contextWindowTokens: Int
 
+    /**
+     * Changes every time the conversation is replaced (newSession, load, unload). Several
+     * features share the one engine (chat, benchmark, translate, summarize), so a caller that
+     * built a session remembers this id and rebuilds if someone else has replaced it since.
+     */
+    val sessionId: Long
+
     /** Loads the model, trying GPU first when [preferGpu] and falling back to CPU. No-op if already loaded. */
     suspend fun load(modelPath: String, preferGpu: Boolean)
 

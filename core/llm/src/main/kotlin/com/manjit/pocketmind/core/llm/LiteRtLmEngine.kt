@@ -66,6 +66,10 @@ class LiteRtLmEngine @Inject constructor(
 
     override val contextWindowTokens: Int = CONTEXT_WINDOW_TOKENS
 
+    @Volatile
+    override var sessionId: Long = 0L
+        private set
+
     /** GPU backends compile their programs on first load; caching them here makes the next load faster. */
     private val cacheDir: String = context.cacheDir.absolutePath
 
@@ -143,6 +147,7 @@ class LiteRtLmEngine @Inject constructor(
                 val loaded = checkNotNull(engine) { "load() must succeed before newSession()" }
                 conversation?.close()
                 conversation = null
+                sessionId++
                 conversation = loaded.createConversation(
                     ConversationConfig(
                         systemInstruction = Contents.of(systemPrompt),
@@ -236,6 +241,7 @@ class LiteRtLmEngine @Inject constructor(
 
     /** Releases native memory. Order matters: the conversation belongs to the engine. */
     private fun closeAllLocked() {
+        sessionId++ // any existing session is gone
         runCatching { conversation?.close() }.onFailure { Timber.w(it, "conversation.close failed") }
         runCatching { engine?.close() }.onFailure { Timber.w(it, "engine.close failed") }
         conversation = null

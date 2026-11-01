@@ -1,4 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="feature_settings_title">Settings</string>
+    <string name="feature_settings_section_model">Model</string>
+    <string name="feature_settings_section_answers">Answers</string>
+    <string name="feature_settings_section_appearance">Appearance</string>
+    <string name="feature_settings_section_downloads">Downloads</string>
+    <string name="feature_settings_section_tools">Tools</string>
+    <string name="feature_settings_model">Model</string>
+    <string name="feature_settings_no_model">No model selected — tap to choose one</string>
+    <string name="feature_settings_gpu">Use the GPU</string>
+    <string name="feature_settings_gpu_hint">Usually faster. Falls back to the CPU automatically if the GPU is not supported.</string>
+    <string name="feature_settings_gpu_active">Currently running on: %1$s</string>
+    <string name="feature_settings_temperature">Creativity (temperature): %1$s</string>
+    <string name="feature_settings_temperature_hint">Low = focused and predictable. High = more varied, more mistakes.</string>
+    <string name="feature_settings_top_k">Top-K: %1$d</string>
+    <string name="feature_settings_top_k_hint">How many likely next words the model chooses from.</string>
+    <string name="feature_settings_system_prompt">System prompt</string>
+    <string name="feature_settings_save">Save</string>
+    <string name="feature_settings_reset">Reset to default</string>
+    <string name="feature_settings_cancel">Cancel</string>
+    <string name="feature_settings_theme_system">Follow system</string>
+    <string name="feature_settings_theme_light">Light</string>
+    <string name="feature_settings_theme_dark">Dark</string>
+    <string name="feature_settings_mobile_data">Allow downloads on mobile data</string>
+    <string name="feature_settings_mobile_data_hint">Models are large. Off = Wi-Fi only.</string>
+    <string name="feature_settings_benchmark">Benchmark</string>
+    <string name="feature_settings_benchmark_hint">Measure speed and memory on this phone</string>
 </resources>

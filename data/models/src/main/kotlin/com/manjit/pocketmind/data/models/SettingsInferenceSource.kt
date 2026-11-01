@@ -29,6 +29,8 @@ internal class SettingsInferenceSource @Inject constructor(
             preferGpu = user.preferGpu,
             systemPrompt = user.customSystemPrompt ?: DefaultPrompts.SYSTEM,
             sampling = SamplingParams(temperature = user.temperature.toDouble(), topK = user.topK),
+            modelId = modelId,
+            modelName = catalog.find(modelId)?.displayName.orEmpty(),
         )
     }
 }

@@ -3,6 +3,7 @@ package com.manjit.pocketmind.core.database.di
 import android.content.Context
 import androidx.room.Room
 import com.manjit.pocketmind.core.database.PocketMindDatabase
+import com.manjit.pocketmind.core.database.dao.BenchmarkDao
 import com.manjit.pocketmind.core.database.dao.ChatDao
 import com.manjit.pocketmind.core.database.dao.MessageDao
 import dagger.Module
@@ -27,4 +28,7 @@ object DatabaseModule {
 
     @Provides
     fun providesMessageDao(db: PocketMindDatabase): MessageDao = db.messageDao()
+
+    @Provides
+    fun providesBenchmarkDao(db: PocketMindDatabase): BenchmarkDao = db.benchmarkDao()
 }

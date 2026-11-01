@@ -22,6 +22,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.manjit.pocketmind.feature.benchmark.navigation.benchmarkScreen
+import com.manjit.pocketmind.feature.benchmark.navigation.navigateToBenchmark
 import com.manjit.pocketmind.feature.chat.navigation.ChatRoute
 import com.manjit.pocketmind.feature.chat.navigation.chatScreen
 import com.manjit.pocketmind.feature.chat.navigation.navigateToChat
@@ -31,6 +32,7 @@ import com.manjit.pocketmind.feature.models.navigation.modelsScreen
 import com.manjit.pocketmind.feature.models.navigation.navigateToModels
 import com.manjit.pocketmind.feature.onboarding.navigation.OnboardingRoute
 import com.manjit.pocketmind.feature.onboarding.navigation.onboardingScreen
+import com.manjit.pocketmind.feature.settings.SettingsNavigation
 import com.manjit.pocketmind.feature.settings.navigation.settingsScreen
 import com.manjit.pocketmind.feature.translate.navigation.translateScreen
 import com.manjit.pocketmind.navigation.TopLevelDestination
@@ -81,9 +83,14 @@ fun PocketMindAppUi(startDestination: Any, navController: NavHostController = re
             historyScreen(onOpenChat = { chatId -> navController.navigateToChat(chatId) })
             documentsScreen()
             translateScreen()
-            settingsScreen()
+            settingsScreen(
+                SettingsNavigation(
+                    onOpenModels = { navController.navigateToModels() },
+                    onOpenBenchmark = { navController.navigateToBenchmark() },
+                ),
+            )
             modelsScreen(onBack = { navController.popBackStack() })
-            benchmarkScreen()
+            benchmarkScreen(onBack = { navController.popBackStack() })
         }
     }
 }

@@ -60,6 +60,9 @@ internal class OfflineChatRepository @Inject constructor(
 
     /** False after a stopped/failed answer: the model then remembers text that Room doesn't. */
     private var sessionInSync = false
+
+    /** The engine's [LlmEngine.sessionId] right after WE built the session (-1 = never). */
+    private var ownedSessionId = -1L
     private var lastTimestamp = 0L
 
     override val engineState: StateFlow<EngineState> = engine.state
@@ -176,16 +179,11 @@ internal class OfflineChatRepository @Inject constructor(
         chatDao.restore(deleted.chat.asEntity(), deleted.messages.map { it.asEntity() })
     }
 
-    /** Loads the model; if this call actually (re)loaded it, the old conversation is gone. */
+    /** Loads the model (a no-op if already loaded). A real reload changes [LlmEngine.sessionId]. */
     private suspend fun load(settings: InferenceSettings): AppResult<Unit> {
-        val wasReady = (engine.state.value as? EngineState.Ready)?.modelPath == settings.modelPath
         engine.load(settings.modelPath, settings.preferGpu)
         return when (engine.state.value) {
-            is EngineState.Ready -> {
-                if (!wasReady) sessionLock.withLock { session = null }
-                AppResult.Success(Unit)
-            }
-
+            is EngineState.Ready -> AppResult.Success(Unit)
             else -> AppResult.Failure(ErrorKind.MODEL_LOAD_FAILED)
         }
     }
@@ -209,13 +207,18 @@ internal class OfflineChatRepository @Inject constructor(
         val historyTokens = turns.sumOf { TokenEstimator.estimate(it.text) }
 
         val key = SessionKey(chatId, settings)
-        val upToDate = session == key && sessionInSync && historyTokens <= budget
+        val upToDate = session == key &&
+            sessionInSync &&
+            // Someone else (benchmark, translate, a reload…) may have replaced the conversation.
+            ownedSessionId == engine.sessionId &&
+            historyTokens <= budget
         if (upToDate) return
 
         val trimmed = HistoryTrimmer.trim(turns, budget)
         val systemPrompt = listOfNotNull(settings.systemPrompt, trimmed.summaryNote).joinToString("\n\n")
         engine.newSession(systemPrompt, trimmed.turns, settings.sampling)
         session = key
+        ownedSessionId = engine.sessionId
         sessionInSync = true
     }
 

@@ -49,6 +49,7 @@ include(":core:datastore")
 
 include(":data:chat")
 include(":data:models")
+include(":data:benchmark")
 
 include(":feature:chat")
 include(":feature:history")
@@ -58,3 +59,5 @@ include(":feature:benchmark")
 include(":feature:onboarding")
 include(":feature:documents")
 include(":feature:translate")
+
+include(":benchmark")

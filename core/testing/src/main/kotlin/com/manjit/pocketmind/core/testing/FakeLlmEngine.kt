@@ -28,6 +28,8 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
     override val state = MutableStateFlow<EngineState>(EngineState.Idle)
     override var lastStats: GenerationStats? = null
     override var contextWindowTokens: Int = 4096
+    override var sessionId: Long = 0
+        private set
 
     var failLoad: Boolean = false
     var generationError: Throwable? = null
@@ -43,7 +45,10 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
         private set
 
     override suspend fun load(modelPath: String, preferGpu: Boolean) {
+        // Same as the real engine: loading the already-loaded model is a no-op.
+        if ((state.value as? EngineState.Ready)?.modelPath == modelPath) return
         loadedPaths += modelPath
+        sessionId++
         state.value = EngineState.Loading(modelPath)
         state.value = if (failLoad) {
             EngineState.Failed(modelPath, FailureReason.INIT_FAILED)
@@ -55,6 +60,7 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
     override suspend fun newSession(systemPrompt: String, history: List<ChatTurn>, sampling: SamplingParams) {
         check(state.value is EngineState.Ready) { "load() must succeed before newSession()" }
         sessions += Session(systemPrompt, history, sampling)
+        sessionId++
     }
 
     override fun generate(prompt: String): Flow<String> = flow {
@@ -75,6 +81,7 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
 
     override suspend fun unload() {
         unloadCount++
+        sessionId++
         state.value = EngineState.Idle
     }
 }
