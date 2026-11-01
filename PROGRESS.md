@@ -79,8 +79,10 @@ Detekt 1.23.8. Full list: `gradle/libs.versions.toml`.
 - Onboarding → model screen recommended Gemma 4 E2B (8 GB) ✓. Gemma 4 E2B + EmbeddingGemma downloaded,
   exact byte sizes, SHA-256 verified (renamed to model.litertlm) ✓.
 - Chat: model loaded on **GPU in 13.3 s**; streamed Markdown answer; auto-title ✓; **21.7 tok/s · GPU** ✓. No crashes.
-- Still to check on device: offline/airplane mode, history, summarize, Ask-your-PDF, translate, benchmark,
-  app lock, and the R8 release build.
+- User confirmed on device: answers correct, airplane mode, history, summarize, Ask-your-PDF, translate ✓.
+- **Benchmark screen (official numbers):** GPU · load 5.5 s (log: 5454 ms; first-ever load 13.3 s before the
+  GPU program cache existed) · TTFT 0.39 s · 26.3 tok/s · peak PSS 960 MB. Recorded in README + docs/benchmarks.md.
+- Still to check on device: app lock and the R8 release build (signed) before publishing.
 
 ## Open issues
 

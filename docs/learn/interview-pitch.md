@@ -157,7 +157,8 @@ session rebuild time on your phone.]
 ## Resume bullets (fill in the brackets)
 
 - Built PocketMind, an offline Android AI assistant running Gemma 4 E2B fully on-device with LiteRT-LM:
-  [ ] tok/s and [ ] s time-to-first-token on [phone], automatic GPU→CPU fallback across [ ] tested devices.
+  26.3 tok/s and 0.39 s time-to-first-token on an iQOO Neo 10R (Snapdragon 8s Gen 3) GPU, 5.5 s model
+  load, automatic GPU→CPU fallback [across [ ] tested devices — add after testing more phones].
 - Designed a 21-module clean-architecture app (Kotlin, Compose, Hilt, Room, WorkManager) with streaming
   Flow-based generation, resumable SHA-256-verified 2.6 GB downloads, and [ ] unit tests in GitHub Actions CI.
 - Implemented on-device RAG over PDFs (EmbeddingGemma, Room vector store, cosine retrieval) with page-cited,

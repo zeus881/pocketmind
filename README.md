@@ -57,9 +57,11 @@ Module graph and flows: [docs/architecture.md](docs/architecture.md).
 Measured on real phones with the in-app benchmark (3 fixed prompts, greedy decoding, cold load).
 Full table and method: [docs/benchmarks.md](docs/benchmarks.md).
 
-| Phone | Model | Backend | Load | First token | Decode | Peak memory |
+| Phone | Model | Backend | Load | First token | Decode | Peak memory* |
 |---|---|---|---|---|---|---|
-| _measure on device_ | Gemma 4 E2B | | | | | |
+| iQOO Neo 10R (Snapdragon 8s Gen 3, 8 GB) | Gemma 4 E2B | GPU | 5.5 s (13.3 s first ever) | 0.39 s | 26.3 tok/s | 960 MB |
+
+\* Process PSS; excludes most of the memory-mapped model and GPU driver buffers — see docs/benchmarks.md.
 
 ## Design decisions and trade-offs
 

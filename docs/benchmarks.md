@@ -8,9 +8,18 @@ Empty cells mean "not measured yet" — never estimate them.
 
 | Phone | SoC | RAM | Android | Model | Backend | Load (s) | TTFT avg (s) | Decode avg (tok/s) | Peak mem (MB) |
 |---|---|---|---|---|---|---|---|---|---|
+| iQOO Neo 10R | Snapdragon 8s Gen 3 (SM8635) | 8 GB | 16 | Gemma 4 E2B | GPU | 5.5 | 0.39 | 26.3 | 960 |
 | | | | | Gemma 4 E2B | | | | | |
 | | | | | Qwen3.5 0.8B | | | | | |
 | | | | | Qwen3 0.6B | | | | | |
+
+Notes on the iQOO Neo 10R row (2026-11-02, debug build, phone charging):
+- **Load 5.5 s** was a re-load: the first-ever load on this phone took **13.3 s** because the GPU backend
+  compiles its shader programs once and caches them in the app's cache dir (`EngineConfig.cacheDir`).
+  Clearing the app cache brings back the slower first load.
+- **Peak memory** is process PSS (`Debug.getPss`). It does NOT fully include the memory-mapped 2.6 GB model
+  file or buffers the GPU driver allocates outside the process, so it understates the true RAM footprint.
+  Treat it as "app process memory", not "total model memory".
 
 How to fill a row: run the benchmark, tap Share, copy the numbers from the shared text. Values marked
 `*` in the shared text are estimates (the runtime's counters were unavailable) — mark them the same way here.
