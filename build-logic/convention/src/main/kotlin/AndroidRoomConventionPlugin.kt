@@ -1,6 +1,6 @@
 import androidx.room.gradle.RoomExtension
-import com.manjit.pocketmind.buildlogic.lib
-import com.manjit.pocketmind.buildlogic.libs
+import com.sanjay.pocketmind.buildlogic.lib
+import com.sanjay.pocketmind.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure

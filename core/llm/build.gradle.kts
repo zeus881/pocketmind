@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manjit.pocketmind.core.llm"
+    namespace = "com.sanjay.pocketmind.core.llm"
 }
 
 dependencies {

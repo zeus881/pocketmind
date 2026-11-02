@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manjit.pocketmind.feature.documents"
+    namespace = "com.sanjay.pocketmind.feature.documents"
 }
 
 dependencies {

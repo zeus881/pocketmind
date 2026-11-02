@@ -2,6 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Lets the benchmark see and launch the app under test (Android 11+ package visibility). -->
     <queries>
-        <package android:name="com.manjit.pocketmind" />
+        <package android:name="com.sanjay.pocketmind" />
     </queries>
 </manifest>

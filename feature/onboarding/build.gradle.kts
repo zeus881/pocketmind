@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manjit.pocketmind.feature.onboarding"
+    namespace = "com.sanjay.pocketmind.feature.onboarding"
 }
 
 dependencies {

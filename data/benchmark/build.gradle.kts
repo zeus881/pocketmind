@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manjit.pocketmind.data.benchmark"
+    namespace = "com.sanjay.pocketmind.data.benchmark"
 }
 
 dependencies {

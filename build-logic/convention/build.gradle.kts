@@ -4,7 +4,7 @@ plugins {
     `kotlin-dsl`
 }
 
-group = "com.manjit.pocketmind.buildlogic"
+group = "com.sanjay.pocketmind.buildlogic"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_17

@@ -1,10 +1,10 @@
 import com.android.build.api.dsl.ApplicationExtension
-import com.manjit.pocketmind.buildlogic.PocketMindJavaVersion
-import com.manjit.pocketmind.buildlogic.configureKotlin
-import com.manjit.pocketmind.buildlogic.configureLint
-import com.manjit.pocketmind.buildlogic.intVersion
-import com.manjit.pocketmind.buildlogic.lib
-import com.manjit.pocketmind.buildlogic.libs
+import com.sanjay.pocketmind.buildlogic.PocketMindJavaVersion
+import com.sanjay.pocketmind.buildlogic.configureKotlin
+import com.sanjay.pocketmind.buildlogic.configureLint
+import com.sanjay.pocketmind.buildlogic.intVersion
+import com.sanjay.pocketmind.buildlogic.lib
+import com.sanjay.pocketmind.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure

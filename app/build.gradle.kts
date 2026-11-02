@@ -24,10 +24,10 @@ val hasReleaseKeystore = listOf(keystorePath, keystorePassword, signingKeyAlias,
     file(keystorePath!!).exists()
 
 android {
-    namespace = "com.manjit.pocketmind"
+    namespace = "com.sanjay.pocketmind"
 
     defaultConfig {
-        applicationId = "com.manjit.pocketmind"
+        applicationId = "com.sanjay.pocketmind"
         versionCode = 1
         versionName = "1.0.0"
     }

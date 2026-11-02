@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manjit.pocketmind.data.chat"
+    namespace = "com.sanjay.pocketmind.data.chat"
 }
 
 dependencies {

@@ -84,16 +84,30 @@ Detekt 1.23.8. Full list: `gradle/libs.versions.toml`.
   GPU program cache existed) · TTFT 0.39 s · 26.3 tok/s · peak PSS 960 MB. Recorded in README + docs/benchmarks.md.
 - Still to check on device: app lock and the R8 release build (signed) before publishing.
 
+## Fixes after first device test (2026-11-02)
+
+Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while streaming, (3) rename Manjit → Sanjay.
+- **Rename**: package/applicationId `com.sanjay.pocketmind`, all folders, Room schema folder, docs, LICENSE, git user.name.
+  New applicationId = new app on the phone (old `com.manjit.pocketmind` must be uninstalled; models re-copied or re-downloaded).
+- **Flicker**: `Markdown(content = text)` re-parsed asynchronously on every 50 ms update and showed an empty frame,
+  plus an animated height change on every token. Now `rememberMarkdownState(text, retainState = true)`, size animation
+  off, finished answers parsed `immediate`, assistant bubbles full width (chat, PDF summary, Ask-your-PDF).
+- **Code answers**: new default system prompt (one complete runnable program in a fenced block with language, explain,
+  expected output, fix-code rules, answer only the latest message); default temperature 0.7 → 0.4; answer reserve
+  1024 → 1536 tokens so long code is not cut off. Users who edited temperature/system prompt keep their own values.
+- Check: `spotlessApply detekt lint testDebugUnitTest assembleDebug assembleRelease` → BUILD SUCCESSFUL. Not yet re-tested on phone.
+
 ## Open issues
 
-- Remaining real-device checks listed above.
+- Remaining real-device checks listed above, plus re-test flicker and code answers on the phone.
+- A 2 B model will still make mistakes in harder code; Gemma 4 E2B is the best that fits 8 GB comfortably.
 - `docs/benchmarks.md` and README benchmark table are empty until measured on phones (by design: no invented numbers).
 
 ## BLOCKERS
 
 - None.
 
-## MANUAL STEPS FOR MANJIT
+## MANUAL STEPS FOR SANJAY
 
 1. **GitHub**: create repo `pocketmind`; `git remote add origin https://github.com/<you>/pocketmind.git`;
    `git push -u origin main`. Replace `YOUR_GITHUB_USER` in README.md (badges/links).

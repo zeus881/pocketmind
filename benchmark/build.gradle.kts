@@ -13,7 +13,7 @@ plugins {
 }
 
 extensions.configure<TestExtension> {
-    namespace = "com.manjit.pocketmind.benchmark"
+    namespace = "com.sanjay.pocketmind.benchmark"
     compileSdk = libs.versions.compileSdk.get().toInt()
 
     defaultConfig {

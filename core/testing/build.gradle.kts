@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manjit.pocketmind.core.testing"
+    namespace = "com.sanjay.pocketmind.core.testing"
 }
 
 // Test helpers shared by many modules. Other modules add this ONLY as `testImplementation`,

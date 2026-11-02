@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manjit.pocketmind.feature.history"
+    namespace = "com.sanjay.pocketmind.feature.history"
 }
 
 dependencies {

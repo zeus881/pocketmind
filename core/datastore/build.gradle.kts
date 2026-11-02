@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manjit.pocketmind.core.datastore"
+    namespace = "com.sanjay.pocketmind.core.datastore"
 }
 
 dependencies {

@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manjit.pocketmind.data.models"
+    namespace = "com.sanjay.pocketmind.data.models"
 }
 
 dependencies {

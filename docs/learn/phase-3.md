@@ -131,7 +131,7 @@ Rebuild triggers: other chat, changed settings, last answer stopped/failed (`ses
 = false`), history no longer fits the context window, or the model was reloaded (e.g. after
 `onTrimMemory`). Rebuilding costs "prefill" time, so we avoid it when possible.
 
-`budget = contextWindow − 1024 (answer) − systemPrompt − prompt`.
+`budget = contextWindow − 1536 (answer) − systemPrompt − prompt`.
 `nextTimestamp()` makes timestamps strictly increasing so two messages saved in the same
 millisecond keep their order.
 

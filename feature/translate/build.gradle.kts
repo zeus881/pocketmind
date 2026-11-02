@@ -3,7 +3,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manjit.pocketmind.feature.translate"
+    namespace = "com.sanjay.pocketmind.feature.translate"
 }
 
 dependencies {
