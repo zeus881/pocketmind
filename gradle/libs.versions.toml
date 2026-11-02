@@ -11,6 +11,7 @@ spotless = "8.10.4"
 ktlint = "1.8.0"
 detekt = "1.23.8"
 aboutlibraries = "15.3.0"
+kover = "0.9.11"
 
 # Android SDK levels (plain numbers, read by the convention plugins)
 compileSdk = "37"
@@ -129,6 +130,7 @@ kotlin-gradle-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", v
 ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
 compose-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 room-gradle-plugin = { module = "androidx.room:room-gradle-plugin", version.ref = "androidx-room" }
+kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -144,6 +146,7 @@ androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "and
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 
 # Our own convention plugins (defined in build-logic/convention)
 pocketmind-android-application = { id = "pocketmind.android.application" }

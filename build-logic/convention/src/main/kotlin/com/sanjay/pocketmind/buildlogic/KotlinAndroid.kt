@@ -1,11 +1,16 @@
 package com.sanjay.pocketmind.buildlogic
 
 import com.android.build.api.dsl.Lint
+import com.android.build.api.variant.AndroidComponentsExtension
+import com.android.build.api.variant.HasHostTestsBuilder
+import com.android.build.api.variant.HostTestBuilder
+import kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
@@ -49,6 +54,45 @@ internal fun Project.configureKotlin() {
         )
     }
 }
+
+/**
+ * Runs JVM unit tests for the DEBUG build type only.
+ *
+ * WHY: AGP creates a unit-test task per build type (debug, release, and the app's extra
+ * benchmark/nonMinified types). They run the same tests against the same Kotlin code, so the
+ * extra runs only double the build time — and Kover's merged report would run all of them.
+ */
+internal fun Project.configureHostTestsForDebugOnly() {
+    // Looked up by name: AGP registers it under its concrete type (application or library).
+    val components = extensions.getByName("androidComponents") as AndroidComponentsExtension<*, *, *>
+    components.beforeVariants { variant ->
+        if (variant.buildType != "debug") {
+            (variant as? HasHostTestsBuilder)?.hostTests?.get(HostTestBuilder.UNIT_TEST_TYPE)?.enable = false
+        }
+    }
+}
+
+/**
+ * Code coverage with Kover. Every module applies the plugin; the root project merges all
+ * modules into one report and enforces the minimum (see the root build.gradle.kts).
+ *
+ * Kover's default "total" report covers EVERY build type, so it compiles the release variants
+ * too — slow, and it adds nothing because the unit tests only run on debug. Instead each module
+ * contributes one custom variant named [COVERAGE_VARIANT] holding just its tested code:
+ * [koverSource] is "debug" for Android modules and "jvm" for pure Kotlin modules.
+ * The root then offers `koverVerifyApp`, `koverXmlReportApp` and `koverHtmlReportApp`.
+ */
+internal fun Project.configureKover(koverSource: String) {
+    pluginManager.apply("org.jetbrains.kotlinx.kover")
+    extensions.configure<KoverProjectExtension> {
+        currentProject {
+            createVariant(COVERAGE_VARIANT) { add(koverSource) }
+        }
+    }
+}
+
+/** Name of the merged coverage variant (tasks: koverVerifyApp, koverXmlReportApp, …). */
+internal const val COVERAGE_VARIANT = "app"
 
 /**
  * Android Lint settings shared by the app and every library.

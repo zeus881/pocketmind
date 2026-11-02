@@ -6,6 +6,46 @@ This file is the single source of truth. Read it fully at the start of every ses
 
 ---
 
+## 0. v2 — current work (read first)
+
+v1 (sections 1–7 below) is complete and must keep working. v2 turns it into a store-quality product.
+**Plan: [V2_PLAN.md](V2_PLAN.md) (approved 2026-11-02). Audit: [AUDIT.md](AUDIT.md). Status: [PROGRESS.md](PROGRESS.md).**
+If a session restarts: read this file, V2_PLAN.md and PROGRESS.md, then continue with the next unfinished phase.
+
+### v2 workflow
+- Work on git branch `v2`. Phases run in order without stopping for approval.
+- Per phase: implement → tests → `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`
+  → fix until green → conventional commit(s) → update PROGRESS.md → write `docs/learn/v2-phase-N.md`
+  (what changed, why, concepts, code walkthrough, trade-offs, 8 interview questions with model answers) → next phase.
+- Things only the owner can do go under **"MANUAL STEPS FOR SANJAY"** in PROGRESS.md; do not stop for them.
+- Same error 3 times → record under **BLOCKERS** in PROGRESS.md, choose the safest working alternative, continue.
+- Anything that needs the real phone is marked "to verify on device" until it has been run there.
+- Verify every new library version (Google Maven / Maven Central) and every API (javap or sources of the resolved
+  artifact) before use. Never invent versions, prices, sizes or checksums.
+
+### v2 decisions (approved)
+1. **No third-party crash SDK.** Local crash log + user-initiated "Share diagnostic report" via the share sheet.
+2. **PocketMind Pro** (one-time Play Billing purchase, server-free, verified with `queryPurchasesAsync`) unlocks bigger
+   models, unlimited PDF size, personas, extra themes. **Voice stays free** (accessibility).
+3. A bigger Pro model (likely Gemma 4 E4B) is added only after its real URL, size and SHA-256 are verified.
+4. The Pro price is set by the owner in Play Console; never hard-coded.
+5. **Network rule (amends §4):** PocketMind's own code makes no network calls except model downloads. Google Play
+   features (Billing, In-App Updates, In-App Review) run through the Play Store app and send no user content.
+6. Chats are encrypted with SQLCipher (key wrapped by Android Keystore); the APK size cost is measured and reported.
+
+### v2 quality gates
+- Kover: `koverVerifyApp` (merged debug-only variant; the default `koverVerify` would also compile every release
+  variant for nothing) rises phase by phase to **≥ 80 % line coverage on data, domain and ViewModel classes**.
+  Compose UI is covered by Roborazzi screenshot tests (light/dark, phone/tablet, font 2.0) and Compose UI tests.
+- Performance budget lives in `docs/performance-budget.md`; numbers there are measured, never estimated.
+- Room schema changes ship with migration tests from every earlier schema version.
+
+### v2 modules (added during v2)
+`core:speech` (on-device speech in/out), `core:tools` (LLM tool calling), `core:billing` (Play Billing),
+`feature:personas` (personas + prompt library). Dependency rules from §3 apply unchanged.
+
+---
+
 ## 1. Product scope
 
 ### v1.0 (must ship first)

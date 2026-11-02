@@ -4,7 +4,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, v2]
   pull_request:
 
 # Cancel an older run of the same branch when a newer commit arrives (saves CI minutes).
@@ -36,8 +36,29 @@ jobs:
       - name: Android Lint
         run: ./gradlew lint
 
-      - name: Unit tests
-        run: ./gradlew testDebugUnitTest
+      - name: Unit tests and coverage gate
+        run: ./gradlew testDebugUnitTest koverVerifyApp koverXmlReportApp koverHtmlReportApp
+
+      # Coverage summary on the run page (no third-party action: parses Kover's JaCoCo-format XML).
+      - name: Coverage summary
+        if: always()
+        run: |
+          python3 - <<'EOF' >> "$GITHUB_STEP_SUMMARY"
+          import xml.etree.ElementTree as ET, os
+          path = "build/reports/kover/reportApp.xml"
+          if not os.path.exists(path):
+              print("No coverage report was produced."); raise SystemExit
+          root = ET.parse(path).getroot()
+          line = next(c for c in root.findall("counter") if c.get("type") == "LINE")
+          missed, covered = int(line.get("missed")), int(line.get("covered"))
+          print(f"### Line coverage: {100 * covered / (missed + covered):.1f} % ({covered}/{missed + covered} lines)")
+          EOF
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage
+          path: build/reports/kover/
 
       - name: Debug build
         run: ./gradlew assembleDebug

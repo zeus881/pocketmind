@@ -16,6 +16,57 @@ plugins {
     alias(libs.plugins.aboutlibraries) apply false
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.kover)
+}
+
+// ---------- Kover: one merged coverage report for the whole app ----------
+// Every module applies Kover through its convention plugin; here the root collects them all.
+// core:testing (test helpers) and :benchmark (device-only tests) are not app code.
+
+/** Minimum line coverage in percent. Raised phase by phase towards 80 (V2_PLAN.md). Never lowered. */
+val koverMinLineCoverage = 66 // v2 phase 0 baseline: 66.8 % measured
+
+val coveredModules = listOf(
+    ":app",
+    ":core:model", ":core:common", ":core:designsystem", ":core:llm", ":core:database", ":core:datastore",
+    ":data:chat", ":data:models", ":data:benchmark", ":data:documents",
+    ":feature:chat", ":feature:history", ":feature:models", ":feature:settings",
+    ":feature:benchmark", ":feature:onboarding", ":feature:documents", ":feature:translate",
+)
+
+dependencies {
+    coveredModules.forEach { kover(project(it)) }
+}
+
+kover {
+    // The merged variant: each module adds its own "app" variant (debug build or JVM code).
+    currentProject {
+        createVariant("app") { }
+    }
+    reports {
+        filters {
+            excludes {
+                // Generated code (Hilt, Room, Compose compiler, serialization) is not ours to test.
+                classes(
+                    "*Hilt_*", "*_HiltModules*", "*_Factory*", "*_MembersInjector", "*_Provide*Factory*",
+                    "dagger.*", "hilt_aggregated_deps.*", "*_GeneratedInjector",
+                    "*_Impl", "*_Impl$*", "*_AutoMigration_*",
+                    "*ComposableSingletons*", "*.BuildConfig", "*\$\$serializer",
+                )
+                // Wiring only: DI modules and navigation graph builders.
+                packages("*.di", "*.navigation")
+                // Composable UI is verified by screenshot and UI tests, not by line coverage
+                // (CLAUDE.md §0 "v2 quality gates").
+                annotatedBy("androidx.compose.runtime.Composable", "androidx.compose.ui.tooling.preview.Preview")
+            }
+        }
+        verify {
+            rule("Line coverage of app logic") {
+                // Raised phase by phase towards 80 % (V2_PLAN.md). Never lowered.
+                minBound(koverMinLineCoverage)
+            }
+        }
+    }
 }
 
 // ---------- Spotless: one formatting style for every Kotlin file ----------

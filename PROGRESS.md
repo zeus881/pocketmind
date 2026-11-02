@@ -2,7 +2,16 @@
 
 Read this file and CLAUDE.md first when a session restarts. Never redo finished phases.
 
-## Status: ALL 8 PHASES DONE
+## v2 status (branch `v2`, plan: V2_PLAN.md, approved 2026-11-02)
+
+| Phase | State | Coverage gate (logic) | Notes |
+|---|---|---|---|
+| 0 Foundations: Kover, config cache, Dependabot, CI coverage, perf budget | DONE | 66 % (measured 66.8 %) | `koverVerifyApp` = debug-only merged variant |
+| 1 Crash-loop guard + model integrity | NEXT | | |
+
+Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
+
+## v1 status: ALL 8 PHASES DONE
 
 | Phase | State | Commit |
 |---|---|---|

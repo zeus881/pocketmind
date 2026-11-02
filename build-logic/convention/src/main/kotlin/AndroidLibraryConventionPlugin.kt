@@ -1,6 +1,8 @@
 import com.android.build.api.dsl.LibraryExtension
 import com.sanjay.pocketmind.buildlogic.PocketMindJavaVersion
+import com.sanjay.pocketmind.buildlogic.configureHostTestsForDebugOnly
 import com.sanjay.pocketmind.buildlogic.configureKotlin
+import com.sanjay.pocketmind.buildlogic.configureKover
 import com.sanjay.pocketmind.buildlogic.configureLint
 import com.sanjay.pocketmind.buildlogic.intVersion
 import com.sanjay.pocketmind.buildlogic.lib
@@ -47,6 +49,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 configureLint(lint)
             }
             configureKotlin()
+            configureHostTestsForDebugOnly()
+            configureKover(koverSource = "debug")
 
             dependencies {
                 add("implementation", libs.lib("timber"))

@@ -25,6 +25,7 @@ dependencies {
     compileOnly(libs.ksp.gradle.plugin)
     compileOnly(libs.compose.gradle.plugin)
     compileOnly(libs.room.gradle.plugin)
+    compileOnly(libs.kover.gradle.plugin)
 }
 
 gradlePlugin {

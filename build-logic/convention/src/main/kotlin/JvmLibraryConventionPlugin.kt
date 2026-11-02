@@ -1,5 +1,6 @@
 import com.sanjay.pocketmind.buildlogic.PocketMindJavaVersion
 import com.sanjay.pocketmind.buildlogic.configureKotlin
+import com.sanjay.pocketmind.buildlogic.configureKover
 import com.sanjay.pocketmind.buildlogic.lib
 import com.sanjay.pocketmind.buildlogic.libs
 import org.gradle.api.Plugin
@@ -23,6 +24,7 @@ class JvmLibraryConventionPlugin : Plugin<Project> {
                 targetCompatibility = PocketMindJavaVersion
             }
             configureKotlin()
+            configureKover(koverSource = "jvm")
             dependencies {
                 add("testImplementation", libs.lib("junit"))
             }
