@@ -8,6 +8,8 @@ import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.EngineState
 import com.sanjay.pocketmind.core.llm.FailureReason
+import com.sanjay.pocketmind.core.model.BranchInfo
+import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -78,8 +80,16 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
     }
 
     // flatMapLatest: when chatId changes, stop observing the old chat and observe the new one.
-    private val messages = chatId.flatMapLatest { id ->
-        if (id == null) flowOf(emptyList()) else repository.observeMessages(id)
+
+    /** The visible branch and its version info, together, so they always describe the same messages. */
+    private val conversation: Flow<Pair<List<Message>, Map<String, BranchInfo>>> = chatId.flatMapLatest { id ->
+        if (id == null) {
+            flowOf(emptyList<Message>() to emptyMap())
+        } else {
+            combine(repository.observeMessages(id), repository.observeBranches(id)) { list, versions ->
+                list to versions
+            }
+        }
     }
     private val title = chatId.flatMapLatest { id ->
         if (id == null) flowOf(null) else repository.observeChat(id).map { it?.title }
@@ -88,14 +98,15 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
     val uiState: StateFlow<ChatUiState> = combine(
         chatId,
         title,
-        messages,
+        conversation,
         streaming,
         modelUi,
-    ) { id, title, list, live, model ->
+    ) { id, title, (list, versions), live, model ->
         ChatUiState(
             chatId = id,
             title = title,
             messages = list,
+            branches = versions,
             streamingText = live,
             isGenerating = live != null,
             model = model,
@@ -190,6 +201,31 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
         if (!isNewChat) return
         repository.deleteChat(id)
         if (chatId.value == id) chatId.value = null
+    }
+
+    /**
+     * Sends an edited version of the question [messageId]. The original question and the
+     * conversation after it stay available through the version switcher.
+     */
+    fun edit(messageId: String, newText: String) {
+        val id = chatId.value ?: return
+        val text = newText.trim()
+        if (text.isEmpty() || generationJob?.isActive == true) return
+        generationJob = viewModelScope.launch {
+            streaming.value = ""
+            when (val result = guarded { repository.editAndResend(id, messageId, text) }) {
+                is AppResult.Success -> collectAnswer(id, result.value)
+                is AppResult.Failure -> fail(result.kind)
+                null -> Unit
+            }
+        }
+    }
+
+    /** Shows the previous (-1) or next (+1) version of a message. Not while an answer is being written. */
+    fun showVersion(messageId: String, offset: Int) {
+        val id = chatId.value ?: return
+        if (generationJob?.isActive == true) return
+        viewModelScope.launch { guarded { repository.showVersion(id, messageId, offset) } }
     }
 
     /** The Stop button. Cancellation travels down to the engine, which stops native generation. */

@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanjay.pocketmind.core.model.ChatSummary
 import com.sanjay.pocketmind.core.model.DeletedChat
+import com.sanjay.pocketmind.core.model.Folder
 import com.sanjay.pocketmind.data.chat.ChatRepository
+import com.sanjay.pocketmind.data.chat.FolderRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -24,7 +26,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /** Screen state: the search text plus the result of loading the list. */
-data class HistoryUiState(val query: String = "", val list: ListState = ListState.Loading)
+data class HistoryUiState(
+    val query: String = "",
+    val list: ListState = ListState.Loading,
+    val folders: List<Folder> = emptyList(),
+    /** Only chats in this folder are listed; null = all chats. */
+    val selectedFolderId: String? = null,
+)
 
 sealed interface ListState {
     data object Loading : ListState
@@ -47,9 +55,13 @@ sealed interface HistoryEvent {
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class HistoryViewModel @Inject constructor(private val repository: ChatRepository) : ViewModel() {
+class HistoryViewModel @Inject constructor(
+    private val repository: ChatRepository,
+    private val folderRepository: FolderRepository,
+) : ViewModel() {
 
     private val query = MutableStateFlow("")
+    private val selectedFolder = MutableStateFlow<String?>(null)
     private val retryTrigger = MutableStateFlow(0)
     private val _events = Channel<HistoryEvent>(Channel.BUFFERED)
     val events: Flow<HistoryEvent> = _events.receiveAsFlow()
@@ -69,8 +81,21 @@ class HistoryViewModel @Inject constructor(private val repository: ChatRepositor
                 .catch { emit(ListState.Error) }
         }
 
-    val uiState: StateFlow<HistoryUiState> = combine(query, list, ::HistoryUiState)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HistoryUiState())
+    val uiState: StateFlow<HistoryUiState> = combine(
+        query,
+        list,
+        folderRepository.observeFolders(),
+        selectedFolder,
+    ) { q, chats, folders, selected ->
+        // A folder deleted elsewhere can't stay selected.
+        val folderId = selected?.takeIf { id -> folders.any { it.id == id } }
+        val filtered = if (folderId != null && chats is ListState.Content) {
+            ListState.Content(chats.chats.filter { it.chat.folderId == folderId })
+        } else {
+            chats
+        }
+        HistoryUiState(query = q, list = filtered, folders = folders, selectedFolderId = folderId)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), HistoryUiState())
 
     fun onQueryChange(newQuery: String) {
         query.value = newQuery
@@ -93,6 +118,36 @@ class HistoryViewModel @Inject constructor(private val repository: ChatRepositor
 
     fun undoDelete(deleted: DeletedChat) {
         viewModelScope.launch { repository.restoreChat(deleted) }
+    }
+
+    fun setPinned(chatId: String, pinned: Boolean) {
+        viewModelScope.launch { repository.setPinned(chatId, pinned) }
+    }
+
+    fun moveToFolder(chatId: String, folderId: String?) {
+        viewModelScope.launch { repository.moveToFolder(chatId, folderId) }
+    }
+
+    fun selectFolder(folderId: String?) {
+        selectedFolder.value = folderId
+    }
+
+    /** Creates a folder; when [moveChatId] is given (from "Move to → New folder"), files that chat in it. */
+    fun createFolder(name: String, moveChatId: String?) {
+        viewModelScope.launch {
+            val id = folderRepository.createFolder(name) ?: return@launch
+            if (moveChatId != null) repository.moveToFolder(moveChatId, id)
+        }
+    }
+
+    fun renameFolder(folderId: String, name: String) {
+        viewModelScope.launch { folderRepository.renameFolder(folderId, name) }
+    }
+
+    /** Deletes the folder; its chats stay and move back to "All chats". */
+    fun deleteFolder(folderId: String) {
+        if (selectedFolder.value == folderId) selectedFolder.value = null
+        viewModelScope.launch { folderRepository.deleteFolder(folderId) }
     }
 
     private companion object {

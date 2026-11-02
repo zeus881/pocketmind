@@ -10,6 +10,7 @@ import com.sanjay.pocketmind.core.llm.InferenceSettings
 import com.sanjay.pocketmind.core.llm.InferenceSettingsSource
 import com.sanjay.pocketmind.core.llm.SamplingParams
 import com.sanjay.pocketmind.core.llm.SessionReplacedException
+import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.ChatTurn
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
@@ -246,6 +247,65 @@ class OfflineChatRepositoryTest {
         val messages = repository.observeMessages(chatId).first()
         assertEquals(listOf("question", "Better answer"), messages.map { it.text })
         assertEquals("question", engine.prompts.last())
+    }
+
+    @Test
+    fun regenerateKeepsTheOldAnswerAsAnotherVersion() = runTest {
+        val chatId = repository.createChat()
+        sendAndFinish(chatId, "question")
+        engine.responsePieces = listOf("Better")
+        val again = (repository.regenerateLastAnswer(chatId) as AppResult.Success).value.toList().joinToString("")
+        repository.saveAssistantMessage(chatId, again, MessageStatus.COMPLETE, null)
+
+        val visible = repository.observeMessages(chatId).first()
+        assertEquals(listOf("question", "Better"), visible.map { it.text })
+        val answerVersions = repository.observeBranches(chatId).first()[visible.last().id]
+        assertEquals(BranchInfo(index = 1, count = 2), answerVersions)
+
+        repository.showVersion(chatId, visible.last().id, offset = -1)
+        assertEquals(listOf("question", "Hello from fake"), repository.observeMessages(chatId).first().map { it.text })
+    }
+
+    @Test
+    fun editAndResendCreatesANewBranchAndKeepsTheOldOne() = runTest {
+        val chatId = repository.createChat()
+        sendAndFinish(chatId, "first")
+        sendAndFinish(chatId, "secnd question")
+        val typo = repository.observeMessages(chatId).first()[2]
+
+        val answer = (repository.editAndResend(chatId, typo.id, "second question") as AppResult.Success).value
+        repository.saveAssistantMessage(chatId, answer.toList().joinToString(""), MessageStatus.COMPLETE, null)
+
+        val visible = repository.observeMessages(chatId).first()
+        assertEquals(listOf("first", "Hello from fake", "second question", "Hello from fake"), visible.map { it.text })
+        assertEquals(BranchInfo(1, 2), repository.observeBranches(chatId).first()[visible[2].id])
+        // The model was rebuilt with only the turns BEFORE the edited question.
+        assertEquals(2, engine.sessions.last().history.size)
+
+        repository.showVersion(chatId, visible[2].id, offset = -1)
+        assertEquals("secnd question", repository.observeMessages(chatId).first()[2].text)
+    }
+
+    @Test
+    fun editingAnAnswerIsRefused() = runTest {
+        val chatId = repository.createChat()
+        sendAndFinish(chatId, "q")
+        val answer = repository.observeMessages(chatId).first().last()
+
+        val result = repository.editAndResend(chatId, answer.id, "changed")
+
+        assertEquals(ErrorKind.UNKNOWN, (result as AppResult.Failure).kind)
+    }
+
+    @Test
+    fun pinsAndFoldersAreSaved() = runTest {
+        val chatId = repository.createChat()
+        repository.setPinned(chatId, true)
+        repository.moveToFolder(chatId, "f1")
+
+        val chat = repository.observeChat(chatId).first()!!
+        assertTrue(chat.pinned)
+        assertEquals("f1", chat.folderId)
     }
 
     @Test

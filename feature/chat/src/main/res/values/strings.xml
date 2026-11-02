@@ -29,4 +29,13 @@
     <string name="feature_chat_suggestion_code">Write a Python function that reverses a string</string>
     <string name="feature_chat_suggestion_ideas">Give me five ideas for a healthy breakfast</string>
     <string name="feature_chat_suggestion_write">Help me write a polite leave application</string>
+    <string name="feature_chat_message_options">Message options</string>
+    <string name="feature_chat_edit">Edit</string>
+    <string name="feature_chat_edit_title">Edit your question</string>
+    <string name="feature_chat_edit_send">Send</string>
+    <string name="feature_chat_cancel">Cancel</string>
+    <string name="feature_chat_version">%1$d / %2$d</string>
+    <string name="feature_chat_version_description">Version %1$d of %2$d</string>
+    <string name="feature_chat_previous_version">Previous version</string>
+    <string name="feature_chat_next_version">Next version</string>
 </resources>

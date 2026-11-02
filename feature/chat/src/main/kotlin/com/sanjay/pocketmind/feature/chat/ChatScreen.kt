@@ -102,6 +102,8 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
         onNewChat = viewModel::newChat,
         onReloadModel = viewModel::retryModel,
         onOpenModels = onOpenModels,
+        onEdit = viewModel::edit,
+        onShowVersion = viewModel::showVersion,
     )
 }
 
@@ -117,6 +119,8 @@ fun ChatContent(
     onOpenModels: () -> Unit,
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    onEdit: (messageId: String, newText: String) -> Unit = { _, _ -> },
+    onShowVersion: (messageId: String, offset: Int) -> Unit = { _, _ -> },
 ) {
     Scaffold(
         modifier = modifier,
@@ -190,6 +194,9 @@ fun ChatContent(
                                 streamingText = state.streamingText,
                                 canRetry = !state.isGenerating,
                                 onRetry = onRetry,
+                                branches = state.branches,
+                                onEdit = onEdit,
+                                onShowVersion = onShowVersion,
                             )
                         }
                     }

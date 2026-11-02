@@ -7,7 +7,10 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -20,31 +23,46 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.sanjay.pocketmind.core.designsystem.component.MarkdownText
+import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
 import com.sanjay.pocketmind.core.designsystem.theme.PmBubbleShapes
 import com.sanjay.pocketmind.core.designsystem.theme.PmMotion
 import com.sanjay.pocketmind.core.designsystem.theme.PmSize
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
+import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
@@ -76,7 +94,12 @@ internal fun MessageList(
     canRetry: Boolean,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    branches: Map<String, BranchInfo> = emptyMap(),
+    onEdit: (messageId: String, newText: String) -> Unit = { _, _ -> },
+    onShowVersion: (messageId: String, offset: Int) -> Unit = { _, _ -> },
 ) {
+    // Editing and switching versions are blocked while an answer is being written (same rule as retry).
+    val canChange = canRetry
     val newestFirst = messages.asReversed()
     val lastAssistantId = messages.lastOrNull()?.takeIf { it.role == TurnRole.ASSISTANT }?.id
     val listState = rememberLazyListState()
@@ -96,15 +119,27 @@ internal fun MessageList(
                 item(key = STREAMING_KEY) { StreamingAnswer(streamingText, Modifier.animateItem()) }
             }
             items(newestFirst, key = { it.id }) { message ->
-                if (message.role == TurnRole.USER) {
-                    UserBubble(message.text, Modifier.animateItem())
-                } else {
-                    AssistantAnswer(
-                        message = message,
-                        showRetry = canRetry && message.id == lastAssistantId,
-                        onRetry = onRetry,
-                        modifier = Modifier.animateItem(),
-                    )
+                val versions = branches[message.id]
+                Column(Modifier.animateItem()) {
+                    if (message.role == TurnRole.USER) {
+                        UserBubble(message.text, canEdit = canChange, onEdit = { onEdit(message.id, it) })
+                    } else {
+                        AssistantAnswer(
+                            message = message,
+                            showRetry = canRetry && message.id == lastAssistantId,
+                            onRetry = onRetry,
+                        )
+                    }
+                    if (versions != null) {
+                        VersionSwitcher(
+                            info = versions,
+                            enabled = canChange,
+                            onShow = { offset -> onShowVersion(message.id, offset) },
+                            modifier = Modifier.align(
+                                if (message.role == TurnRole.USER) Alignment.End else Alignment.Start,
+                            ),
+                        )
+                    }
                 }
             }
         }
@@ -126,28 +161,120 @@ internal fun MessageList(
     }
 }
 
+/**
+ * A question. Long-press (or TalkBack's "actions" menu) offers Edit and Copy. Editing sends a
+ * NEW version of the question; the old one stays reachable through the version switcher.
+ */
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun UserBubble(text: String, modifier: Modifier = Modifier) {
+private fun UserBubble(text: String, canEdit: Boolean, onEdit: (String) -> Unit, modifier: Modifier = Modifier) {
+    val clipboard = LocalClipboard.current
+    val scope = rememberCoroutineScope()
+    val haptics = rememberPmHaptics()
+    var menuOpen by remember { mutableStateOf(false) }
+    var editing by rememberSaveable { mutableStateOf(false) }
+    val optionsLabel = stringResource(R.string.feature_chat_message_options)
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
-        Surface(
-            color = MaterialTheme.colorScheme.primaryContainer,
-            shape = PmBubbleShapes.user,
-            modifier = Modifier.widthIn(max = PmSize.userBubbleMaxWidth),
-        ) {
-            Text(
-                text,
-                Modifier.padding(horizontal = PmSpacing.l, vertical = PmSpacing.m),
-                style = MaterialTheme.typography.bodyLarge,
+        Box {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = PmBubbleShapes.user,
+                modifier = Modifier
+                    .widthIn(max = PmSize.userBubbleMaxWidth)
+                    .clip(PmBubbleShapes.user)
+                    .combinedClickable(
+                        onClick = {},
+                        onLongClickLabel = optionsLabel,
+                        onLongClick = {
+                            haptics.longPress()
+                            menuOpen = true
+                        },
+                    ),
+            ) {
+                Text(
+                    text,
+                    Modifier.padding(horizontal = PmSpacing.l, vertical = PmSpacing.m),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
+            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.feature_chat_edit)) },
+                    enabled = canEdit,
+                    onClick = {
+                        menuOpen = false
+                        editing = true
+                    },
+                )
+                DropdownMenuItem(
+                    text = { Text(stringResource(R.string.feature_chat_copy)) },
+                    onClick = {
+                        menuOpen = false
+                        scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("question", text))) }
+                    },
+                )
+            }
+        }
+    }
+    if (editing) {
+        EditQuestionDialog(
+            initial = text,
+            onSend = { newText ->
+                editing = false
+                onEdit(newText)
+            },
+            onDismiss = { editing = false },
+        )
+    }
+}
+
+@Composable
+private fun EditQuestionDialog(initial: String, onSend: (String) -> Unit, onDismiss: () -> Unit) {
+    var value by rememberSaveable { mutableStateOf(initial) }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.feature_chat_edit_title)) },
+        text = { OutlinedTextField(value = value, onValueChange = { value = it }, maxLines = 8) },
+        confirmButton = {
+            TextButton(onClick = { onSend(value) }, enabled = value.isNotBlank() && value.trim() != initial.trim()) {
+                Text(stringResource(R.string.feature_chat_edit_send))
+            }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.feature_chat_cancel)) } },
+    )
+}
+
+/** "‹ 2 / 3 ›": switch between versions of an edited question or a regenerated answer. */
+@Composable
+private fun VersionSwitcher(info: BranchInfo, enabled: Boolean, onShow: (Int) -> Unit, modifier: Modifier = Modifier) {
+    val description = stringResource(R.string.feature_chat_version_description, info.index + 1, info.count)
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        IconButton(onClick = { onShow(-1) }, enabled = enabled && info.index > 0) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                contentDescription = stringResource(R.string.feature_chat_previous_version),
+            )
+        }
+        Text(
+            text = stringResource(R.string.feature_chat_version, info.index + 1, info.count),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.semantics { contentDescription = description },
+        )
+        IconButton(onClick = { onShow(1) }, enabled = enabled && info.index < info.count - 1) {
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = stringResource(R.string.feature_chat_next_version),
             )
         }
     }
 }
 
 @Composable
-private fun AssistantAnswer(message: Message, showRetry: Boolean, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+private fun AssistantAnswer(message: Message, showRetry: Boolean, onRetry: () -> Unit) {
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
-    Column(modifier.fillMaxWidth()) {
+    Column(Modifier.fillMaxWidth()) {
         // immediate: a finished answer is parsed once, synchronously, so it never shows
         // an empty frame when the streaming answer is swapped for the saved one.
         if (message.text.isNotBlank()) MarkdownText(message.text, immediate = true)

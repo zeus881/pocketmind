@@ -1,15 +1,19 @@
 package com.sanjay.pocketmind.feature.history
 
 import com.sanjay.pocketmind.core.common.result.AppResult
+import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.EngineState
 import com.sanjay.pocketmind.core.llm.GenerationStats
+import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Chat
 import com.sanjay.pocketmind.core.model.ChatSummary
 import com.sanjay.pocketmind.core.model.DeletedChat
+import com.sanjay.pocketmind.core.model.Folder
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.testing.MainDispatcherRule
 import com.sanjay.pocketmind.data.chat.ChatRepository
+import com.sanjay.pocketmind.data.chat.FolderRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -80,10 +84,73 @@ class HistoryViewModelTest {
             stats: GenerationStats?,
         ) = Unit
         override fun lastGenerationStats(): GenerationStats? = null
+        override fun observeBranches(chatId: String): Flow<Map<String, BranchInfo>> = emptyFlow()
+        override suspend fun editAndResend(chatId: String, messageId: String, newText: String) =
+            AppResult.Failure(ErrorKind.UNKNOWN)
+        override suspend fun showVersion(chatId: String, messageId: String, offset: Int) = Unit
+
+        override suspend fun setPinned(chatId: String, pinned: Boolean) {
+            chats.value = chats.value.map { if (it.id == chatId) it.copy(pinned = pinned) else it }
+        }
+
+        override suspend fun moveToFolder(chatId: String, folderId: String?) {
+            chats.value = chats.value.map { if (it.id == chatId) it.copy(folderId = folderId) else it }
+        }
+    }
+
+    private class FakeFolders : FolderRepository {
+        val folders = MutableStateFlow<List<Folder>>(emptyList())
+
+        override fun observeFolders(): Flow<List<Folder>> = folders
+        override suspend fun createFolder(name: String): String? {
+            val id = "f${folders.value.size + 1}"
+            folders.value += Folder(id, name, 0)
+            return id
+        }
+        override suspend fun renameFolder(id: String, name: String) {
+            folders.value = folders.value.map { if (it.id == id) it.copy(name = name) else it }
+        }
+        override suspend fun deleteFolder(id: String) {
+            folders.value = folders.value.filterNot { it.id == id }
+        }
     }
 
     private val repo = FakeRepo()
-    private val viewModel by lazy { HistoryViewModel(repo) }
+    private val folderRepo = FakeFolders()
+    private val viewModel by lazy { HistoryViewModel(repo, folderRepo) }
+
+    @Test
+    fun `selecting a folder lists only its chats, deleting it shows all again`() = runTest(mainRule.testDispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
+        viewModel.createFolder("Drones", moveChatId = "a")
+        advanceUntilIdle()
+        val folderId = viewModel.uiState.value.folders.single().id
+
+        viewModel.selectFolder(folderId)
+        advanceUntilIdle()
+        assertEquals(listOf("Drone batteries"), titles())
+
+        viewModel.deleteFolder(folderId)
+        advanceUntilIdle()
+        assertEquals(null, viewModel.uiState.value.selectedFolderId)
+        assertEquals(2, titles().size)
+    }
+
+    @Test
+    fun `pin, move and folder rename are forwarded`() = runTest(mainRule.testDispatcher) {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
+        viewModel.setPinned("b", true)
+        viewModel.moveToFolder("b", "x")
+        viewModel.createFolder("Old", moveChatId = null)
+        advanceUntilIdle()
+        viewModel.renameFolder("f1", "New")
+        advanceUntilIdle()
+
+        val b = repo.chats.value.first { it.id == "b" }
+        assertEquals(true, b.pinned)
+        assertEquals("x", b.folderId)
+        assertEquals(listOf("New"), viewModel.uiState.value.folders.map { it.name })
+    }
 
     private fun titles(): List<String> = (viewModel.uiState.value.list as ListState.Content).chats.map { it.chat.title }
 

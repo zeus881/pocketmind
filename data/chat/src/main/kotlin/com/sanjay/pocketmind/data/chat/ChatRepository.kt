@@ -3,6 +3,7 @@ package com.sanjay.pocketmind.data.chat
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.llm.EngineState
 import com.sanjay.pocketmind.core.llm.GenerationStats
+import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Chat
 import com.sanjay.pocketmind.core.model.ChatSummary
 import com.sanjay.pocketmind.core.model.DeletedChat
@@ -26,7 +27,11 @@ interface ChatRepository {
 
     fun observeChat(chatId: String): Flow<Chat?>
 
+    /** The VISIBLE conversation: the current branch of the chat's message tree, oldest first. */
     fun observeMessages(chatId: String): Flow<List<Message>>
+
+    /** "Version i of n" for the visible messages that have alternatives (edited questions, regenerated answers). */
+    fun observeBranches(chatId: String): Flow<Map<String, BranchInfo>>
 
     /** Lazily loads the selected model. Returns NO_MODEL / MODEL_LOAD_FAILED failures. */
     suspend fun ensureModelLoaded(): AppResult<Unit>
@@ -49,6 +54,20 @@ interface ChatRepository {
      * message. Returns null if there is no user message to answer.
      */
     suspend fun regenerateLastAnswer(chatId: String): AppResult<Flow<String>>?
+
+    /**
+     * Replaces the visible question [messageId] with [newText] as a NEW version (the old question
+     * and everything after it stay available through the version switcher) and streams the answer.
+     */
+    suspend fun editAndResend(chatId: String, messageId: String, newText: String): AppResult<Flow<String>>
+
+    /** Shows the previous ([offset] = -1) or next (+1) version of [messageId] and the conversation that followed it. */
+    suspend fun showVersion(chatId: String, messageId: String, offset: Int)
+
+    suspend fun setPinned(chatId: String, pinned: Boolean)
+
+    /** Files the chat in [folderId], or takes it out of any folder (null). */
+    suspend fun moveToFolder(chatId: String, folderId: String?)
 
     /** Writes the finished (or stopped/failed) answer to Room — once, not per token. */
     suspend fun saveAssistantMessage(chatId: String, text: String, status: MessageStatus, stats: GenerationStats?)

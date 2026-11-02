@@ -29,3 +29,9 @@ enum class MessageStatus {
     /** The engine failed mid-answer; the user can retry. */
     FAILED,
 }
+
+/**
+ * Where a message sits among its alternatives: version [index] (0-based) of [count]. Editing a
+ * question or regenerating an answer creates another version; the chat shows "‹ 2 / 3 ›".
+ */
+data class BranchInfo(val index: Int, val count: Int)

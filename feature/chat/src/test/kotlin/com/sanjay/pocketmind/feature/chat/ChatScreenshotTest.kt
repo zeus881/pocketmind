@@ -2,6 +2,7 @@ package com.sanjay.pocketmind.feature.chat
 
 import androidx.compose.runtime.Composable
 import com.sanjay.pocketmind.core.llm.FailureReason
+import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.TurnRole
 import com.sanjay.pocketmind.core.testing.captureScreenshots
@@ -53,6 +54,8 @@ class ChatScreenshotTest {
                         backend = "GPU",
                     ),
                 ),
+                // The answer was regenerated once: "‹ 2 / 2 ›" under it.
+                branches = mapOf("2" to BranchInfo(index = 1, count = 2)),
                 model = ModelUi.Ready("GPU"),
             ),
         )

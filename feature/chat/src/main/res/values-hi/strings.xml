@@ -29,4 +29,13 @@
     <string name="feature_chat_suggestion_code">एक Python फ़ंक्शन लिखिए जो स्ट्रिंग को उल्टा कर दे</string>
     <string name="feature_chat_suggestion_ideas">स्वस्थ नाश्ते के पाँच सुझाव दीजिए</string>
     <string name="feature_chat_suggestion_write">छुट्टी के लिए एक विनम्र आवेदन लिखने में मदद कीजिए</string>
+    <string name="feature_chat_message_options">संदेश के विकल्प</string>
+    <string name="feature_chat_edit">बदलें</string>
+    <string name="feature_chat_edit_title">अपना सवाल बदलें</string>
+    <string name="feature_chat_edit_send">भेजें</string>
+    <string name="feature_chat_cancel">रद्द करें</string>
+    <string name="feature_chat_version">%1$d / %2$d</string>
+    <string name="feature_chat_version_description">%2$d में से संस्करण %1$d</string>
+    <string name="feature_chat_previous_version">पिछला संस्करण</string>
+    <string name="feature_chat_next_version">अगला संस्करण</string>
 </resources>

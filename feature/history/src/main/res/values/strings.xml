@@ -15,4 +15,14 @@
     <string name="feature_history_cancel">Cancel</string>
     <string name="feature_history_deleted">Chat deleted</string>
     <string name="feature_history_undo">Undo</string>
+    <string name="feature_history_all_chats">All chats</string>
+    <string name="feature_history_new_folder">New folder</string>
+    <string name="feature_history_rename_folder">Rename folder</string>
+    <string name="feature_history_delete_folder">Delete folder (keeps its chats)</string>
+    <string name="feature_history_folder_options">Options for folder %1$s</string>
+    <string name="feature_history_no_folder">No folder</string>
+    <string name="feature_history_move_to_folder">Move to folder</string>
+    <string name="feature_history_pin">Pin to top</string>
+    <string name="feature_history_unpin">Unpin</string>
+    <string name="feature_history_pinned">Pinned</string>
 </resources>

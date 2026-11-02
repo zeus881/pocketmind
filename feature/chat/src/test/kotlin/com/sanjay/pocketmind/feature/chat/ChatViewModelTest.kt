@@ -3,6 +3,7 @@ package com.sanjay.pocketmind.feature.chat
 import androidx.lifecycle.SavedStateHandle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.FailureReason
+import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
 import com.sanjay.pocketmind.core.testing.MainDispatcherRule
@@ -146,6 +147,35 @@ class ChatViewModelTest {
 
         assertEquals(first, vm.uiState.value.chatId)
         assertEquals(listOf("first chat", "Hi there"), vm.uiState.value.messages.map { it.text })
+    }
+
+    @Test
+    fun `edit sends a new version and streams its answer`() = runTest(mainRule.testDispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        vm.send("secnd")
+        advanceUntilIdle()
+        val question = vm.uiState.value.messages.first()
+
+        vm.edit(question.id, "  second  ")
+        advanceUntilIdle()
+
+        assertEquals(listOf(question.id to "second"), repository.edits)
+        assertEquals("Hi there", vm.uiState.value.messages.last().text)
+    }
+
+    @Test
+    fun `version info reaches the state and switching is forwarded`() = runTest(mainRule.testDispatcher) {
+        val vm = viewModel("chat0").also { repository.createChat() }
+        backgroundScope.launch { vm.uiState.collect {} }
+        repository.branches.value = mapOf("m1" to BranchInfo(0, 2))
+        advanceUntilIdle()
+        assertEquals(BranchInfo(0, 2), vm.uiState.value.branches["m1"])
+
+        vm.showVersion("m1", 1)
+        advanceUntilIdle()
+
+        assertEquals(listOf("m1" to 1), repository.versionRequests)
     }
 
     @Test

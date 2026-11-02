@@ -104,4 +104,8 @@ interface ChatDao {
 
     @Upsert
     suspend fun upsertSummary(summary: ConversationSummaryEntity)
+
+    /** The visible conversation changed earlier than the newest turn (edit, other version): forget its summary. */
+    @Query("DELETE FROM conversation_summaries WHERE chatId = :chatId")
+    suspend fun deleteSummary(chatId: String)
 }

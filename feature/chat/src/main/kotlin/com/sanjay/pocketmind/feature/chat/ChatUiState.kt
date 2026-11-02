@@ -2,6 +2,7 @@ package com.sanjay.pocketmind.feature.chat
 
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.FailureReason
+import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Message
 
 /**
@@ -15,6 +16,8 @@ data class ChatUiState(
     val chatId: String? = null,
     val title: String? = null,
     val messages: List<Message> = emptyList(),
+    /** Version info for visible messages that have alternatives (edited / regenerated): "‹ 2 / 3 ›". */
+    val branches: Map<String, BranchInfo> = emptyMap(),
     /** The answer currently being generated (not in Room yet), or null when idle. */
     val streamingText: String? = null,
     val isGenerating: Boolean = false,

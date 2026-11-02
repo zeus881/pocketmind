@@ -2,8 +2,10 @@ package com.sanjay.pocketmind.data.chat.di
 
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import com.sanjay.pocketmind.data.chat.ConversationSummarizer
+import com.sanjay.pocketmind.data.chat.FolderRepository
 import com.sanjay.pocketmind.data.chat.LlmConversationSummarizer
 import com.sanjay.pocketmind.data.chat.OfflineChatRepository
+import com.sanjay.pocketmind.data.chat.RoomFolderRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -17,4 +19,7 @@ internal abstract class ChatDataModule {
 
     @Binds
     abstract fun bindsConversationSummarizer(summarizer: LlmConversationSummarizer): ConversationSummarizer
+
+    @Binds
+    abstract fun bindsFolderRepository(repository: RoomFolderRepository): FolderRepository
 }

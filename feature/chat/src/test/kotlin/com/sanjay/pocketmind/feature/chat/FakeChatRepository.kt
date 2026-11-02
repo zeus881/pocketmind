@@ -6,6 +6,7 @@ import com.sanjay.pocketmind.core.llm.EngineState
 import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.llm.GenerationStats
 import com.sanjay.pocketmind.core.llm.LlmBackend
+import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Chat
 import com.sanjay.pocketmind.core.model.ChatSummary
 import com.sanjay.pocketmind.core.model.DeletedChat
@@ -46,6 +47,32 @@ class FakeChatRepository : ChatRepository {
 
     override fun observeMessages(chatId: String): Flow<List<Message>> =
         messages.map { all -> all.filter { it.chatId == chatId } }
+
+    /** Tests set this to show version switchers. */
+    val branches = MutableStateFlow<Map<String, BranchInfo>>(emptyMap())
+    val edits = mutableListOf<Pair<String, String>>()
+    val versionRequests = mutableListOf<Pair<String, Int>>()
+
+    override fun observeBranches(chatId: String): Flow<Map<String, BranchInfo>> = branches
+
+    override suspend fun editAndResend(chatId: String, messageId: String, newText: String): AppResult<Flow<String>> {
+        if (!modelAvailable) return AppResult.Failure(ErrorKind.NO_MODEL)
+        edits += messageId to newText
+        add(chatId, TurnRole.USER, newText, MessageStatus.COMPLETE)
+        return AppResult.Success(answer())
+    }
+
+    override suspend fun showVersion(chatId: String, messageId: String, offset: Int) {
+        versionRequests += messageId to offset
+    }
+
+    override suspend fun setPinned(chatId: String, pinned: Boolean) {
+        chats.value += chatId to chats.value.getValue(chatId).copy(pinned = pinned)
+    }
+
+    override suspend fun moveToFolder(chatId: String, folderId: String?) {
+        chats.value += chatId to chats.value.getValue(chatId).copy(folderId = folderId)
+    }
 
     override suspend fun ensureModelLoaded(): AppResult<Unit> {
         loadAttempts++

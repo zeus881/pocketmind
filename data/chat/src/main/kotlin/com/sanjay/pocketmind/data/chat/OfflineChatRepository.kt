@@ -15,6 +15,7 @@ import com.sanjay.pocketmind.core.llm.InferenceSettings
 import com.sanjay.pocketmind.core.llm.InferenceSettingsSource
 import com.sanjay.pocketmind.core.llm.LlmEngine
 import com.sanjay.pocketmind.core.llm.TokenEstimator
+import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Chat
 import com.sanjay.pocketmind.core.model.ChatSummary
 import com.sanjay.pocketmind.core.model.ChatTurn
@@ -27,6 +28,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -102,7 +104,19 @@ internal class OfflineChatRepository @Inject constructor(
     override fun observeChat(chatId: String): Flow<Chat?> = chatDao.observe(chatId).map { it?.asModel() }
 
     override fun observeMessages(chatId: String): Flow<List<Message>> =
-        messageDao.observe(chatId).map { list -> list.map { it.asModel() } }
+        combine(messageDao.observe(chatId), chatDao.observe(chatId)) { all, chat ->
+            ConversationTree.path(all.map { it.asModel() }, chat?.currentLeafId)
+        }
+
+    override fun observeBranches(chatId: String): Flow<Map<String, BranchInfo>> =
+        combine(messageDao.observe(chatId), chatDao.observe(chatId)) { all, chat ->
+            val messages = all.map { it.asModel() }
+            ConversationTree.branchInfo(messages, ConversationTree.path(messages, chat?.currentLeafId))
+        }
+
+    /** The visible conversation right now (current branch), oldest first. */
+    private suspend fun currentPath(chatId: String): List<Message> =
+        ConversationTree.path(messageDao.getAll(chatId).map { it.asModel() }, chatDao.get(chatId)?.currentLeafId)
 
     override suspend fun ensureModelLoaded(): AppResult<Unit> = when (val loaded = loadSelectedModel()) {
         is AppResult.Failure -> loaded
@@ -134,7 +148,7 @@ internal class OfflineChatRepository @Inject constructor(
         }
         val session = sessionLock.withLock {
             // History BEFORE the new message: the new message is sent as the prompt itself.
-            val history = messageDao.getAll(chatId).map { it.asModel() }
+            val history = currentPath(chatId)
             prepareSessionLocked(chatId, settings, history, prompt = text)
 
             val now = nextTimestamp()
@@ -145,7 +159,7 @@ internal class OfflineChatRepository @Inject constructor(
                 text = text,
                 createdAt = now,
                 // v5 tree: the question follows the newest message of the chat's branch.
-                parentId = chatDao.get(chatId)?.currentLeafId ?: history.lastOrNull()?.id,
+                parentId = history.lastOrNull()?.id,
             )
             messageDao.upsert(question.asEntity())
             chatDao.setCurrentLeaf(chatId, question.id)
@@ -166,11 +180,11 @@ internal class OfflineChatRepository @Inject constructor(
             is AppResult.Success -> loaded.value
         }
         val prompt = sessionLock.withLock {
-            val messages = messageDao.getAll(chatId).map { it.asModel() }
+            val messages = currentPath(chatId)
             val lastUserIndex = messages.indexOfLast { it.role == TurnRole.USER }
             if (lastUserIndex < 0) return null
-            // Remove the old answer(s) after the last question.
-            messages.drop(lastUserIndex + 1).forEach { messageDao.delete(it.id) }
+            // v2: the old answer is KEPT as another version. Showing the question as the newest
+            // message makes the new answer its sibling ("‹ 2 / 2 ›" in the chat).
             chatDao.setCurrentLeaf(chatId, messages[lastUserIndex].id)
             sessionInSync = false // the model still remembers the old answer
             prepareSessionLocked(chatId, settings, messages.take(lastUserIndex), messages[lastUserIndex].text)
@@ -206,6 +220,53 @@ internal class OfflineChatRepository @Inject constructor(
             pendingPromptTokens = 0
         }
     }
+
+    override suspend fun editAndResend(chatId: String, messageId: String, newText: String): AppResult<Flow<String>> {
+        val settings = when (val loaded = loadSelectedModel()) {
+            is AppResult.Failure -> return loaded
+            is AppResult.Success -> loaded.value
+        }
+        val session = sessionLock.withLock {
+            val path = currentPath(chatId)
+            val index = path.indexOfFirst { it.id == messageId && it.role == TurnRole.USER }
+            if (index < 0) return AppResult.Failure(ErrorKind.UNKNOWN)
+            // Everything from the edited question on is a different conversation now.
+            chatDao.deleteSummary(chatId)
+            sessionInSync = false
+            prepareSessionLocked(chatId, settings, path.take(index), prompt = newText)
+            val now = nextTimestamp()
+            val edited = Message(
+                id = UUID.randomUUID().toString(),
+                chatId = chatId,
+                role = TurnRole.USER,
+                text = newText,
+                createdAt = now,
+                parentId = path[index].parentId, // a sibling of the original question
+            )
+            messageDao.upsert(edited.asEntity())
+            chatDao.setCurrentLeaf(chatId, edited.id)
+            chatDao.touch(chatId, now)
+            ownedSessionId
+        }
+        return AppResult.Success(engine.generate(newText, session))
+    }
+
+    override suspend fun showVersion(chatId: String, messageId: String, offset: Int) {
+        sessionLock.withLock {
+            val all = messageDao.getAll(chatId).map { it.asModel() }
+            val message = all.firstOrNull { it.id == messageId } ?: return@withLock
+            val versions = ConversationTree.siblings(all, message)
+            val target = versions.getOrNull(versions.indexOf(message) + offset) ?: return@withLock
+            chatDao.setCurrentLeaf(chatId, ConversationTree.newestLeafUnder(all, target.id))
+            // The model remembers the branch it was on, and the cached summary may describe it.
+            chatDao.deleteSummary(chatId)
+            sessionInSync = false
+        }
+    }
+
+    override suspend fun setPinned(chatId: String, pinned: Boolean) = chatDao.setPinned(chatId, pinned)
+
+    override suspend fun moveToFolder(chatId: String, folderId: String?) = chatDao.setFolder(chatId, folderId)
 
     override fun lastGenerationStats(): GenerationStats? = engine.lastStats
 
