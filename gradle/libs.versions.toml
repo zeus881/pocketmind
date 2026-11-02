@@ -98,6 +98,10 @@ compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview"
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 compose-material3 = { module = "androidx.compose.material3:material3" }
+# Adaptive layouts (versions from the Compose BOM): bottom bar / rail / drawer by window size,
+# and window size classes for two-pane layouts.
+compose-material3-adaptive-navigation-suite = { module = "androidx.compose.material3:material3-adaptive-navigation-suite" }
+compose-material3-adaptive = { module = "androidx.compose.material3.adaptive:adaptive" }
 compose-foundation = { module = "androidx.compose.foundation:foundation" }
 compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose-material-icons" }
 

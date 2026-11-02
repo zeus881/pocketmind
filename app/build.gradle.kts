@@ -114,6 +114,8 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.process) // app-wide foreground/background (ModelKeepAlive)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.compose.material3.adaptive.navigation.suite)
+    implementation(libs.compose.material3.adaptive)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)
     implementation(libs.androidx.work.runtime)

@@ -202,6 +202,16 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
         chatId.value = null
     }
 
+    /**
+     * Shows another saved chat in this same screen (History's detail pane on wide screens).
+     * A running answer is stopped first; it is saved as "stopped" like any other interruption.
+     */
+    fun openChat(id: String?) {
+        if (id == chatId.value) return
+        stop()
+        chatId.value = id
+    }
+
     @Suppress("TooGenericExceptionCaught") // the engine's native layer can throw many exception types
     private suspend fun collectAnswer(chatId: String, answer: Flow<String>) {
         val text = StringBuilder()

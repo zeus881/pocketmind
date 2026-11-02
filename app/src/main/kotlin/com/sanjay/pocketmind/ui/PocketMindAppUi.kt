@@ -1,18 +1,16 @@
 package com.sanjay.pocketmind.ui
 
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.consumeWindowInsets
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfoV2
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.navigation.NavDestination
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -23,6 +21,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
 import com.sanjay.pocketmind.feature.benchmark.navigation.benchmarkScreen
 import com.sanjay.pocketmind.feature.benchmark.navigation.navigateToBenchmark
+import com.sanjay.pocketmind.feature.chat.ChatScreen
+import com.sanjay.pocketmind.feature.chat.ChatViewModel
 import com.sanjay.pocketmind.feature.chat.navigation.ChatRoute
 import com.sanjay.pocketmind.feature.chat.navigation.chatScreen
 import com.sanjay.pocketmind.feature.chat.navigation.navigateToChat
@@ -40,39 +40,45 @@ import com.sanjay.pocketmind.navigation.TopLevelDestination
 import com.sanjay.pocketmind.navigation.licensesScreen
 
 /**
- * The app's outer frame: bottom navigation bar + the NavHost that swaps screens.
+ * The app's outer frame: the navigation for the five tabs + the NavHost that swaps screens.
+ *
+ * Adaptive (v2): `NavigationSuiteScaffold` picks the navigation for the window, a bottom bar on
+ * phones, a navigation rail on tablets, unfolded foldables and phones in landscape. It also
+ * consumes that bar's window insets for the content, so screens don't add them twice.
  *
  * The NavHost is where all features meet. Features never navigate to each other directly;
- * they expose callbacks, and this file connects those callbacks to NavController calls.
+ * they expose callbacks (and, for the History two-pane layout, a slot), and this file connects
+ * them.
  */
 @Composable
 fun PocketMindAppUi(startDestination: Any, navController: NavHostController = rememberNavController()) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
-    // The bottom bar belongs to the five tabs only, not to onboarding or the model manager.
+    // The navigation belongs to the five tabs only, not to onboarding or the model manager.
     val onTopLevel = TopLevelDestination.entries.any { tab ->
         currentDestination?.hierarchy?.any { it.hasRoute(tab.routeClass) } == true
     }
+    val layoutType = if (onTopLevel) {
+        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfoV2())
+    } else {
+        NavigationSuiteType.None
+    }
 
-    Scaffold(
-        // Each screen draws its own top bar (which handles the status bar). The outer frame
-        // only reserves room for the bottom navigation bar.
-        contentWindowInsets = WindowInsets(0),
-        bottomBar = {
-            if (onTopLevel) {
-                BottomBar(navController, currentDestination)
+    NavigationSuiteScaffold(
+        layoutType = layoutType,
+        navigationSuiteItems = {
+            TopLevelDestination.entries.forEach { destination ->
+                item(
+                    selected = currentDestination?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true,
+                    onClick = { navController.navigateToTopLevel(destination) },
+                    // The label below already names the tab, so the icon is decorative for TalkBack.
+                    icon = { Icon(destination.icon, contentDescription = null) },
+                    label = { Text(stringResource(destination.labelRes)) },
+                )
             }
         },
-    ) { padding ->
-        NavHost(
-            navController = navController,
-            startDestination = startDestination,
-            modifier = Modifier
-                .padding(padding)
-                // Tell inner screens the bottom-bar space is already handled, so the chat's
-                // imePadding() doesn't add it a second time when the keyboard opens.
-                .consumeWindowInsets(padding),
-        ) {
+    ) {
+        NavHost(navController = navController, startDestination = startDestination) {
             onboardingScreen(
                 onFinished = {
                     // After onboarding: pick a model. Onboarding is removed from the back stack,
@@ -82,7 +88,13 @@ fun PocketMindAppUi(startDestination: Any, navController: NavHostController = re
                 },
             )
             chatScreen(onOpenModels = { navController.navigateToModels() })
-            historyScreen(onOpenChat = { chatId -> navController.navigateToChat(chatId) })
+            historyScreen(
+                onOpenChat = { chatId -> navController.navigateToChat(chatId) },
+                // On wide screens History shows the selected chat beside the list.
+                detailPane = { chatId ->
+                    HistoryChatDetail(chatId, onOpenModels = { navController.navigateToModels() })
+                },
+            )
             documentsScreen(onOpenModels = { navController.navigateToModels() })
             translateScreen()
             settingsScreen(
@@ -99,20 +111,15 @@ fun PocketMindAppUi(startDestination: Any, navController: NavHostController = re
     }
 }
 
+/**
+ * The chat shown in History's detail pane. It has its own ViewModel instance (key), and switches
+ * chats in place when another one is selected in the list.
+ */
 @Composable
-private fun BottomBar(navController: NavHostController, currentDestination: NavDestination?) {
-    NavigationBar {
-        TopLevelDestination.entries.forEach { destination ->
-            val selected = currentDestination?.hierarchy?.any { it.hasRoute(destination.routeClass) } == true
-            NavigationBarItem(
-                selected = selected,
-                onClick = { navController.navigateToTopLevel(destination) },
-                // The label below already names the tab, so the icon is decorative for TalkBack.
-                icon = { Icon(destination.icon, contentDescription = null) },
-                label = { Text(stringResource(destination.labelRes)) },
-            )
-        }
-    }
+private fun HistoryChatDetail(chatId: String?, onOpenModels: () -> Unit) {
+    val viewModel: ChatViewModel = hiltViewModel(key = "history-detail")
+    LaunchedEffect(chatId) { viewModel.openChat(chatId) }
+    ChatScreen(onOpenModels = onOpenModels, viewModel = viewModel)
 }
 
 /**

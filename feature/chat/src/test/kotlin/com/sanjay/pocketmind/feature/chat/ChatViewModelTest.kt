@@ -131,6 +131,24 @@ class ChatViewModelTest {
     }
 
     @Test
+    fun `openChat switches the shown chat in place`() = runTest(mainRule.testDispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        vm.send("first chat")
+        advanceUntilIdle()
+        val first = vm.uiState.value.chatId
+        vm.newChat()
+        vm.send("second chat")
+        advanceUntilIdle()
+
+        vm.openChat(first)
+        advanceUntilIdle()
+
+        assertEquals(first, vm.uiState.value.chatId)
+        assertEquals(listOf("first chat", "Hi there"), vm.uiState.value.messages.map { it.text })
+    }
+
+    @Test
     fun `blank input is ignored`() = runTest(mainRule.testDispatcher) {
         val vm = viewModel()
         vm.send("   ")

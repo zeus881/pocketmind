@@ -54,7 +54,11 @@ import com.sanjay.pocketmind.core.model.ChatSummary
 
 /** Stateful history screen: wires the ViewModel to [HistoryContent] and shows the Undo snackbar. */
 @Composable
-fun HistoryScreen(onOpenChat: (String) -> Unit, viewModel: HistoryViewModel = hiltViewModel()) {
+fun HistoryScreen(
+    onOpenChat: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: HistoryViewModel = hiltViewModel(),
+) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
@@ -82,6 +86,7 @@ fun HistoryScreen(onOpenChat: (String) -> Unit, viewModel: HistoryViewModel = hi
         onRename = viewModel::rename,
         onDelete = viewModel::delete,
         onRetry = viewModel::retry,
+        modifier = modifier,
     )
 }
 
