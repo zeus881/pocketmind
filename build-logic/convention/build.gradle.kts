@@ -26,6 +26,7 @@ dependencies {
     compileOnly(libs.compose.gradle.plugin)
     compileOnly(libs.room.gradle.plugin)
     compileOnly(libs.kover.gradle.plugin)
+    compileOnly(libs.roborazzi.gradle.plugin)
 
     testImplementation(libs.junit)
 }

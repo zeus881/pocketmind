@@ -24,4 +24,9 @@
     <string name="feature_chat_open_models">मॉडल खोलें</string>
     <string name="feature_chat_status_writing">PocketMind लिख रहा है…</string>
     <string name="feature_chat_status_ready">जवाब तैयार है</string>
+    <string name="feature_chat_jump_latest">सबसे नए संदेश पर जाएँ</string>
+    <string name="feature_chat_suggestion_explain">GPS कैसे काम करता है, आसान शब्दों में समझाइए</string>
+    <string name="feature_chat_suggestion_code">एक Python फ़ंक्शन लिखिए जो स्ट्रिंग को उल्टा कर दे</string>
+    <string name="feature_chat_suggestion_ideas">स्वस्थ नाश्ते के पाँच सुझाव दीजिए</string>
+    <string name="feature_chat_suggestion_write">छुट्टी के लिए एक विनम्र आवेदन लिखने में मदद कीजिए</string>
 </resources>

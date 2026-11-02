@@ -25,6 +25,7 @@ import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.sanjay.pocketmind.R
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -62,7 +63,9 @@ fun LicensesScreen(onBack: () -> Unit) {
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                // Centred at a readable width on tablets and foldables.
+                .readableWidth(),
         ) {
             Card(
                 Modifier

@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.BenchmarkResult
 import com.sanjay.pocketmind.data.benchmark.BenchmarkProgress
@@ -123,7 +124,9 @@ fun BenchmarkContent(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                // Centred at a readable width on tablets and foldables.
+                .readableWidth(),
             contentPadding = PaddingValues(PmSpacing.l),
             verticalArrangement = Arrangement.spacedBy(PmSpacing.m),
         ) {

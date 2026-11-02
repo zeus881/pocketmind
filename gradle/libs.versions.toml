@@ -60,6 +60,7 @@ junit = "4.13.2"
 mockk = "1.14.11"
 turbine = "1.2.1"
 robolectric = "4.17"
+roborazzi = "1.77.0"
 
 [libraries]
 # AndroidX core
@@ -129,6 +130,8 @@ junit = { module = "junit:junit", version.ref = "junit" }
 mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
 robolectric = { module = "org.robolectric:robolectric", version.ref = "robolectric" }
+roborazzi = { module = "io.github.takahirom.roborazzi:roborazzi", version.ref = "roborazzi" }
+roborazzi-compose = { module = "io.github.takahirom.roborazzi:roborazzi-compose", version.ref = "roborazzi" }
 
 # Gradle plugins used inside build-logic (as code dependencies, not applied plugins)
 android-gradle-plugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
@@ -137,6 +140,7 @@ ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.
 compose-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 room-gradle-plugin = { module = "androidx.room:room-gradle-plugin", version.ref = "androidx-room" }
 kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
+roborazzi-gradle-plugin = { module = "io.github.takahirom.roborazzi:roborazzi-gradle-plugin", version.ref = "roborazzi" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -153,6 +157,7 @@ aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.re
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 
 # Our own convention plugins (defined in build-logic/convention)
 pocketmind-android-application = { id = "pocketmind.android.application" }

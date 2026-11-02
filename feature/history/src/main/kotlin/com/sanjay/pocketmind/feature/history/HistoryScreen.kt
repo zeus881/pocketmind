@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
 import com.sanjay.pocketmind.core.designsystem.component.ErrorState
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.ChatSummary
 
@@ -112,7 +113,9 @@ fun HistoryContent(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                // Centred at a readable width on tablets and foldables.
+                .readableWidth(),
         ) {
             SearchField(state.query, onQueryChange)
             Box(Modifier.weight(1f)) {

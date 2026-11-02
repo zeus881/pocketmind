@@ -23,6 +23,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 
 /**
  * Documents tab with two tools: "Summarize" (phase 6) and "Ask" (on-device RAG, phase 7).
@@ -56,7 +57,9 @@ fun DocumentsScreen(
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(padding),
+                .padding(padding)
+                // Centred at a readable width on tablets and foldables.
+                .readableWidth(),
         ) {
             PrimaryTabRow(selectedTabIndex = tab) {
                 Tab(

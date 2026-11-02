@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.ThemeMode
@@ -63,7 +64,7 @@ fun SettingsScreen(navigation: SettingsNavigation, viewModel: SettingsViewModel 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SettingsContent(state: SettingsUiState, vm: SettingsViewModel, navigation: SettingsNavigation) {
+internal fun SettingsContent(state: SettingsUiState, vm: SettingsActions, navigation: SettingsNavigation) {
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.feature_settings_title)) }) }) { padding ->
         if (state.isLoading) {
             LoadingState(Modifier.padding(padding))
@@ -74,6 +75,8 @@ private fun SettingsContent(state: SettingsUiState, vm: SettingsViewModel, navig
             Modifier
                 .fillMaxSize()
                 .padding(padding)
+                // Centred at a readable width on tablets and foldables.
+                .readableWidth()
                 .verticalScroll(rememberScrollState()),
         ) {
             Section(R.string.feature_settings_section_model)
@@ -213,7 +216,7 @@ private fun TopKSlider(saved: Int, onSave: (Int) -> Unit) {
 }
 
 @Composable
-private fun SystemPromptRow(current: String, isCustom: Boolean, vm: SettingsViewModel) {
+private fun SystemPromptRow(current: String, isCustom: Boolean, vm: SettingsActions) {
     var editing by rememberSaveable { mutableStateOf(false) }
     ListItem(
         headlineContent = { Text(stringResource(R.string.feature_settings_system_prompt)) },

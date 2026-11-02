@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
+import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.data.documents.Language
 import com.sanjay.pocketmind.data.documents.Languages
@@ -61,7 +62,7 @@ fun TranslateScreen(viewModel: TranslateViewModel = hiltViewModel()) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TranslateContent(state: TranslateUiState, vm: TranslateViewModel) {
+internal fun TranslateContent(state: TranslateUiState, vm: TranslateActions) {
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
     Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.feature_translate_title)) }) }) { padding ->
@@ -69,6 +70,8 @@ private fun TranslateContent(state: TranslateUiState, vm: TranslateViewModel) {
             Modifier
                 .fillMaxSize()
                 .padding(padding)
+                // Centred at a readable width on tablets and foldables.
+                .readableWidth()
                 .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(PmSpacing.l),

@@ -1,11 +1,15 @@
 package com.sanjay.pocketmind.feature.chat
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.AddComment
@@ -19,6 +23,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -27,12 +32,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -40,13 +47,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
 import com.sanjay.pocketmind.core.designsystem.component.ErrorState
+import com.sanjay.pocketmind.core.designsystem.component.PmIllustration
+import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.feature.chat.component.ChatInput
 import com.sanjay.pocketmind.feature.chat.component.MessageList
 import kotlinx.coroutines.delay
-
 /**
  * Stateful wrapper: gets the ViewModel from Hilt, collects its state and events, and passes
  * plain values + callbacks down to the stateless [ChatContent].
@@ -175,11 +183,7 @@ fun ChatContent(
                     }
                     Box(Modifier.weight(1f)) {
                         if (state.messages.isEmpty() && state.streamingText == null) {
-                            EmptyState(
-                                icon = Icons.AutoMirrored.Outlined.Chat,
-                                title = stringResource(R.string.feature_chat_empty_title),
-                                body = stringResource(R.string.feature_chat_empty_body),
-                            )
+                            ChatWelcome(onSuggestion = onSend)
                         } else {
                             MessageList(
                                 messages = state.messages,
@@ -194,6 +198,7 @@ fun ChatContent(
                         isGenerating = state.isGenerating,
                         onSend = onSend,
                         onStop = onStop,
+                        modifier = Modifier.readableWidth(),
                     )
                 }
             }
@@ -253,3 +258,48 @@ private fun GenerationStatus(isGenerating: Boolean) {
 }
 
 private const val READY_VISIBLE_MS = 3_000L
+
+/**
+ * The empty chat: the illustration, a promise ("nothing leaves this phone"), and four example
+ * prompts. Suggestions answer the blank-page question "what can I ask?"; tapping one sends it.
+ */
+@Composable
+private fun ChatWelcome(onSuggestion: (String) -> Unit) {
+    val suggestions = listOf(
+        stringResource(R.string.feature_chat_suggestion_explain),
+        stringResource(R.string.feature_chat_suggestion_code),
+        stringResource(R.string.feature_chat_suggestion_ideas),
+        stringResource(R.string.feature_chat_suggestion_write),
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .readableWidth()
+            .padding(PmSpacing.xl),
+        verticalArrangement = Arrangement.spacedBy(PmSpacing.m, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        PmIllustration(Icons.AutoMirrored.Outlined.Chat)
+        Text(
+            stringResource(R.string.feature_chat_empty_title),
+            style = MaterialTheme.typography.titleLarge,
+            textAlign = TextAlign.Center,
+        )
+        Text(
+            stringResource(R.string.feature_chat_empty_body),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(PmSpacing.s, Alignment.CenterHorizontally),
+            verticalArrangement = Arrangement.spacedBy(PmSpacing.s),
+            modifier = Modifier.padding(top = PmSpacing.s),
+        ) {
+            suggestions.forEach { text ->
+                SuggestionChip(onClick = { onSuggestion(text) }, label = { Text(text) })
+            }
+        }
+    }
+}

@@ -9,6 +9,8 @@ plugins {
     alias(libs.plugins.androidx.baselineprofile)
     // Collects the licence of every dependency at build time for the "Open-source licences" screen.
     alias(libs.plugins.aboutlibraries)
+    // Screenshot tests (lock screen): recordRoborazziDebug / verifyRoborazziDebug.
+    alias(libs.plugins.roborazzi)
 }
 
 /*
@@ -82,6 +84,10 @@ android {
             if (hasReleaseKeystore) signingConfig = signingConfigs.getByName("release")
         }
     }
+}
+
+roborazzi {
+    outputDir.set(layout.projectDirectory.dir("src/test/screenshots"))
 }
 
 aboutLibraries {

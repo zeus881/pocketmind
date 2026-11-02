@@ -9,6 +9,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -53,6 +54,8 @@ internal fun ChatInput(
             onValueChange = { text = it },
             placeholder = { Text(stringResource(R.string.feature_chat_input_hint)) },
             maxLines = 5,
+            // A pill, like the input of most messaging apps (shape token: extra large, 32 dp).
+            shape = MaterialTheme.shapes.extraLarge,
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
             modifier = Modifier
                 .weight(1f)

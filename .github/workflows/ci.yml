@@ -59,6 +59,17 @@ jobs:
         with:
           name: coverage
           path: build/reports/kover/
+      # Screenshot tests: re-render every screen and compare with the committed golden images
+      # (src/test/screenshots). A visual change fails CI until the images are re-recorded.
+      - name: Screenshot tests
+        run: ./gradlew verifyRoborazziDebug
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: screenshot-diffs
+          path: "**/build/outputs/roborazzi/"
+          retention-days: 7
 
       - name: Debug build
         run: ./gradlew assembleDebug

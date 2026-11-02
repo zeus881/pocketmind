@@ -37,7 +37,8 @@ class SettingsViewModel @Inject constructor(
     private val settings: SettingsDataSource,
     models: ModelRepository,
     engine: LlmEngine,
-) : ViewModel() {
+) : ViewModel(),
+    SettingsActions {
 
     val uiState: StateFlow<SettingsUiState> = combine(
         settings.settings,
@@ -52,30 +53,30 @@ class SettingsViewModel @Inject constructor(
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), SettingsUiState())
 
-    fun setPreferGpu(value: Boolean) = save { settings.setPreferGpu(value) }
+    override fun setPreferGpu(value: Boolean) = save { settings.setPreferGpu(value) }
 
-    fun setTemperature(value: Float) = save { settings.setTemperature(value) }
+    override fun setTemperature(value: Float) = save { settings.setTemperature(value) }
 
-    fun setTopK(value: Int) = save { settings.setTopK(value) }
+    override fun setTopK(value: Int) = save { settings.setTopK(value) }
 
     /** Saving the default text (or blank) stores "no custom prompt". */
-    fun setSystemPrompt(value: String) = save {
+    override fun setSystemPrompt(value: String) = save {
         settings.setCustomSystemPrompt(value.takeUnless { it.trim() == DefaultPrompts.SYSTEM })
     }
 
-    fun resetSystemPrompt() = save { settings.setCustomSystemPrompt(null) }
+    override fun resetSystemPrompt() = save { settings.setCustomSystemPrompt(null) }
 
-    fun setThemeMode(mode: ThemeMode) = save { settings.setThemeMode(mode) }
+    override fun setThemeMode(mode: ThemeMode) = save { settings.setThemeMode(mode) }
 
-    fun setAllowMobileData(value: Boolean) = save { settings.setAllowMobileData(value) }
+    override fun setAllowMobileData(value: Boolean) = save { settings.setAllowMobileData(value) }
 
-    fun setAppLock(enabled: Boolean) = save { settings.setAppLockEnabled(enabled) }
+    override fun setAppLock(enabled: Boolean) = save { settings.setAppLockEnabled(enabled) }
 
-    fun setAppLockTimeout(seconds: Int) = save { settings.setAppLockTimeoutSeconds(seconds) }
+    override fun setAppLockTimeout(seconds: Int) = save { settings.setAppLockTimeoutSeconds(seconds) }
 
-    fun setKeepModelLoaded(minutes: Int) = save { settings.setKeepModelLoadedMinutes(minutes) }
+    override fun setKeepModelLoaded(minutes: Int) = save { settings.setKeepModelLoadedMinutes(minutes) }
 
-    fun setDynamicColor(enabled: Boolean) = save { settings.setDynamicColor(enabled) }
+    override fun setDynamicColor(enabled: Boolean) = save { settings.setDynamicColor(enabled) }
 
     private fun save(block: suspend () -> Unit) {
         viewModelScope.launch { block() }

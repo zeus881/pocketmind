@@ -24,4 +24,9 @@
     <string name="feature_chat_open_models">Open models</string>
     <string name="feature_chat_status_writing">PocketMind is writing…</string>
     <string name="feature_chat_status_ready">Answer ready</string>
+    <string name="feature_chat_jump_latest">Jump to the latest message</string>
+    <string name="feature_chat_suggestion_explain">Explain how GPS works in simple words</string>
+    <string name="feature_chat_suggestion_code">Write a Python function that reverses a string</string>
+    <string name="feature_chat_suggestion_ideas">Give me five ideas for a healthy breakfast</string>
+    <string name="feature_chat_suggestion_write">Help me write a polite leave application</string>
 </resources>

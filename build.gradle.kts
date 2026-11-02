@@ -14,6 +14,7 @@ plugins {
     alias(libs.plugins.room) apply false
     alias(libs.plugins.androidx.baselineprofile) apply false
     alias(libs.plugins.aboutlibraries) apply false
+    alias(libs.plugins.roborazzi) apply false
     alias(libs.plugins.spotless)
     alias(libs.plugins.detekt)
     alias(libs.plugins.kover)
@@ -24,7 +25,7 @@ plugins {
 // core:testing (test helpers) and :benchmark (device-only tests) are not app code.
 
 /** Minimum line coverage in percent. Raised phase by phase towards 80 (V2_PLAN.md). Never lowered. */
-val koverMinLineCoverage = 80 // v2 phase 7: 80.1 % measured (target reached; never lower)
+val koverMinLineCoverage = 81 // v2 phase 10: 81.1 % measured (target 80 reached in phase 7; never lower)
 
 val coveredModules = listOf(
     ":app",

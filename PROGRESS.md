@@ -16,7 +16,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 7 Smarter context (summaries, context size) | DONE | 80 % (measured 80.1 %, 213 tests) | Room v4; 8k context deferred until memory is measured on a phone |
 | 8 Design system v2 | DONE | 80 % (measured 80.5 %, 217 tests) | tokens everywhere (92 raw dp replaced), checkDesignTokens in lint, dynamic-colour switch |
 | 9 Adaptive layouts, edge-to-edge, predictive back | DONE | 80 % (measured 80.6 %, 218 tests) | rail on wide windows, History list-detail at 840 dp+; build memory capped (workers 6) after 2 stalls |
-| 10 Screen redesign + Roborazzi screenshot tests | NEXT | | |
+| 10 Screen redesign + Roborazzi screenshot tests | DONE | 81 % (measured 81.1 %, 234 tests) | 64 goldens (16 states x phone light/dark, tablet, font 200 %); CI verifies |
+| 11 Database v5: pin, folders, branches, FTS | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -140,6 +141,8 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   LeakCanary notifications; report anything found.
 - **Context size (phase 7):** to consider an 8k context on 8 GB+ phones, measure peak memory with 8192 tokens first
   (Benchmark screen after temporarily changing `CONTEXT_WINDOW_TOKENS`). Until then it stays 4096.
+- **Screenshots on Linux (phase 10):** push the repo, run the GitHub Actions workflow **Record screenshots**, download
+  the `golden-screenshots` artifact and commit the PNGs (fonts render slightly differently on Windows than on CI).
 
 ### v1
 

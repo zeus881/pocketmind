@@ -42,7 +42,8 @@ data class TranslateUiState(
 class TranslateViewModel @Inject constructor(
     private val translator: Translator,
     private val savedState: SavedStateHandle,
-) : ViewModel() {
+) : ViewModel(),
+    TranslateActions {
 
     private val _uiState = MutableStateFlow(
         TranslateUiState(
@@ -54,20 +55,20 @@ class TranslateViewModel @Inject constructor(
 
     private var job: Job? = null
 
-    fun onInputChange(text: String) = _uiState.update { it.copy(input = text, error = null) }
+    override fun onInputChange(text: String) = _uiState.update { it.copy(input = text, error = null) }
 
-    fun setFrom(language: Language) {
+    override fun setFrom(language: Language) {
         savedState[KEY_FROM] = language.code
         _uiState.update { it.copy(from = language) }
     }
 
-    fun setTo(language: Language) {
+    override fun setTo(language: Language) {
         savedState[KEY_TO] = language.code
         _uiState.update { it.copy(to = language) }
     }
 
     /** Swaps the languages; if there is a translation, it becomes the new input. */
-    fun swap() {
+    override fun swap() {
         val s = _uiState.value
         savedState[KEY_FROM] = s.to.code
         savedState[KEY_TO] = s.from.code
@@ -80,7 +81,7 @@ class TranslateViewModel @Inject constructor(
     }
 
     @Suppress("TooGenericExceptionCaught") // any engine failure becomes a readable error
-    fun translate() {
+    override fun translate() {
         val s = _uiState.value
         if (!s.canTranslate) return
         job = viewModelScope.launch {
@@ -106,7 +107,7 @@ class TranslateViewModel @Inject constructor(
         }
     }
 
-    fun stop() {
+    override fun stop() {
         job?.cancel()
     }
 

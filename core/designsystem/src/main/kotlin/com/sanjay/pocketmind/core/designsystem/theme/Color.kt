@@ -14,6 +14,10 @@ private val Teal40 = Color(0xFF006A6A)
 private val Teal80 = Color(0xFF4CDADA)
 private val Teal90 = Color(0xFF6FF7F6)
 
+// A calmer container teal for light mode: the strict tonal T90 (6FF7F6) is very loud on large
+// areas such as chat bubbles. Contrast with Teal10 text is still well above 7:1.
+private val TealSoft90 = Color(0xFFC4EDEA)
+
 private val Amber10 = Color(0xFF2B1700)
 private val Amber20 = Color(0xFF472A00)
 private val Amber30 = Color(0xFF653E00)
@@ -38,15 +42,32 @@ private val GreyVariant60 = Color(0xFF889392)
 private val GreyVariant80 = Color(0xFFBEC9C8)
 private val GreyVariant90 = Color(0xFFDAE5E4)
 
+// Surface containers (Material 3 "tonal surfaces"), tinted with our teal instead of the
+// default purple, so cards, sheets and bars belong to the same family.
+private val SurfaceLowestLight = Color(0xFFFFFFFF)
+private val SurfaceLowLight = Color(0xFFF3F7F6)
+private val SurfaceLight = Color(0xFFEDF2F1)
+private val SurfaceHighLight = Color(0xFFE7EDEC)
+private val SurfaceHighestLight = Color(0xFFE1E8E7)
+private val SurfaceLowestDark = Color(0xFF0E1212)
+private val SurfaceLowDark = Color(0xFF171B1B)
+private val SurfaceDark = Color(0xFF1B2020)
+private val SurfaceHighDark = Color(0xFF252B2A)
+private val SurfaceHighestDark = Color(0xFF303635)
+
 internal val PocketMindLightColors = lightColorScheme(
     primary = Teal40,
     onPrimary = Color.White,
-    primaryContainer = Teal90,
+    primaryContainer = TealSoft90,
     onPrimaryContainer = Teal10,
     secondary = Amber40,
     onSecondary = Color.White,
     secondaryContainer = Amber90,
     onSecondaryContainer = Amber10,
+    tertiary = Amber40,
+    onTertiary = Color.White,
+    tertiaryContainer = Amber90,
+    onTertiaryContainer = Amber10,
     error = Red40,
     onError = Color.White,
     errorContainer = Red90,
@@ -60,6 +81,11 @@ internal val PocketMindLightColors = lightColorScheme(
     outline = GreyVariant50,
     inverseSurface = Grey10,
     inverseOnSurface = Grey95,
+    surfaceContainerLowest = SurfaceLowestLight,
+    surfaceContainerLow = SurfaceLowLight,
+    surfaceContainer = SurfaceLight,
+    surfaceContainerHigh = SurfaceHighLight,
+    surfaceContainerHighest = SurfaceHighestLight,
 )
 
 internal val PocketMindDarkColors = darkColorScheme(
@@ -71,6 +97,10 @@ internal val PocketMindDarkColors = darkColorScheme(
     onSecondary = Amber20,
     secondaryContainer = Amber30,
     onSecondaryContainer = Amber90,
+    tertiary = Amber80,
+    onTertiary = Amber20,
+    tertiaryContainer = Amber30,
+    onTertiaryContainer = Amber90,
     error = Red80,
     onError = Red20,
     errorContainer = Red30,
@@ -84,4 +114,9 @@ internal val PocketMindDarkColors = darkColorScheme(
     outline = GreyVariant60,
     inverseSurface = Grey90,
     inverseOnSurface = Grey10,
+    surfaceContainerLowest = SurfaceLowestDark,
+    surfaceContainerLow = SurfaceLowDark,
+    surfaceContainer = SurfaceDark,
+    surfaceContainerHigh = SurfaceHighDark,
+    surfaceContainerHighest = SurfaceHighestDark,
 )

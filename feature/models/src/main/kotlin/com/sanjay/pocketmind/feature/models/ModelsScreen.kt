@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.ErrorState
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.feature.models.component.ModelActions
 import com.sanjay.pocketmind.feature.models.component.ModelCard
@@ -141,6 +142,8 @@ fun ModelsContent(
         val modifier = Modifier
             .fillMaxSize()
             .padding(padding)
+            // Centred at a readable width on tablets and foldables.
+            .readableWidth()
         when {
             state.isLoading -> LoadingState(modifier)
 

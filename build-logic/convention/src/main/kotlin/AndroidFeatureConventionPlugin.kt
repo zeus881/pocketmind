@@ -1,7 +1,9 @@
 import com.sanjay.pocketmind.buildlogic.lib
 import com.sanjay.pocketmind.buildlogic.libs
+import io.github.takahirom.roborazzi.RoborazziExtension
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.project
 
@@ -20,6 +22,11 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             pluginManager.apply("pocketmind.hilt")
             // Type-safe navigation routes are @Serializable Kotlin objects.
             pluginManager.apply("org.jetbrains.kotlin.plugin.serialization")
+            // Screenshot tests: recordRoborazziDebug / verifyRoborazziDebug (see core:testing Screenshots.kt).
+            pluginManager.apply("io.github.takahirom.roborazzi")
+            extensions.configure<RoborazziExtension> {
+                outputDir.set(layout.projectDirectory.dir("src/test/screenshots"))
+            }
 
             dependencies {
                 add("implementation", project(":core:model"))
