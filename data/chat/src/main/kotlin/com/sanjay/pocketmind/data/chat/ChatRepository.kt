@@ -31,6 +31,9 @@ interface ChatRepository {
     /** Lazily loads the selected model. Returns NO_MODEL / MODEL_LOAD_FAILED failures. */
     suspend fun ensureModelLoaded(): AppResult<Unit>
 
+    /** Lets the next load retry backends that crashed the app before (the user chose "Try again"). */
+    fun resetModelCrashProtection()
+
     /** Creates an empty chat and returns its id. */
     suspend fun createChat(): String
 

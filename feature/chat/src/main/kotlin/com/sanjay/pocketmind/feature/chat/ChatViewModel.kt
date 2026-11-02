@@ -7,6 +7,7 @@ import com.sanjay.pocketmind.core.common.flow.throttleLatest
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.EngineState
+import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -71,7 +72,7 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
             missing -> ModelUi.NoModel
             engine is EngineState.Ready -> ModelUi.Ready(engine.backend.label)
             engine is EngineState.Loading || loading -> ModelUi.Loading
-            engine is EngineState.Failed -> ModelUi.Failed
+            engine is EngineState.Failed -> ModelUi.Failed(engine.reason)
             else -> ModelUi.Unloaded
         }
     }
@@ -114,6 +115,21 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
             noModel.value = result is AppResult.Failure && result.kind == ErrorKind.NO_MODEL
             loadingModel.value = false
         }
+    }
+
+    /**
+     * The "Try again" button of the model error state.
+     *
+     * After FailureReason.CRASHED_LAST_TIME the engine stopped retrying on its own to avoid a
+     * crash loop. Pressing the button is the user asking for one more attempt on purpose, so the
+     * crash records are cleared first. For every other reason it is a plain reload.
+     */
+    fun retryModel() {
+        val model = uiState.value.model
+        if (model is ModelUi.Failed && model.reason == FailureReason.CRASHED_LAST_TIME) {
+            repository.resetModelCrashProtection()
+        }
+        loadModel()
     }
 
     fun send(text: String) {

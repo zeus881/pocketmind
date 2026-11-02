@@ -38,8 +38,18 @@ interface LlmEngine {
      */
     val sessionId: Long
 
-    /** Loads the model, trying GPU first when [preferGpu] and falling back to CPU. No-op if already loaded. */
-    suspend fun load(modelPath: String, preferGpu: Boolean)
+    /**
+     * Loads the model, trying GPU first when [preferGpu] and falling back to CPU. No-op if already loaded.
+     * When [expectedSizeBytes] is given, a file of any other size is refused ([FailureReason.FILE_DAMAGED])
+     * instead of being handed to native code.
+     */
+    suspend fun load(modelPath: String, preferGpu: Boolean, expectedSizeBytes: Long? = null)
+
+    /**
+     * Forgets backends that crashed the app while loading (see [LoadGuard]), so the next [load]
+     * tries them again. Called when the user deliberately presses "Try again".
+     */
+    fun resetCrashProtection()
 
     /**
      * Starts a fresh conversation. [history] restores earlier turns when a saved chat is reopened.

@@ -2,6 +2,7 @@ package com.sanjay.pocketmind.feature.chat
 
 import androidx.lifecycle.SavedStateHandle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
+import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
 import com.sanjay.pocketmind.core.testing.MainDispatcherRule
@@ -45,6 +46,45 @@ class ChatViewModelTest {
         advanceUntilIdle()
 
         assertEquals(ModelUi.NoModel, vm.uiState.value.model)
+    }
+
+    @Test
+    fun `a load failure shows its reason`() = runTest(mainRule.testDispatcher) {
+        repository.loadFailure = FailureReason.FILE_DAMAGED
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+
+        assertEquals(ModelUi.Failed(FailureReason.FILE_DAMAGED), vm.uiState.value.model)
+    }
+
+    @Test
+    fun `try again after a crash clears the crash records and loads`() = runTest(mainRule.testDispatcher) {
+        repository.loadFailure = FailureReason.CRASHED_LAST_TIME
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+        assertEquals(ModelUi.Failed(FailureReason.CRASHED_LAST_TIME), vm.uiState.value.model)
+
+        vm.retryModel()
+        advanceUntilIdle()
+
+        assertEquals(1, repository.crashResets)
+        assertEquals(ModelUi.Ready("GPU"), vm.uiState.value.model)
+    }
+
+    @Test
+    fun `plain retry does not clear crash records`() = runTest(mainRule.testDispatcher) {
+        repository.loadFailure = FailureReason.INIT_FAILED
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+
+        vm.retryModel()
+        advanceUntilIdle()
+
+        assertEquals(0, repository.crashResets)
+        assertEquals(2, repository.loadAttempts)
     }
 
     @Test

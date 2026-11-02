@@ -68,7 +68,7 @@ class BenchmarkRunner @Inject constructor(
 
         send(BenchmarkProgress.LoadingModel)
         engine.unload() // force a cold load so "load time" is honest
-        engine.load(settings.modelPath, settings.preferGpu)
+        engine.load(settings.modelPath, settings.preferGpu, settings.expectedSizeBytes)
         val ready = engine.state.value as? EngineState.Ready
         if (ready == null) {
             sampler.cancel()

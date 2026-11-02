@@ -45,6 +45,7 @@ class SettingsViewModelTest {
         override suspend fun cancel(modelId: String) = Unit
         override suspend fun delete(modelId: String) = Unit
         override suspend fun select(modelId: String) = Unit
+        override suspend fun verify(modelId: String): AppResult<Unit> = AppResult.Success(Unit)
         override fun requiredFreeBytes(modelId: String) = 0L
     }
 

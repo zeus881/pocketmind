@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
 import com.sanjay.pocketmind.core.designsystem.component.ErrorState
+import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.feature.chat.component.ChatInput
 import com.sanjay.pocketmind.feature.chat.component.MessageList
 
@@ -78,7 +79,7 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
         onStop = viewModel::stop,
         onRetry = viewModel::retry,
         onNewChat = viewModel::newChat,
-        onReloadModel = viewModel::loadModel,
+        onReloadModel = viewModel::retryModel,
         onOpenModels = onOpenModels,
     )
 }
@@ -137,10 +138,15 @@ fun ChatContent(
                     modifier = Modifier.weight(1f),
                 )
 
-                ModelUi.Failed -> ErrorState(
-                    message = stringResource(R.string.feature_chat_model_failed),
+                is ModelUi.Failed -> ErrorState(
+                    message = stringResource(state.model.reason.messageRes()),
                     onRetry = onReloadModel,
                     modifier = Modifier.weight(1f),
+                    // A damaged/missing file or a crash can be fixed in the model manager
+                    // (check the file, download again, or pick a smaller model).
+                    secondaryActionLabel = stringResource(R.string.feature_chat_open_models)
+                        .takeIf { state.model.reason != FailureReason.INIT_FAILED },
+                    onSecondaryAction = onOpenModels,
                 )
 
                 else -> {
@@ -187,4 +193,11 @@ internal fun ErrorKind.messageRes(): Int = when (this) {
     ErrorKind.NO_MODEL -> R.string.feature_chat_no_model_title
     ErrorKind.MODEL_LOAD_FAILED -> R.string.feature_chat_model_failed
     else -> R.string.feature_chat_generation_failed
+}
+
+/** User-readable text for each way the model can fail to load. */
+private fun FailureReason.messageRes(): Int = when (this) {
+    FailureReason.FILE_NOT_FOUND, FailureReason.FILE_DAMAGED -> R.string.feature_chat_model_damaged
+    FailureReason.INIT_FAILED -> R.string.feature_chat_model_failed
+    FailureReason.CRASHED_LAST_TIME -> R.string.feature_chat_model_crashed
 }

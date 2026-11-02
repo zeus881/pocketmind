@@ -19,4 +19,7 @@
     <string name="feature_chat_get_model">मॉडल लें</string>
     <string name="feature_chat_model_failed">इस फ़ोन पर मॉडल लोड नहीं हो सका।</string>
     <string name="feature_chat_generation_failed">जवाब बनाते समय कुछ गड़बड़ हो गई।</string>
+    <string name="feature_chat_model_damaged">मॉडल फ़ाइल मौजूद नहीं है या ख़राब है, इसलिए उसे लोड नहीं किया गया। Models में फ़ाइल जाँचें या उसे फिर से डाउनलोड करें।</string>
+    <string name="feature_chat_model_crashed">पिछली बार इस मॉडल को लोड करते समय ऐप बंद हो गया था, इसलिए PocketMind ने अपने आप दोबारा कोशिश नहीं की। आप एक बार और कोशिश कर सकते हैं, या Models में फ़ाइल जाँचें या छोटा मॉडल चुनें।</string>
+    <string name="feature_chat_open_models">मॉडल खोलें</string>
 </resources>

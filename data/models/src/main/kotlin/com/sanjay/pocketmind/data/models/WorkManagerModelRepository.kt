@@ -14,6 +14,7 @@ import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.llm.EngineState
 import com.sanjay.pocketmind.core.llm.LlmEngine
+import com.sanjay.pocketmind.core.llm.LoadGuard
 import com.sanjay.pocketmind.core.llm.ModelFiles
 import com.sanjay.pocketmind.core.model.ModelKind
 import com.sanjay.pocketmind.data.models.work.ModelDownloadWorker
@@ -39,6 +40,8 @@ internal class WorkManagerModelRepository @Inject constructor(
     private val deviceInfo: DeviceInfo,
     private val settings: SettingsDataSource,
     private val engine: LlmEngine,
+    private val verifier: ModelVerifier,
+    private val loadGuard: LoadGuard,
 ) : ModelRepository {
 
     /** File changes (delete/cancel) aren't observable, so we poke this to re-evaluate. */
@@ -121,6 +124,8 @@ internal class WorkManagerModelRepository @Inject constructor(
         // Never delete the file under a loaded model: unload first.
         val loaded = engine.state.value
         if (loaded is EngineState.Ready && loaded.modelPath == files.finalFile(modelId).path) engine.unload()
+        // A crash record belongs to THIS file; a future download is a different file.
+        loadGuard.clear(files.finalFile(modelId).path)
         files.delete(modelId)
         if (settings.current().selectedModelId == modelId) {
             // Fall back to another downloaded chat model, if there is one.
@@ -128,6 +133,12 @@ internal class WorkManagerModelRepository @Inject constructor(
             settings.setSelectedModel(fallback?.id)
         }
         fileChanges.value++
+    }
+
+    override suspend fun verify(modelId: String): AppResult<Unit> {
+        val result = verifier.verify(modelId)
+        if (result is AppResult.Failure && result.kind == ErrorKind.CHECKSUM_MISMATCH) delete(modelId)
+        return result
     }
 
     override suspend fun select(modelId: String) {

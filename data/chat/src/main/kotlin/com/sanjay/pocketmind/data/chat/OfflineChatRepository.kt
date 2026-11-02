@@ -91,6 +91,8 @@ internal class OfflineChatRepository @Inject constructor(
         }
     }
 
+    override fun resetModelCrashProtection() = engine.resetCrashProtection()
+
     override suspend fun createChat(): String {
         val now = nextTimestamp()
         val id = UUID.randomUUID().toString()
@@ -183,7 +185,7 @@ internal class OfflineChatRepository @Inject constructor(
 
     /** Loads the model (a no-op if already loaded). A real reload changes [LlmEngine.sessionId]. */
     private suspend fun load(settings: InferenceSettings): AppResult<Unit> {
-        engine.load(settings.modelPath, settings.preferGpu)
+        engine.load(settings.modelPath, settings.preferGpu, settings.expectedSizeBytes)
         return when (engine.state.value) {
             is EngineState.Ready -> AppResult.Success(Unit)
             else -> AppResult.Failure(ErrorKind.MODEL_LOAD_FAILED)

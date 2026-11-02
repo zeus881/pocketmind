@@ -81,8 +81,14 @@ fun ModelsScreen(onBack: (() -> Unit)?, viewModel: ModelsViewModel = hiltViewMod
                             Formatter.formatShortFileSize(context, event.neededBytes),
                         )
 
+                        ErrorKind.CHECKSUM_MISMATCH -> resources.getString(R.string.feature_models_verify_damaged)
+
                         else -> resources.getString(R.string.feature_models_error_generic)
                     },
+                )
+
+                is ModelsEvent.Verified -> snackbar.showSnackbar(
+                    resources.getString(R.string.feature_models_verify_ok, event.displayName),
                 )
             }
         }
@@ -102,6 +108,7 @@ fun ModelsScreen(onBack: (() -> Unit)?, viewModel: ModelsViewModel = hiltViewMod
         onCancel = viewModel::cancel,
         onDelete = viewModel::delete,
         onSelect = viewModel::select,
+        onVerify = viewModel::verify,
     )
     ModelsContent(state, actions, viewModel::setAllowMobileData, onBack, snackbar)
 }
@@ -152,12 +159,22 @@ fun ModelsContent(
                 item { MobileDataRow(state.allowMobileData, onAllowMobileData) }
                 item { SectionHeader(stringResource(R.string.feature_models_chat_section)) }
                 items(state.chatModels, key = { it.info.id }) { model ->
-                    ModelCard(model, isRecommended = model.info.id == state.recommendedId, actions = actions)
+                    ModelCard(
+                        model,
+                        isRecommended = model.info.id == state.recommendedId,
+                        actions = actions,
+                        isVerifying = model.info.id in state.verifyingIds,
+                    )
                 }
                 if (state.embeddingModels.isNotEmpty()) {
                     item { SectionHeader(stringResource(R.string.feature_models_embedding_section)) }
                     items(state.embeddingModels, key = { it.info.id }) { model ->
-                        ModelCard(model, isRecommended = false, actions = actions)
+                        ModelCard(
+                            model,
+                            isRecommended = false,
+                            actions = actions,
+                            isVerifying = model.info.id in state.verifyingIds,
+                        )
                     }
                 }
             }

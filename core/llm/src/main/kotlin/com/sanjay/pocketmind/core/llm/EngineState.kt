@@ -36,6 +36,18 @@ enum class FailureReason {
     /** The model file does not exist or the app cannot read it. */
     FILE_NOT_FOUND,
 
+    /**
+     * The file's size differs from the catalog: it was truncated or changed after download.
+     * Feeding it to native code could crash the app, so it is never loaded.
+     */
+    FILE_DAMAGED,
+
     /** The runtime rejected the model on every backend (corrupt file, unsupported phone, out of memory). */
     INIT_FAILED,
+
+    /**
+     * Loading this model crashed the whole app in native code on every allowed backend before
+     * (see [LoadGuard]). We don't try again automatically; the user can retry on purpose.
+     */
+    CRASHED_LAST_TIME,
 }

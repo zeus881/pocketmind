@@ -30,4 +30,8 @@
     <string name="feature_models_failed_network">डाउनलोड रुक गया: अपना कनेक्शन जाँचें।</string>
     <string name="feature_models_error_storage">जगह कम है। कम से कम %1$s खाली करें और फिर से कोशिश करें।</string>
     <string name="feature_models_error_generic">कुछ गड़बड़ हो गई। कृपया फिर से कोशिश करें।</string>
+    <string name="feature_models_verify">फ़ाइल जाँचें</string>
+    <string name="feature_models_verifying">फ़ाइल जाँची जा रही है… इसमें कुछ सेकंड लगते हैं।</string>
+    <string name="feature_models_verify_ok">%1$s ठीक है और इस्तेमाल के लिए तैयार है।</string>
+    <string name="feature_models_verify_damaged">फ़ाइल ख़राब थी और हटा दी गई है। कृपया इसे फिर से डाउनलोड करें।</string>
 </resources>

@@ -7,4 +7,6 @@ data class ModelActions(
     val onCancel: (String) -> Unit,
     val onDelete: (String) -> Unit,
     val onSelect: (String) -> Unit,
+    /** Re-checks a downloaded file's size and SHA-256 ("Check file"). */
+    val onVerify: (String) -> Unit,
 )

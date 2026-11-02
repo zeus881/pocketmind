@@ -13,6 +13,8 @@ data class InferenceSettings(
     /** Catalog id and display name, e.g. for labelling benchmark results. */
     val modelId: String = "",
     val modelName: String = "",
+    /** Exact size from the catalog; the engine refuses a file of any other size. Null = unknown. */
+    val expectedSizeBytes: Long? = null,
 )
 
 /**

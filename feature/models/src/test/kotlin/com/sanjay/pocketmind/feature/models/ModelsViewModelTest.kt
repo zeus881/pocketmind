@@ -51,6 +51,13 @@ class ModelsViewModelTest {
         override suspend fun delete(modelId: String) = Unit
         override suspend fun select(modelId: String) = Unit
         override fun requiredFreeBytes(modelId: String) = 1_200L
+
+        var verifyResult: AppResult<Unit> = AppResult.Success(Unit)
+        val verified = mutableListOf<String>()
+        override suspend fun verify(modelId: String): AppResult<Unit> {
+            verified += modelId
+            return verifyResult
+        }
     }
 
     private val repo = FakeRepo()
@@ -94,6 +101,29 @@ class ModelsViewModelTest {
         advanceUntilIdle()
         assertEquals(listOf("chat"), repo.downloads)
         assertEquals(listOf("chat"), repo.paused)
+    }
+
+    @Test
+    fun verifyReportsAnIntactFileByName() = runTest {
+        repo.models.value = listOf(
+            ModelState(info("chat").copy(displayName = "Gemma"), ModelStatus.Downloaded, true, true),
+        )
+        viewModel.uiState.first { !it.isLoading }
+
+        viewModel.verify("chat")
+
+        assertEquals(ModelsEvent.Verified("Gemma"), viewModel.events.first())
+        assertEquals(listOf("chat"), repo.verified)
+        assertTrue(viewModel.uiState.first { it.verifyingIds.isEmpty() }.verifyingIds.isEmpty())
+    }
+
+    @Test
+    fun verifyReportsADamagedFile() = runTest {
+        repo.verifyResult = AppResult.Failure(ErrorKind.CHECKSUM_MISMATCH)
+
+        viewModel.verify("chat")
+
+        assertEquals(ModelsEvent.Error(ErrorKind.CHECKSUM_MISMATCH), viewModel.events.first())
     }
 
     @Test

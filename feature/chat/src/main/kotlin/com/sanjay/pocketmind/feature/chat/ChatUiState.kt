@@ -1,6 +1,7 @@
 package com.sanjay.pocketmind.feature.chat
 
 import com.sanjay.pocketmind.core.common.result.ErrorKind
+import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.model.Message
 
 /**
@@ -27,8 +28,8 @@ sealed interface ModelUi {
     /** No model downloaded/selected yet: show "Get a model". */
     data object NoModel : ModelUi
 
-    /** The model failed to load: show an error with Retry. */
-    data object Failed : ModelUi
+    /** The model failed to load; [reason] decides the message and the recovery actions. */
+    data class Failed(val reason: FailureReason) : ModelUi
 
     /** Not in memory (e.g. unloaded under memory pressure); it reloads on the next message. */
     data object Unloaded : ModelUi

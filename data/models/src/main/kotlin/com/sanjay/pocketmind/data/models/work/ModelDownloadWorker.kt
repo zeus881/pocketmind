@@ -19,6 +19,7 @@ import androidx.work.workDataOf
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
+import com.sanjay.pocketmind.core.llm.LoadGuard
 import com.sanjay.pocketmind.core.llm.ModelFiles
 import com.sanjay.pocketmind.core.model.LlmModelInfo
 import com.sanjay.pocketmind.core.model.ModelKind
@@ -52,6 +53,7 @@ class ModelDownloadWorker @AssistedInject constructor(
     private val deviceInfo: DeviceInfo,
     private val files: ModelFiles,
     private val settings: SettingsDataSource,
+    private val loadGuard: LoadGuard,
 ) : CoroutineWorker(context, params) {
 
     private val notificationId = inputData.getString(KEY_MODEL_ID).hashCode()
@@ -79,6 +81,8 @@ class ModelDownloadWorker @AssistedInject constructor(
         }
         return when (result) {
             is AppResult.Success -> {
+                // A fresh, verified file: crashes recorded for the old file no longer apply.
+                loadGuard.clear(result.value.path)
                 // First chat model ever downloaded: select it so the user can chat right away.
                 if (model.kind == ModelKind.CHAT && settings.current().selectedModelId == null) {
                     settings.setSelectedModel(model.id)

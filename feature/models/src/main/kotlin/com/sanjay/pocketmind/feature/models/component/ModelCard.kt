@@ -32,7 +32,13 @@ import com.sanjay.pocketmind.feature.models.R
 
 /** One model: what it is, whether it fits this phone, its download state and the actions. */
 @Composable
-fun ModelCard(model: ModelState, isRecommended: Boolean, actions: ModelActions, modifier: Modifier = Modifier) {
+fun ModelCard(
+    model: ModelState,
+    isRecommended: Boolean,
+    actions: ModelActions,
+    modifier: Modifier = Modifier,
+    isVerifying: Boolean = false,
+) {
     val context = LocalContext.current
     val info = model.info
     val size = Formatter.formatShortFileSize(context, info.sizeBytes)
@@ -51,7 +57,7 @@ fun ModelCard(model: ModelState, isRecommended: Boolean, actions: ModelActions, 
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            StatusSection(model, actions, onAskDelete = { confirmDelete = true })
+            StatusSection(model, actions, isVerifying, onAskDelete = { confirmDelete = true })
         }
     }
 
@@ -74,7 +80,7 @@ fun ModelCard(model: ModelState, isRecommended: Boolean, actions: ModelActions, 
 }
 
 @Composable
-private fun StatusSection(model: ModelState, actions: ModelActions, onAskDelete: () -> Unit) {
+private fun StatusSection(model: ModelState, actions: ModelActions, isVerifying: Boolean, onAskDelete: () -> Unit) {
     val id = model.info.id
     when (val status = model.status) {
         ModelStatus.NotDownloaded -> if (model.fitsInRam) {
@@ -123,11 +129,23 @@ private fun StatusSection(model: ModelState, actions: ModelActions, onAskDelete:
             }
         }
 
-        ModelStatus.Downloaded -> ButtonRow {
-            if (model.info.kind == ModelKind.CHAT && !model.isSelected) {
-                Button(onClick = { actions.onSelect(id) }) { Text(stringResource(R.string.feature_models_use)) }
+        ModelStatus.Downloaded -> {
+            if (isVerifying) {
+                // Hashing gigabytes takes a few seconds: show that something is happening.
+                LinearProgressIndicator(Modifier.fillMaxWidth())
+                Text(stringResource(R.string.feature_models_verifying), style = MaterialTheme.typography.bodySmall)
             }
-            OutlinedButton(onClick = onAskDelete) { Text(stringResource(R.string.feature_models_delete)) }
+            ButtonRow {
+                if (model.info.kind == ModelKind.CHAT && !model.isSelected) {
+                    Button(onClick = { actions.onSelect(id) }) { Text(stringResource(R.string.feature_models_use)) }
+                }
+                OutlinedButton(onClick = { actions.onVerify(id) }, enabled = !isVerifying) {
+                    Text(stringResource(R.string.feature_models_verify))
+                }
+                OutlinedButton(onClick = onAskDelete, enabled = !isVerifying) {
+                    Text(stringResource(R.string.feature_models_delete))
+                }
+            }
         }
     }
 }

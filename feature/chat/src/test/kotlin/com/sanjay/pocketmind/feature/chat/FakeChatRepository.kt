@@ -3,6 +3,7 @@ package com.sanjay.pocketmind.feature.chat
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.EngineState
+import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.llm.GenerationStats
 import com.sanjay.pocketmind.core.llm.LlmBackend
 import com.sanjay.pocketmind.core.model.Chat
@@ -28,6 +29,13 @@ class FakeChatRepository : ChatRepository {
     var pieceDelayMs = 0L
     var answerError: Throwable? = null
     var modelAvailable = true
+
+    /** When set, loading fails with this reason (until [resetModelCrashProtection] for a crash). */
+    var loadFailure: FailureReason? = null
+    var crashResets = 0
+        private set
+    var loadAttempts = 0
+        private set
     private var nextId = 0
 
     override fun observeChats(query: String): Flow<List<ChatSummary>> = chats.map { all ->
@@ -40,9 +48,19 @@ class FakeChatRepository : ChatRepository {
         messages.map { all -> all.filter { it.chatId == chatId } }
 
     override suspend fun ensureModelLoaded(): AppResult<Unit> {
+        loadAttempts++
         if (!modelAvailable) return AppResult.Failure(ErrorKind.NO_MODEL)
+        loadFailure?.let { reason ->
+            engineState.value = EngineState.Failed("/m", reason)
+            return AppResult.Failure(ErrorKind.MODEL_LOAD_FAILED)
+        }
         engineState.value = EngineState.Ready("/m", LlmBackend.GPU, 1)
         return AppResult.Success(Unit)
+    }
+
+    override fun resetModelCrashProtection() {
+        crashResets++
+        if (loadFailure == FailureReason.CRASHED_LAST_TIME) loadFailure = null
     }
 
     override suspend fun createChat(): String {

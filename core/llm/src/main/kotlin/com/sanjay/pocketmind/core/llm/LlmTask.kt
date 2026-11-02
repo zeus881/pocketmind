@@ -24,7 +24,7 @@ class LlmTask @Inject constructor(private val engine: LlmEngine, private val set
     /** Loads the selected model if needed. NO_MODEL / MODEL_LOAD_FAILED on failure. */
     suspend fun ensureLoaded(): AppResult<InferenceSettings> {
         val settings = settingsSource.current() ?: return AppResult.Failure(ErrorKind.NO_MODEL)
-        engine.load(settings.modelPath, settings.preferGpu)
+        engine.load(settings.modelPath, settings.preferGpu, settings.expectedSizeBytes)
         return if (engine.state.value is EngineState.Ready) {
             AppResult.Success(settings)
         } else {

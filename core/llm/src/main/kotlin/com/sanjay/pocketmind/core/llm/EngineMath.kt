@@ -9,9 +9,24 @@ package com.sanjay.pocketmind.core.llm
 internal object EngineMath {
     private const val MILLIS_PER_SECOND = 1000.0
 
-    /** Which backends to try, in order. GPU is fastest when it works; CPU always works. */
-    fun backendOrder(preferGpu: Boolean): List<LlmBackend> =
-        if (preferGpu) listOf(LlmBackend.GPU, LlmBackend.CPU) else listOf(LlmBackend.CPU)
+    /**
+     * Which backends to try, in order. GPU is fastest when it works; CPU always works.
+     * [blocked] backends crashed the app before (see [LoadGuard]) and are skipped.
+     */
+    fun backendOrder(preferGpu: Boolean, blocked: Set<LlmBackend> = emptySet()): List<LlmBackend> =
+        (if (preferGpu) listOf(LlmBackend.GPU, LlmBackend.CPU) else listOf(LlmBackend.CPU)).filterNot { it in blocked }
+
+    /**
+     * Cheap sanity check before handing a file to native code. Returns the problem, or null if
+     * the file looks right. [expectedBytes] = null means "size unknown" (only readability is checked).
+     * Comparing the exact byte count catches truncated copies and most damage in microseconds;
+     * the full SHA-256 check (seconds) runs on demand from the model manager.
+     */
+    fun modelFileProblem(readable: Boolean, actualBytes: Long, expectedBytes: Long?): FailureReason? = when {
+        !readable -> FailureReason.FILE_NOT_FOUND
+        expectedBytes != null && actualBytes != expectedBytes -> FailureReason.FILE_DAMAGED
+        else -> null
+    }
 
     /**
      * Decode speed from our own measurements: pieces streamed after the first one, divided by

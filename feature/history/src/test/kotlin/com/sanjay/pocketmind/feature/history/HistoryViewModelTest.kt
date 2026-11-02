@@ -68,6 +68,7 @@ class HistoryViewModelTest {
         override fun observeChat(chatId: String): Flow<Chat?> = emptyFlow()
         override fun observeMessages(chatId: String): Flow<List<Message>> = emptyFlow()
         override suspend fun ensureModelLoaded(): AppResult<Unit> = AppResult.Success(Unit)
+        override fun resetModelCrashProtection() = Unit
         override suspend fun createChat() = "new"
         override suspend fun sendMessage(chatId: String, text: String): AppResult<Flow<String>> =
             AppResult.Success(emptyFlow())

@@ -1,5 +1,7 @@
 package com.sanjay.pocketmind.core.llm.di
 
+import com.sanjay.pocketmind.core.llm.AndroidExitReasonSource
+import com.sanjay.pocketmind.core.llm.ExitReasonSource
 import com.sanjay.pocketmind.core.llm.LiteRtLmEmbedder
 import com.sanjay.pocketmind.core.llm.LiteRtLmEngine
 import com.sanjay.pocketmind.core.llm.LlmEngine
@@ -22,4 +24,7 @@ internal abstract class LlmModule {
 
     @Binds
     abstract fun bindsTextEmbedder(embedder: LiteRtLmEmbedder): TextEmbedder
+
+    @Binds
+    abstract fun bindsExitReasonSource(source: AndroidExitReasonSource): ExitReasonSource
 }

@@ -11,6 +11,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -88,9 +89,18 @@ fun EmptyState(
     }
 }
 
-/** A readable error message plus a Retry button (CLAUDE.md: errors must offer retry). */
+/**
+ * A readable error message plus a Retry button (CLAUDE.md: errors must offer retry), and an
+ * optional second, less prominent action (e.g. "Open models") when retrying alone can't help.
+ */
 @Composable
-fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
+fun ErrorState(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+    secondaryActionLabel: String? = null,
+    onSecondaryAction: (() -> Unit)? = null,
+) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -107,5 +117,8 @@ fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifi
         )
         Text(text = message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
         Button(onClick = onRetry) { Text(stringResource(R.string.core_designsystem_retry)) }
+        if (secondaryActionLabel != null && onSecondaryAction != null) {
+            OutlinedButton(onClick = onSecondaryAction) { Text(secondaryActionLabel) }
+        }
     }
 }

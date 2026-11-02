@@ -26,6 +26,12 @@ interface ModelRepository {
     /** Deletes a downloaded model and frees its storage. */
     suspend fun delete(modelId: String)
 
+    /**
+     * Re-checks a downloaded model's size and SHA-256. A damaged file is deleted (so the card
+     * offers "Download" again) and CHECKSUM_MISMATCH is returned.
+     */
+    suspend fun verify(modelId: String): AppResult<Unit>
+
     /** Makes a downloaded chat model the one used for chatting. */
     suspend fun select(modelId: String)
 

@@ -31,6 +31,7 @@ internal class SettingsInferenceSource @Inject constructor(
             sampling = SamplingParams(temperature = user.temperature.toDouble(), topK = user.topK),
             modelId = modelId,
             modelName = catalog.find(modelId)?.displayName.orEmpty(),
+            expectedSizeBytes = catalog.find(modelId)?.sizeBytes,
         )
     }
 }

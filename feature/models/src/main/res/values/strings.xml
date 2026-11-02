@@ -30,4 +30,8 @@
     <string name="feature_models_failed_network">Download stopped: check your connection.</string>
     <string name="feature_models_error_storage">Not enough space. Free up at least %1$s and try again.</string>
     <string name="feature_models_error_generic">Something went wrong. Please try again.</string>
+    <string name="feature_models_verify">Check file</string>
+    <string name="feature_models_verifying">Checking the file… this takes a few seconds.</string>
+    <string name="feature_models_verify_ok">%1$s is intact and ready to use.</string>
+    <string name="feature_models_verify_damaged">The file was damaged and has been removed. Please download it again.</string>
 </resources>

@@ -19,4 +19,7 @@
     <string name="feature_chat_get_model">Get a model</string>
     <string name="feature_chat_model_failed">The model could not be loaded on this phone.</string>
     <string name="feature_chat_generation_failed">Something went wrong while generating the answer.</string>
+    <string name="feature_chat_model_damaged">The model file is missing or damaged, so it was not loaded. Check the file or download it again in Models.</string>
+    <string name="feature_chat_model_crashed">Loading this model closed the app last time, so PocketMind did not try again on its own. You can try once more, or check the file or choose a smaller model in Models.</string>
+    <string name="feature_chat_open_models">Open models</string>
 </resources>

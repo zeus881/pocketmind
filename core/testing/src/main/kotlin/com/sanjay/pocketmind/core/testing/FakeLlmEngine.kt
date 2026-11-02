@@ -33,6 +33,12 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
         private set
 
     var failLoad: Boolean = false
+
+    /** Reason reported when [failLoad] is true. */
+    var failReason: FailureReason = FailureReason.INIT_FAILED
+    var crashResets = 0
+        private set
+    val expectedSizes = mutableListOf<Long?>()
     var generationError: Throwable? = null
 
     /** Virtual-time delay between pieces; lets tests cancel mid-answer. */
@@ -45,14 +51,15 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
     var unloadCount = 0
         private set
 
-    override suspend fun load(modelPath: String, preferGpu: Boolean) {
+    override suspend fun load(modelPath: String, preferGpu: Boolean, expectedSizeBytes: Long?) {
         // Same as the real engine: loading the already-loaded model is a no-op.
         if ((state.value as? EngineState.Ready)?.modelPath == modelPath) return
         loadedPaths += modelPath
+        expectedSizes += expectedSizeBytes
         sessionId++
         state.value = EngineState.Loading(modelPath)
         state.value = if (failLoad) {
-            EngineState.Failed(modelPath, FailureReason.INIT_FAILED)
+            EngineState.Failed(modelPath, failReason)
         } else {
             EngineState.Ready(modelPath, backend, loadMs = 10)
         }
@@ -84,6 +91,10 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
             backend = backend,
             fromEngine = true,
         )
+    }
+
+    override fun resetCrashProtection() {
+        crashResets++
     }
 
     override suspend fun unload() {
