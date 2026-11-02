@@ -10,7 +10,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 1 Crash-loop guard + model integrity | DONE | 67 % (measured 67.0 %, 158 tests) | to verify on device: damaged-file message, "Check file" time |
 | 2 App lock overlay + grace period | DONE | 67 % (measured 67.9 %, 172 tests) | KSP incremental off (lost Hilt outputs); to verify on device: lock + PDF picker, Recents thumbnail |
 | 3 Memory policy + download robustness | DONE | 67 % (measured 67.7 %, 177 tests) | to verify on device: no reload after a 30 s app switch |
-| 4 Tests for engine, worker, model repository | NEXT | | |
+| 4 Tests for engine, worker, model repository | DONE | 78 % (measured 78.0 %, 201 tests) | engine device test written; run manually (see manual steps) |
+| 5 Versioning + quick wins | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -120,6 +121,12 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
 - None.
 
 ## MANUAL STEPS FOR SANJAY
+
+### v2 (added during the v2 build)
+- **Engine test on the phone (phase 4):** `adb push gemma-4-E2B-it.litertlm /data/local/tmp/llm/model.litertlm`, then
+  `./gradlew :core:llm:connectedDebugAndroidTest` (3 tests: load/stream/cancel/unload, damaged size, CPU-only).
+
+### v1
 
 1. **GitHub**: create repo `pocketmind`; `git remote add origin https://github.com/<you>/pocketmind.git`;
    `git push -u origin main`. Replace `YOUR_GITHUB_USER` in README.md (badges/links).

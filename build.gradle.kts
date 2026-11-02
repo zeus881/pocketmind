@@ -24,7 +24,7 @@ plugins {
 // core:testing (test helpers) and :benchmark (device-only tests) are not app code.
 
 /** Minimum line coverage in percent. Raised phase by phase towards 80 (V2_PLAN.md). Never lowered. */
-val koverMinLineCoverage = 67 // v2 phase 1: 67.0 % measured
+val koverMinLineCoverage = 78 // v2 phase 4: 78.0 % measured
 
 val coveredModules = listOf(
     ":app",
@@ -53,8 +53,9 @@ kover {
                     "*_Impl", "*_Impl$*", "*_AutoMigration_*",
                     "*ComposableSingletons*", "*.BuildConfig", "*\$\$serializer",
                 )
-                // Wiring only: DI modules and navigation graph builders.
-                packages("*.di", "*.navigation")
+                // Wiring only: DI modules and navigation graph builders. Design tokens (colors,
+                // type scale) are constants without logic, checked by screenshot tests instead.
+                packages("*.di", "*.navigation", "*.designsystem.theme")
                 // Composable UI is verified by screenshot and UI tests, not by line coverage
                 // (CLAUDE.md §0 "v2 quality gates").
                 annotatedBy("androidx.compose.runtime.Composable", "androidx.compose.ui.tooling.preview.Preview")

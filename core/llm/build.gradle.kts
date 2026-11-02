@@ -15,4 +15,10 @@ dependencies {
     // depends on core:llm. That is how the build ENFORCES "only core:llm imports LiteRT-LM".
     implementation(libs.litertlm.android)
     implementation(libs.kotlinx.coroutines.android)
+
+    // On-device engine test (LiteRtLmEngineDeviceTest). Needs a phone with a model file; see the test's KDoc.
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 }

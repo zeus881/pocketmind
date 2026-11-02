@@ -22,4 +22,9 @@ dependencies {
 
     testImplementation(projects.core.testing)
     testImplementation(libs.okhttp.mockwebserver)
+    // Worker + repository tests: a real WorkManager in test mode on Robolectric's Android.
+    testImplementation(libs.androidx.work.testing)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.datastore.preferences)
 }
