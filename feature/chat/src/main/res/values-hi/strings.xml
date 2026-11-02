@@ -47,4 +47,12 @@
     <string name="feature_chat_answer_as">किस रूप में जवाब दे</string>
     <string name="feature_chat_persona_default">सहायक</string>
     <string name="feature_chat_prompt_library">सहेजा हुआ प्रॉम्प्ट डालें</string>
+    <string name="feature_chat_voice_start">अपना सवाल बोलें</string>
+    <string name="feature_chat_voice_stop">सुनना बंद करें</string>
+    <string name="feature_chat_read_aloud">पढ़कर सुनाएँ</string>
+    <string name="feature_chat_stop_reading">पढ़ना बंद करें</string>
+    <string name="feature_chat_voice_unavailable">इस भाषा के लिए ऑफ़लाइन आवाज़ उपलब्ध नहीं है। Android सेटिंग में ऑफ़लाइन स्पीच या वॉइस डेटा डाउनलोड करें।</string>
+    <string name="feature_chat_voice_permission">आवाज़ से इनपुट के लिए माइक्रोफ़ोन की अनुमति चाहिए।</string>
+    <string name="feature_chat_voice_nothing_heard">समझ नहीं आया। कृपया फिर से कोशिश करें।</string>
+    <string name="feature_chat_voice_failed">आवाज़ इनपुट रुक गया। कृपया फिर से कोशिश करें।</string>
 </resources>

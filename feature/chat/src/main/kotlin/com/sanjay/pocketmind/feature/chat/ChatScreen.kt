@@ -1,6 +1,9 @@
 package com.sanjay.pocketmind.feature.chat
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -40,6 +43,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
@@ -48,6 +53,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
@@ -59,6 +65,7 @@ import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.model.Persona
+import com.sanjay.pocketmind.core.speech.SpeechError
 import com.sanjay.pocketmind.feature.chat.component.ChatInput
 import com.sanjay.pocketmind.feature.chat.component.MessageList
 import kotlinx.coroutines.delay
@@ -78,7 +85,6 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
     val resources = LocalResources.current
     val haptics = rememberPmHaptics()
 
-    // LaunchedEffect(Unit) starts once when the screen appears and is cancelled when it leaves.
     // The system "Save as" screen: the user picks where; we only get permission for that one file.
     val saveMarkdown = rememberLauncherForActivityResult(CreateDocument(ExportFormat.MARKDOWN.mimeType)) { uri ->
         uri?.let { viewModel.export(it, ExportFormat.MARKDOWN) }
@@ -87,11 +93,34 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
         uri?.let { viewModel.export(it, ExportFormat.PDF) }
     }
 
+    // Voice input: the recognizer listens in the phone's language; the microphone permission is
+    // asked the first time (Android shows its own dialog).
+    val context = LocalContext.current
+    val languageTag = LocalConfiguration.current.locales[0].toLanguageTag()
+    val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) viewModel.startVoice(languageTag)
+    }
+    val onMicClick = {
+        when {
+            state.voice.listening -> viewModel.stopVoice()
+
+            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
+                PackageManager.PERMISSION_GRANTED -> viewModel.startVoice(languageTag)
+
+            else -> micPermission.launch(Manifest.permission.RECORD_AUDIO)
+        }
+    }
+
+    // LaunchedEffect(Unit) starts once when the screen appears and is cancelled when it leaves.
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 ChatEvent.Exported -> snackbarHostState.showSnackbar(
                     resources.getString(R.string.feature_chat_exported),
+                )
+
+                is ChatEvent.VoiceProblem -> snackbarHostState.showSnackbar(
+                    resources.getString(event.kind.messageRes()),
                 )
 
                 is ChatEvent.Error -> {
@@ -128,6 +157,8 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
         onEdit = viewModel::edit,
         onShowVersion = viewModel::showVersion,
         onSelectPersona = viewModel::selectPersona,
+        onMicClick = onMicClick,
+        onToggleSpeak = viewModel::toggleSpeak,
         onExport = { format ->
             val name = exportFileName(state.title, format)
             if (format == ExportFormat.MARKDOWN) saveMarkdown.launch(name) else savePdf.launch(name)
@@ -151,6 +182,8 @@ fun ChatContent(
     onShowVersion: (messageId: String, offset: Int) -> Unit = { _, _ -> },
     onExport: (ExportFormat) -> Unit = {},
     onSelectPersona: (String?) -> Unit = {},
+    onMicClick: () -> Unit = {},
+    onToggleSpeak: (messageId: String, text: String) -> Unit = { _, _ -> },
 ) {
     Scaffold(
         modifier = modifier,
@@ -242,6 +275,8 @@ fun ChatContent(
                                 branches = state.branches,
                                 onEdit = onEdit,
                                 onShowVersion = onShowVersion,
+                                speakingMessageId = state.speakingMessageId,
+                                onToggleSpeak = onToggleSpeak,
                             )
                         }
                     }
@@ -251,6 +286,8 @@ fun ChatContent(
                         onSend = onSend,
                         initialText = state.draft,
                         prompts = state.prompts,
+                        voice = state.voice,
+                        onMicClick = onMicClick,
                         onStop = onStop,
                         modifier = Modifier.readableWidth(),
                     )
@@ -426,3 +463,10 @@ internal fun exportFileName(title: String?, format: ExportFormat): String {
 }
 
 private const val MAX_FILE_NAME = 60
+
+private fun SpeechError.messageRes(): Int = when (this) {
+    SpeechError.UNAVAILABLE -> R.string.feature_chat_voice_unavailable
+    SpeechError.PERMISSION -> R.string.feature_chat_voice_permission
+    SpeechError.NOTHING_HEARD -> R.string.feature_chat_voice_nothing_heard
+    SpeechError.FAILED -> R.string.feature_chat_voice_failed
+}

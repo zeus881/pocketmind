@@ -11,6 +11,8 @@ import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.Persona
 import com.sanjay.pocketmind.core.model.SavedPrompt
 import com.sanjay.pocketmind.core.model.TurnRole
+import com.sanjay.pocketmind.core.speech.SpeechError
+import com.sanjay.pocketmind.core.speech.SpeechEvent
 import com.sanjay.pocketmind.core.testing.MainDispatcherRule
 import com.sanjay.pocketmind.data.chat.ChatExporter
 import com.sanjay.pocketmind.data.chat.PersonaRepository
@@ -53,12 +55,73 @@ class ChatViewModelTest {
         override suspend fun deletePrompt(id: String) = Unit
     }
 
+    private val speechIn = FakeSpeechInput()
+    private val speechOut = FakeSpeechOutput()
+
     private fun viewModel(chatId: String? = null, draft: String? = null) = ChatViewModel(
         repository,
         exporter,
         personas,
+        speechIn,
+        speechOut,
         SavedStateHandle(mapOf(ChatViewModel.CHAT_ID_KEY to chatId, ChatViewModel.DRAFT_KEY to draft)),
     )
+
+    @Test
+    fun `voice input streams the transcript into the box but sends nothing`() = runTest(mainRule.testDispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+
+        vm.startVoice("hi-IN")
+        advanceUntilIdle()
+
+        val voice = vm.uiState.value.voice
+        assertEquals("how do drones fly", voice.transcript)
+        assertEquals(2, voice.transcriptVersion) // one partial + the final result
+        assertFalse(voice.listening)
+        assertEquals(listOf("hi-IN"), speechIn.languages)
+        assertEquals(emptyList<Any>(), repository.messages.value)
+    }
+
+    @Test
+    fun `a voice error is reported and stops listening`() = runTest(mainRule.testDispatcher) {
+        speechIn.events = listOf(SpeechEvent.Listening, SpeechEvent.Error(SpeechError.NOTHING_HEARD))
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+
+        vm.startVoice("en-IN")
+        advanceUntilIdle()
+
+        assertEquals(ChatEvent.VoiceProblem(SpeechError.NOTHING_HEARD), vm.events.first())
+        assertFalse(vm.uiState.value.voice.listening)
+    }
+
+    @Test
+    fun `voice is unavailable without an on-device recognizer`() = runTest(mainRule.testDispatcher) {
+        speechIn.available = false
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+
+        assertFalse(vm.uiState.value.voice.available)
+    }
+
+    @Test
+    fun `read aloud toggles and reports a missing offline voice`() = runTest(mainRule.testDispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+
+        vm.toggleSpeak("m1", "**Hello**")
+        advanceUntilIdle()
+        assertEquals("m1", vm.uiState.value.speakingMessageId)
+        vm.toggleSpeak("m1", "**Hello**")
+        advanceUntilIdle()
+        assertEquals(null, vm.uiState.value.speakingMessageId)
+
+        speechOut.hasOfflineVoice = false
+        vm.toggleSpeak("m2", "Hi")
+        assertEquals(ChatEvent.VoiceProblem(SpeechError.UNAVAILABLE), vm.events.first())
+    }
 
     @Test
     fun `a persona picked on the welcome screen is used for the new chat`() = runTest(mainRule.testDispatcher) {

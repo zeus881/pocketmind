@@ -6,6 +6,7 @@ import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.Persona
 import com.sanjay.pocketmind.core.model.SavedPrompt
+import com.sanjay.pocketmind.core.speech.SpeechError
 
 /**
  * Everything the chat screen draws, in one immutable object.
@@ -32,6 +33,9 @@ data class ChatUiState(
     val personaId: String? = null,
     /** The prompt library, insertable from the input box. */
     val prompts: List<SavedPrompt> = emptyList(),
+    val voice: VoiceUi = VoiceUi(),
+    /** Id of the answer being read aloud, or null. */
+    val speakingMessageId: String? = null,
 ) {
     val personaName: String? get() = personas.firstOrNull { it.id == personaId }?.name
 }
@@ -64,4 +68,19 @@ sealed interface ChatEvent {
 
     /** The chat was saved to the file the user picked. */
     data object Exported : ChatEvent
+
+    /** Voice input or read-aloud didn't work. */
+    data class VoiceProblem(val kind: SpeechError) : ChatEvent
 }
+
+/**
+ * Voice input state. [transcript] is what the recognizer heard so far; every new transcript gets a
+ * new [transcriptVersion], which is how the input box knows to show it (it then belongs to the user,
+ * who can edit it and tap Send — nothing is sent automatically).
+ */
+data class VoiceUi(
+    val available: Boolean = false,
+    val listening: Boolean = false,
+    val transcript: String? = null,
+    val transcriptVersion: Int = 0,
+)

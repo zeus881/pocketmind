@@ -46,6 +46,7 @@ include(":core:llm")
 include(":core:testing")
 include(":core:database")
 include(":core:datastore")
+include(":core:speech")
 
 include(":data:chat")
 include(":data:models")

@@ -47,4 +47,12 @@
     <string name="feature_chat_answer_as">Answer as</string>
     <string name="feature_chat_persona_default">Assistant</string>
     <string name="feature_chat_prompt_library">Insert a saved prompt</string>
+    <string name="feature_chat_voice_start">Speak your question</string>
+    <string name="feature_chat_voice_stop">Stop listening</string>
+    <string name="feature_chat_read_aloud">Read aloud</string>
+    <string name="feature_chat_stop_reading">Stop reading</string>
+    <string name="feature_chat_voice_unavailable">Offline voice is not available for this language. In Android settings, download the offline speech or voice data.</string>
+    <string name="feature_chat_voice_permission">Voice input needs the microphone permission.</string>
+    <string name="feature_chat_voice_nothing_heard">Didn\'t catch that. Please try again.</string>
+    <string name="feature_chat_voice_failed">Voice input stopped. Please try again.</string>
 </resources>

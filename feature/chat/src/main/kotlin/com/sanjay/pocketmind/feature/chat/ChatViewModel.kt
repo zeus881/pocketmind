@@ -14,6 +14,10 @@ import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.Persona
 import com.sanjay.pocketmind.core.model.SavedPrompt
+import com.sanjay.pocketmind.core.speech.SpeechError
+import com.sanjay.pocketmind.core.speech.SpeechEvent
+import com.sanjay.pocketmind.core.speech.SpeechInput
+import com.sanjay.pocketmind.core.speech.SpeechOutput
 import com.sanjay.pocketmind.data.chat.ChatExporter
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import com.sanjay.pocketmind.data.chat.PersonaRepository
@@ -35,6 +39,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -59,6 +64,8 @@ class ChatViewModel @Inject constructor(
     private val repository: ChatRepository,
     private val exporter: ChatExporter,
     personaRepository: PersonaRepository,
+    private val speechInput: SpeechInput,
+    private val speechOutput: SpeechOutput,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -121,13 +128,20 @@ class ChatViewModel @Inject constructor(
 
     private data class PersonaUi(val personas: List<Persona>, val prompts: List<SavedPrompt>, val personaId: String?)
 
+    private val voice = MutableStateFlow(VoiceUi(available = speechInput.isAvailable))
+    private var listenJob: Job? = null
+
+    private data class Extras(val persona: PersonaUi, val voice: VoiceUi, val speakingId: String?)
+
+    private val extras: Flow<Extras> = combine(personaUi, voice, speechOutput.speaking, ::Extras)
+
     val uiState: StateFlow<ChatUiState> = combine(
         combine(chatId, title, ::Pair),
         conversation,
         streaming,
         modelUi,
-        personaUi,
-    ) { (id, title), (list, versions), live, model, persona ->
+        extras,
+    ) { (id, title), (list, versions), live, model, (persona, voiceUi, speakingId) ->
         ChatUiState(
             chatId = id,
             title = title,
@@ -137,6 +151,8 @@ class ChatViewModel @Inject constructor(
             personas = persona.personas,
             personaId = persona.personaId,
             prompts = persona.prompts,
+            voice = voiceUi,
+            speakingMessageId = speakingId,
             streamingText = live,
             isGenerating = live != null,
             model = model,
@@ -276,6 +292,53 @@ class ChatViewModel @Inject constructor(
                 if (result is AppResult.Success) ChatEvent.Exported else ChatEvent.Error(ErrorKind.FILE_UNREADABLE),
             )
         }
+    }
+
+    /**
+     * Starts on-device voice input in [languageTag] (e.g. "hi-IN"). Partial results stream into the
+     * input box; the user sends. Tapping the mic again (or an error) stops it.
+     */
+    fun startVoice(languageTag: String) {
+        if (listenJob?.isActive == true) return
+        listenJob = viewModelScope.launch {
+            speechInput.listen(languageTag).collect { event ->
+                when (event) {
+                    SpeechEvent.Listening -> voice.update { it.copy(listening = true) }
+
+                    is SpeechEvent.Partial -> showTranscript(event.text, listening = true)
+
+                    is SpeechEvent.Final -> showTranscript(event.text, listening = false)
+
+                    is SpeechEvent.Error -> {
+                        voice.update { it.copy(listening = false) }
+                        _events.send(ChatEvent.VoiceProblem(event.kind))
+                    }
+                }
+            }
+            voice.update { it.copy(listening = false) }
+        }
+    }
+
+    fun stopVoice() {
+        listenJob?.cancel()
+        voice.update { it.copy(listening = false) }
+    }
+
+    private fun showTranscript(text: String, listening: Boolean) =
+        voice.update { it.copy(listening = listening, transcript = text, transcriptVersion = it.transcriptVersion + 1) }
+
+    /** Reads an answer aloud with an offline voice; a second tap on the same answer stops it. */
+    fun toggleSpeak(messageId: String, text: String) {
+        if (speechOutput.speaking.value == messageId) {
+            speechOutput.stop()
+        } else if (!speechOutput.speak(messageId, text)) {
+            _events.trySend(ChatEvent.VoiceProblem(SpeechError.UNAVAILABLE))
+        }
+    }
+
+    override fun onCleared() {
+        // Leaving the screen ends listening and reading aloud.
+        speechOutput.stop()
     }
 
     /** The Stop button. Cancellation travels down to the engine, which stops native generation. */

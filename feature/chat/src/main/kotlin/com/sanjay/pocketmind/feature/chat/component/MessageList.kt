@@ -25,9 +25,11 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material.icons.outlined.StopCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -97,6 +99,8 @@ internal fun MessageList(
     branches: Map<String, BranchInfo> = emptyMap(),
     onEdit: (messageId: String, newText: String) -> Unit = { _, _ -> },
     onShowVersion: (messageId: String, offset: Int) -> Unit = { _, _ -> },
+    speakingMessageId: String? = null,
+    onToggleSpeak: (messageId: String, text: String) -> Unit = { _, _ -> },
 ) {
     // Editing and switching versions are blocked while an answer is being written (same rule as retry).
     val canChange = canRetry
@@ -128,6 +132,8 @@ internal fun MessageList(
                             message = message,
                             showRetry = canRetry && message.id == lastAssistantId,
                             onRetry = onRetry,
+                            speaking = message.id == speakingMessageId,
+                            onToggleSpeak = { onToggleSpeak(message.id, message.text) },
                         )
                     }
                     if (versions != null) {
@@ -271,7 +277,13 @@ private fun VersionSwitcher(info: BranchInfo, enabled: Boolean, onShow: (Int) ->
 }
 
 @Composable
-private fun AssistantAnswer(message: Message, showRetry: Boolean, onRetry: () -> Unit) {
+private fun AssistantAnswer(
+    message: Message,
+    showRetry: Boolean,
+    onRetry: () -> Unit,
+    speaking: Boolean = false,
+    onToggleSpeak: () -> Unit = {},
+) {
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
     Column(Modifier.fillMaxWidth()) {
@@ -301,6 +313,16 @@ private fun AssistantAnswer(message: Message, showRetry: Boolean, onRetry: () ->
                     scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("answer", message.text))) }
                 }) {
                     Icon(Icons.Outlined.ContentCopy, contentDescription = stringResource(R.string.feature_chat_copy))
+                }
+            }
+            if (message.text.isNotBlank()) {
+                IconButton(onClick = onToggleSpeak) {
+                    Icon(
+                        if (speaking) Icons.Outlined.StopCircle else Icons.AutoMirrored.Outlined.VolumeUp,
+                        contentDescription = stringResource(
+                            if (speaking) R.string.feature_chat_stop_reading else R.string.feature_chat_read_aloud,
+                        ),
+                    )
                 }
             }
             if (showRetry) {

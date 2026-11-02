@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Mic
+import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material3.DropdownMenu
@@ -14,10 +16,12 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,6 +36,7 @@ import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.SavedPrompt
 import com.sanjay.pocketmind.feature.chat.R
+import com.sanjay.pocketmind.feature.chat.VoiceUi
 
 /**
  * Text field + one button that is "Send" when idle and "Stop" while an answer streams.
@@ -51,9 +56,13 @@ internal fun ChatInput(
     initialText: String = "",
     /** The prompt library: a button inserts one of them into the box. */
     prompts: List<SavedPrompt> = emptyList(),
+    voice: VoiceUi = VoiceUi(),
+    onMicClick: () -> Unit = {},
 ) {
     var text by rememberSaveable { mutableStateOf(initialText) }
     val haptics = rememberPmHaptics()
+    // What the recognizer heard replaces the box's text; from then on the user can edit it.
+    LaunchedEffect(voice.transcriptVersion) { voice.transcript?.let { text = it } }
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -78,6 +87,17 @@ internal fun ChatInput(
                 .weight(1f)
                 .padding(end = PmSpacing.s),
         )
+        if (voice.available && !isGenerating) {
+            IconButton(onClick = onMicClick) {
+                Icon(
+                    if (voice.listening) Icons.Filled.MicOff else Icons.Filled.Mic,
+                    contentDescription = stringResource(
+                        if (voice.listening) R.string.feature_chat_voice_stop else R.string.feature_chat_voice_start,
+                    ),
+                    tint = if (voice.listening) MaterialTheme.colorScheme.error else LocalContentColor.current,
+                )
+            }
+        }
         if (isGenerating) {
             FilledIconButton(onClick = onStop) {
                 Icon(Icons.Filled.Stop, contentDescription = stringResource(R.string.feature_chat_stop))
