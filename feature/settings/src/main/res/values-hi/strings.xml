@@ -43,4 +43,11 @@
         <item quantity="one">%d मिनट बाद</item>
         <item quantity="other">%d मिनट बाद</item>
     </plurals>
+    <string name="feature_settings_keep_model">ऐप छोड़ने के बाद मॉडल को लोड रखें</string>
+    <string name="feature_settings_keep_model_hint">ज़्यादा समय रखने पर लौटते ही इंतज़ार नहीं करना पड़ता, लेकिन तब तक मॉडल मेमोरी इस्तेमाल करता रहता है।</string>
+    <string name="feature_settings_keep_model_none">तुरंत अनलोड करें</string>
+    <plurals name="feature_settings_keep_model_minutes">
+        <item quantity="one">%d मिनट तक</item>
+        <item quantity="other">%d मिनट तक</item>
+    </plurals>
 </resources>

@@ -4,4 +4,5 @@
     <string name="data_models_notification_title">%1$s डाउनलोड हो रहा है</string>
     <string name="data_models_notification_progress">%1$d%% पूरा</string>
     <string name="data_models_notification_pause">रोकें</string>
+    <string name="data_models_notification_paused_by_system">लंबे डाउनलोड के बाद Android ने इसे रोक दिया। यह अपने आप वहीं से फिर शुरू होगा जहाँ रुका था।</string>
 </resources>

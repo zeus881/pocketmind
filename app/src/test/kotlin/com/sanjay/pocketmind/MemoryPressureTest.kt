@@ -7,15 +7,17 @@ import org.junit.Test
 
 class MemoryPressureTest {
     @Test
-    fun `unloads on critical and background levels`() {
+    fun `unloads on critical pressure and deep in the kill list`() {
         assertTrue(MemoryPressure.shouldUnloadModel(15)) // TRIM_MEMORY_RUNNING_CRITICAL
-        assertTrue(MemoryPressure.shouldUnloadModel(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND))
+        assertTrue(MemoryPressure.shouldUnloadModel(60)) // TRIM_MEMORY_MODERATE
         assertTrue(MemoryPressure.shouldUnloadModel(80)) // TRIM_MEMORY_COMPLETE
     }
 
     @Test
-    fun `keeps the model when only the UI is hidden or memory is moderately low`() {
+    fun `ordinary backgrounding is left to the keep-alive timer`() {
+        // Android 14+ sends these on every app switch: not memory pressure.
         assertFalse(MemoryPressure.shouldUnloadModel(ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN))
+        assertFalse(MemoryPressure.shouldUnloadModel(ComponentCallbacks2.TRIM_MEMORY_BACKGROUND))
         assertFalse(MemoryPressure.shouldUnloadModel(5)) // TRIM_MEMORY_RUNNING_MODERATE
     }
 }

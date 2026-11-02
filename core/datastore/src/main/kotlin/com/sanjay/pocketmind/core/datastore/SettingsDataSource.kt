@@ -41,6 +41,7 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
                 ?: ThemeMode.SYSTEM,
             appLockEnabled = prefs[Keys.APP_LOCK] ?: false,
             appLockTimeoutSeconds = prefs[Keys.APP_LOCK_TIMEOUT] ?: UserSettings.DEFAULT_LOCK_TIMEOUT_SECONDS,
+            keepModelLoadedMinutes = prefs[Keys.KEEP_MODEL_MINUTES] ?: UserSettings.DEFAULT_KEEP_MODEL_MINUTES,
         )
     }
 
@@ -80,6 +81,12 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
             ?: UserSettings.DEFAULT_LOCK_TIMEOUT_SECONDS
     }
 
+    /** Only the values offered in Settings are accepted; anything else falls back to the default. */
+    suspend fun setKeepModelLoadedMinutes(minutes: Int) = update {
+        it[Keys.KEEP_MODEL_MINUTES] = minutes.takeIf { m -> m in UserSettings.KEEP_MODEL_OPTIONS }
+            ?: UserSettings.DEFAULT_KEEP_MODEL_MINUTES
+    }
+
     /**
      * Applies [block] in one DataStore transaction. Returns Unit on purpose: DataStore's own
      * `edit` returns its `Preferences` type, which would leak DataStore into every caller's API.
@@ -100,5 +107,6 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
         val THEME = stringPreferencesKey("theme_mode")
         val APP_LOCK = booleanPreferencesKey("app_lock")
         val APP_LOCK_TIMEOUT = intPreferencesKey("app_lock_timeout_s")
+        val KEEP_MODEL_MINUTES = intPreferencesKey("keep_model_loaded_min")
     }
 }

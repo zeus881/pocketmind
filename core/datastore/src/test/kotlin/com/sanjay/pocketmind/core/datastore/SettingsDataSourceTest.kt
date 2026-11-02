@@ -60,4 +60,13 @@ class SettingsDataSourceTest {
         dataSource.setAppLockTimeoutSeconds(7) // not an option: falls back to the default
         assertEquals(UserSettings.DEFAULT_LOCK_TIMEOUT_SECONDS, dataSource.current().appLockTimeoutSeconds)
     }
+
+    @Test
+    fun keepModelLoadedAcceptsOnlyOfferedValues() = runTest {
+        assertEquals(UserSettings.DEFAULT_KEEP_MODEL_MINUTES, dataSource.current().keepModelLoadedMinutes)
+        dataSource.setKeepModelLoadedMinutes(15)
+        assertEquals(15, dataSource.current().keepModelLoadedMinutes)
+        dataSource.setKeepModelLoadedMinutes(42)
+        assertEquals(UserSettings.DEFAULT_KEEP_MODEL_MINUTES, dataSource.current().keepModelLoadedMinutes)
+    }
 }

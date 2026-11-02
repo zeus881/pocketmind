@@ -86,6 +86,7 @@ private fun SettingsContent(state: SettingsUiState, vm: SettingsViewModel, navig
                 checked = s.preferGpu,
                 onChange = vm::setPreferGpu,
             )
+            KeepModelChooser(s.keepModelLoadedMinutes, vm::setKeepModelLoaded)
 
             Section(R.string.feature_settings_section_answers)
             TemperatureSlider(s.temperature, vm::setTemperature)
@@ -291,6 +292,39 @@ private fun LockTimeoutChooser(current: Int, onChange: (Int) -> Unit) {
 }
 
 private const val SECONDS_PER_MINUTE = 60
+
+/** "Keep the model loaded after leaving the app: unload right away / 5 min / 15 min". */
+@Composable
+private fun KeepModelChooser(current: Int, onChange: (Int) -> Unit) {
+    Text(
+        text = stringResource(R.string.feature_settings_keep_model),
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
+    )
+    Text(
+        text = stringResource(R.string.feature_settings_keep_model_hint),
+        style = MaterialTheme.typography.bodySmall,
+        modifier = Modifier.padding(horizontal = 16.dp),
+    )
+    Column(Modifier.selectableGroup()) {
+        UserSettings.KEEP_MODEL_OPTIONS.forEach { minutes ->
+            val label = if (minutes == 0) {
+                stringResource(R.string.feature_settings_keep_model_none)
+            } else {
+                pluralStringResource(R.plurals.feature_settings_keep_model_minutes, minutes, minutes)
+            }
+            ListItem(
+                headlineContent = { Text(label) },
+                leadingContent = { RadioButton(selected = current == minutes, onClick = null) },
+                modifier = Modifier.selectable(
+                    selected = current == minutes,
+                    role = Role.RadioButton,
+                    onClick = { onChange(minutes) },
+                ),
+            )
+        }
+    }
+}
 
 @Composable
 private fun ThemeChooser(current: ThemeMode, onChange: (ThemeMode) -> Unit) {

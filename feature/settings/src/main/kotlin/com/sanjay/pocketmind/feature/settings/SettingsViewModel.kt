@@ -73,6 +73,8 @@ class SettingsViewModel @Inject constructor(
 
     fun setAppLockTimeout(seconds: Int) = save { settings.setAppLockTimeoutSeconds(seconds) }
 
+    fun setKeepModelLoaded(minutes: Int) = save { settings.setKeepModelLoadedMinutes(minutes) }
+
     private fun save(block: suspend () -> Unit) {
         viewModelScope.launch { block() }
     }

@@ -4,4 +4,5 @@
     <string name="data_models_notification_title">Downloading %1$s</string>
     <string name="data_models_notification_progress">%1$d%% complete</string>
     <string name="data_models_notification_pause">Pause</string>
+    <string name="data_models_notification_paused_by_system">Paused by Android after a long download. It continues automatically from where it stopped.</string>
 </resources>

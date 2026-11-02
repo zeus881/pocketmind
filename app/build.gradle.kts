@@ -88,6 +88,7 @@ dependencies {
     implementation(libs.androidx.fragment.ktx) // FragmentActivity, required by BiometricPrompt
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.process) // app-wide foreground/background (ModelKeepAlive)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.hilt.lifecycle.viewmodel.compose)

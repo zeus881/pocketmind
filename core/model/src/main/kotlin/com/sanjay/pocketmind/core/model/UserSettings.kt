@@ -18,6 +18,8 @@ data class UserSettings(
     val appLockEnabled: Boolean = false,
     /** How long the app may stay in the background before the lock comes back (0 = immediately). */
     val appLockTimeoutSeconds: Int = DEFAULT_LOCK_TIMEOUT_SECONDS,
+    /** How long the model stays in memory after the user leaves the app (0 = unload right away). */
+    val keepModelLoadedMinutes: Int = DEFAULT_KEEP_MODEL_MINUTES,
 ) {
     companion object {
         /**
@@ -39,5 +41,14 @@ data class UserSettings(
 
         /** The choices offered in Settings, in seconds. */
         val LOCK_TIMEOUT_OPTIONS = listOf(0, 30, 60, 300)
+
+        /**
+         * 5 minutes: a quick switch to another app (copying text, answering a message) doesn't
+         * cost a 5–13 s reload, but a model holding 1–2 GB doesn't sit in a forgotten app for hours.
+         */
+        const val DEFAULT_KEEP_MODEL_MINUTES = 5
+
+        /** The choices offered in Settings, in minutes. */
+        val KEEP_MODEL_OPTIONS = listOf(0, 5, 15)
     }
 }

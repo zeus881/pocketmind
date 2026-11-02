@@ -43,4 +43,11 @@
         <item quantity="one">After %d minute</item>
         <item quantity="other">After %d minutes</item>
     </plurals>
+    <string name="feature_settings_keep_model">Keep the model loaded after leaving the app</string>
+    <string name="feature_settings_keep_model_hint">Longer means no waiting when you come back, but the model keeps using memory meanwhile.</string>
+    <string name="feature_settings_keep_model_none">Unload right away</string>
+    <plurals name="feature_settings_keep_model_minutes">
+        <item quantity="one">For %d minute</item>
+        <item quantity="other">For %d minutes</item>
+    </plurals>
 </resources>

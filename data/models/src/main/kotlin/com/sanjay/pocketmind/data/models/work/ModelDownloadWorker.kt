@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
@@ -30,6 +31,7 @@ import com.sanjay.pocketmind.data.models.R
 import com.sanjay.pocketmind.data.models.download.ModelDownloader
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 
 /**
@@ -75,9 +77,17 @@ class ModelDownloadWorker @AssistedInject constructor(
             Timber.w(e, "Foreground not allowed now; continuing in the background")
         }
 
-        val result = downloader.download(model) { downloaded, total ->
-            setProgress(workDataOf(KEY_DOWNLOADED to downloaded, KEY_TOTAL to total))
-            notify(model, downloaded)
+        val result = try {
+            downloader.download(model) { downloaded, total ->
+                setProgress(workDataOf(KEY_DOWNLOADED to downloaded, KEY_TOTAL to total))
+                notify(model, downloaded)
+            }
+        } catch (e: CancellationException) {
+            // Android 15+ gives a "dataSync" foreground service at most 6 hours per day. A very slow
+            // 2.6 GB download can hit that limit; Android then stops us. model.part keeps every byte,
+            // and WorkManager runs the job again later, so we only explain what happened.
+            if (stoppedByForegroundTimeout()) notifyPausedBySystem(model)
+            throw e
         }
         return when (result) {
             is AppResult.Success -> {
@@ -106,6 +116,39 @@ class ModelDownloadWorker @AssistedInject constructor(
 
     private fun fail(kind: ErrorKind) = Result.failure(workDataOf(KEY_ERROR to kind.name))
 
+    private fun stoppedByForegroundTimeout(): Boolean = isStopped &&
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+        stopReason == WorkInfo.STOP_REASON_FOREGROUND_SERVICE_TIMEOUT
+
+    /** A normal (dismissible) notification replacing the ongoing progress one. */
+    private fun notifyPausedBySystem(model: LlmModelInfo) {
+        ensureChannel()
+        val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.stat_sys_download_done)
+            .setContentTitle(applicationContext.getString(R.string.data_models_notification_title, model.displayName))
+            .setContentText(applicationContext.getString(R.string.data_models_notification_paused_by_system))
+            .setOnlyAlertOnce(true)
+            .build()
+        post(notification)
+    }
+
+    /**
+     * Posts a notification if Android 13+'s POST_NOTIFICATIONS permission allows it. The user can
+     * revoke the permission at any moment (even between the check and the call), hence the catch.
+     * The download itself never depends on notifications.
+     */
+    private fun post(notification: android.app.Notification) {
+        val allowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+            ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
+            PackageManager.PERMISSION_GRANTED
+        if (!allowed) return
+        try {
+            NotificationManagerCompat.from(applicationContext).notify(notificationId, notification)
+        } catch (e: SecurityException) {
+            Timber.w(e, "Notification permission revoked")
+        }
+    }
+
     private fun foregroundInfo(model: LlmModelInfo?, downloaded: Long): ForegroundInfo {
         val notification = buildNotification(model, downloaded)
         // Android 10+ wants the service type; it must match the manifest (dataSync).
@@ -117,16 +160,8 @@ class ModelDownloadWorker @AssistedInject constructor(
     }
 
     private fun notify(model: LlmModelInfo, downloaded: Long) {
-        val canPost = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-            ContextCompat.checkSelfPermission(applicationContext, Manifest.permission.POST_NOTIFICATIONS) ==
-            PackageManager.PERMISSION_GRANTED
-        if (canPost) {
-            NotificationManagerCompat.from(
-                applicationContext,
-            ).notify(notificationId, buildNotification(model, downloaded))
-        }
+        post(buildNotification(model, downloaded))
     }
-
     private fun buildNotification(model: LlmModelInfo?, downloaded: Long): android.app.Notification {
         ensureChannel()
         val total = model?.sizeBytes ?: 0L
