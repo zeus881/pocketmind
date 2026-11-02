@@ -33,6 +33,7 @@ import com.sanjay.pocketmind.core.database.entity.PromptEntity
  *   A MANUAL migration ([Migrations.MIGRATION_4_5]): existing linear chats get their parent links
  *   and current branch filled in, and the search index is built — things Room can't infer.
  * - 6 (v2 phase 14): + personas, prompts, chats.personaId (AutoMigration: purely additive).
+ * - 7 (v2 phase 16): + messages.imagePath (AutoMigration).
  * Additive changes use AutoMigrations: Room diffs the committed schema JSONs at compile time
  * and generates the SQL. Existing users keep all their data; [MigrationTest] proves it.
  *
@@ -51,13 +52,14 @@ import com.sanjay.pocketmind.core.database.entity.PromptEntity
         PersonaEntity::class,
         PromptEntity::class,
     ],
-    version = 6,
+    version = 7,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 5, to = 6),
+        AutoMigration(from = 6, to = 7),
     ],
 )
 @TypeConverters(Converters::class)

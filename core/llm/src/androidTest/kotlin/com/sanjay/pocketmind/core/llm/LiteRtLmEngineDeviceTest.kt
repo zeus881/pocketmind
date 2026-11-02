@@ -1,6 +1,8 @@
 package com.sanjay.pocketmind.core.llm
 
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -84,7 +86,30 @@ class LiteRtLmEngineDeviceTest {
         assertEquals(LlmBackend.CPU, (engine.state.value as EngineState.Ready).backend)
     }
 
+    /**
+     * Only for a model with an image encoder (Gemma 4 E2B): a plain red picture must be described as red.
+     * Run with `-Pandroid.testInstrumentationRunnerArguments.vision=true`.
+     */
+    @Test
+    fun aPictureIsSeenByAVisionModel() = runBlocking {
+        assumeTrue("Vision test not requested", InstrumentationRegistry.getArguments().getString("vision") == "true")
+        val picture = File(context.cacheDir, "red.jpg")
+        val red = Bitmap.createBitmap(PICTURE_SIDE, PICTURE_SIDE, Bitmap.Config.ARGB_8888)
+        red.eraseColor(Color.RED)
+        picture.outputStream().use { red.compress(Bitmap.CompressFormat.JPEG, JPEG_QUALITY, it) }
+
+        engine.load(modelPath, preferGpu = true, vision = true)
+        val session = engine.newSession("You are a test assistant.")
+        val answer = engine.generate("What colour fills this picture? One word.", session, picture.path)
+            .toList()
+            .joinToString("")
+
+        assertTrue("Expected red, got: $answer", answer.contains("red", ignoreCase = true))
+    }
+
     private companion object {
+        const val PICTURE_SIDE = 256
+        const val JPEG_QUALITY = 90
         const val DEFAULT_MODEL_PATH = "/data/local/tmp/llm/model.litertlm"
     }
 }

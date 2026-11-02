@@ -53,6 +53,9 @@ class MigrationTest {
     @Test
     fun migrateFrom5KeepsChats() = runTest { migrateAndCheck(fromVersion = 5) }
 
+    @Test
+    fun migrateFrom6KeepsChats() = runTest { migrateAndCheck(fromVersion = 6) }
+
     /** v4 → v5 is a manual migration: check the data it derives, not just that it opens. */
     @Test
     fun migrateFrom4LinksMessagesSetsTheBranchAndIndexesText() = runTest {
@@ -92,6 +95,10 @@ class MigrationTest {
         assertNull(db.chatDao().summary("c1"))
         db.chatDao().upsertSummary(ConversationSummaryEntity("c1", "Earlier: greetings.", 2, 5))
         assertEquals("Earlier: greetings.", db.chatDao().summary("c1")?.summary)
+        // v7 column: old messages have no photo; a new one can store it.
+        assertNull(db.messageDao().get("m1")?.imagePath)
+        db.messageDao().upsert(checkNotNull(db.messageDao().get("m1")).copy(imagePath = "/photos/a.jpg"))
+        assertEquals(listOf("/photos/a.jpg"), db.messageDao().imagePaths())
         db.close()
     }
 

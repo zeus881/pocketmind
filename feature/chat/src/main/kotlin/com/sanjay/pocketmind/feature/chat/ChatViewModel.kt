@@ -19,6 +19,7 @@ import com.sanjay.pocketmind.core.speech.SpeechEvent
 import com.sanjay.pocketmind.core.speech.SpeechInput
 import com.sanjay.pocketmind.core.speech.SpeechOutput
 import com.sanjay.pocketmind.data.chat.ChatExporter
+import com.sanjay.pocketmind.data.chat.ChatPhotos
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import com.sanjay.pocketmind.data.chat.PersonaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -62,6 +63,7 @@ import timber.log.Timber
 @HiltViewModel
 class ChatViewModel @Inject constructor(
     private val repository: ChatRepository,
+    private val photos: ChatPhotos,
     private val exporter: ChatExporter,
     personaRepository: PersonaRepository,
     private val speechInput: SpeechInput,
@@ -131,9 +133,11 @@ class ChatViewModel @Inject constructor(
     private val voice = MutableStateFlow(VoiceUi(available = speechInput.isAvailable))
     private var listenJob: Job? = null
 
-    private data class Extras(val persona: PersonaUi, val voice: VoiceUi, val speakingId: String?)
+    private val photo = MutableStateFlow(PhotoUi())
 
-    private val extras: Flow<Extras> = combine(personaUi, voice, speechOutput.speaking, ::Extras)
+    private data class Extras(val persona: PersonaUi, val voice: VoiceUi, val speakingId: String?, val photo: PhotoUi)
+
+    private val extras: Flow<Extras> = combine(personaUi, voice, speechOutput.speaking, photo, ::Extras)
 
     val uiState: StateFlow<ChatUiState> = combine(
         combine(chatId, title, ::Pair),
@@ -141,7 +145,8 @@ class ChatViewModel @Inject constructor(
         streaming,
         modelUi,
         extras,
-    ) { (id, title), (list, versions), live, model, (persona, voiceUi, speakingId) ->
+    ) { (id, title), (list, versions), live, model, extra ->
+        val persona = extra.persona
         ChatUiState(
             chatId = id,
             title = title,
@@ -151,8 +156,9 @@ class ChatViewModel @Inject constructor(
             personas = persona.personas,
             personaId = persona.personaId,
             prompts = persona.prompts,
-            voice = voiceUi,
-            speakingMessageId = speakingId,
+            voice = extra.voice,
+            speakingMessageId = extra.speakingId,
+            photo = extra.photo,
             streamingText = live,
             isGenerating = live != null,
             model = model,
@@ -175,7 +181,35 @@ class ChatViewModel @Inject constructor(
             val result = repository.ensureModelLoaded()
             noModel.value = result is AppResult.Failure && result.kind == ErrorKind.NO_MODEL
             loadingModel.value = false
+            val supported = repository.imagesSupported()
+            photo.update { it.copy(available = supported) }
+            if (!supported) removePhoto() // the user switched to a model without vision
         }
+    }
+
+    /**
+     * The user picked a photo ([uri] from the system photo picker). It is copied and scaled down
+     * right away, so it stays readable after the picker's temporary permission ends. Picking
+     * another photo replaces the first: one photo per question.
+     */
+    fun attachPhoto(uri: String) {
+        if (photo.value.preparing) return
+        viewModelScope.launch {
+            photo.update { it.copy(preparing = true) }
+            val path = photos.attachImage(uri)
+            val previous = photo.value.attached
+            photo.update { it.copy(preparing = false, attached = path ?: previous) }
+            when {
+                path == null -> _events.send(ChatEvent.PhotoUnreadable)
+                previous != null -> photos.discardImage(previous)
+            }
+        }
+    }
+
+    fun removePhoto() {
+        val attached = photo.value.attached ?: return
+        photo.update { it.copy(attached = null) }
+        viewModelScope.launch { photos.discardImage(attached) }
     }
 
     /**
@@ -200,11 +234,20 @@ class ChatViewModel @Inject constructor(
             val isNewChat = chatId.value == null
             val id = chatId.value ?: repository.createChat(pickedPersona.value).also { chatId.value = it }
             streaming.value = "" // shows the "thinking" bubble immediately
-            when (val result = guarded { repository.sendMessage(id, prompt) }) {
-                is AppResult.Success -> collectAnswer(id, result.value)
+            val image = photo.value.attached
+            when (val result = guarded { repository.sendMessage(id, prompt, image) }) {
+                is AppResult.Success -> {
+                    photo.update { it.copy(attached = null) } // it belongs to the saved question now
+                    collectAnswer(id, result.value)
+                }
 
                 is AppResult.Failure -> {
                     discardIfEmpty(id, isNewChat)
+                    // A failed send keeps the photo for another try, unless no model can read it.
+                    if (result.kind == ErrorKind.IMAGES_NOT_SUPPORTED) {
+                        removePhoto()
+                        photo.update { it.copy(available = false) }
+                    }
                     fail(result.kind)
                 }
 

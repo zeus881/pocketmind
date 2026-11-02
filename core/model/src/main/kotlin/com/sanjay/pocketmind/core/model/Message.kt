@@ -17,6 +17,8 @@ data class Message(
     val backend: String? = null,
     /** The message this one answers or follows (null for the first message). See [Chat.currentLeafId]. */
     val parentId: String? = null,
+    /** v7: a photo the user attached to this question (a JPEG in the app's private storage), or null. */
+    val imagePath: String? = null,
 )
 
 /** How an assistant answer ended. User messages are always [COMPLETE]. */

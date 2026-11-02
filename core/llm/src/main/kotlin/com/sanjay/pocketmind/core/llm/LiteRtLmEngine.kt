@@ -82,6 +82,7 @@ class LiteRtLmEngine @Inject constructor(
     private var loadedPath: String? = null
     private var loadedPreferGpu: Boolean? = null
     private var loadedBackend: LlmBackend? = null
+    private var loadedVision = false
 
     init {
         // Lets us read exact time-to-first-token and decode speed from the runtime
@@ -89,49 +90,53 @@ class LiteRtLmEngine @Inject constructor(
         ExperimentalFlags.enableBenchmark = true
     }
 
-    override suspend fun load(modelPath: String, preferGpu: Boolean, expectedSizeBytes: Long?) = withContext(io) {
-        lock.withLock {
-            // Already loaded with the same settings: nothing to do (cheap to call on every screen open).
-            if (engine != null && loadedPath == modelPath && loadedPreferGpu == preferGpu) return@withLock
+    override suspend fun load(modelPath: String, preferGpu: Boolean, expectedSizeBytes: Long?, vision: Boolean) =
+        withContext(io) {
+            lock.withLock {
+                // Already loaded with the same settings: nothing to do (cheap to call on every screen open).
+                // A model with its image encoder also serves text, so only a missing encoder forces a reload.
+                val sameModel = engine != null && loadedPath == modelPath && loadedPreferGpu == preferGpu
+                if (sameModel && (loadedVision || !vision)) return@withLock
 
-            closeAllLocked()
-            loadGuard.recoverFromPreviousRun()
+                closeAllLocked()
+                loadGuard.recoverFromPreviousRun()
 
-            // Never hand a missing or damaged file to native code: it could crash the process.
-            val file = File(modelPath)
-            EngineMath.modelFileProblem(file.canRead(), file.length(), expectedSizeBytes)?.let { problem ->
-                _state.value = EngineState.Failed(modelPath, problem)
-                return@withLock
-            }
-            val backends = EngineMath.backendOrder(preferGpu, loadGuard.blockedBackends(modelPath))
-            if (backends.isEmpty()) {
-                // Every allowed backend crashed the app before: don't crash it again automatically.
-                _state.value = EngineState.Failed(modelPath, FailureReason.CRASHED_LAST_TIME)
-                return@withLock
-            }
-            _state.value = EngineState.Loading(modelPath)
-            val start = SystemClock.elapsedRealtime()
+                // Never hand a missing or damaged file to native code: it could crash the process.
+                val file = File(modelPath)
+                EngineMath.modelFileProblem(file.canRead(), file.length(), expectedSizeBytes)?.let { problem ->
+                    _state.value = EngineState.Failed(modelPath, problem)
+                    return@withLock
+                }
+                val backends = EngineMath.backendOrder(preferGpu, loadGuard.blockedBackends(modelPath))
+                if (backends.isEmpty()) {
+                    // Every allowed backend crashed the app before: don't crash it again automatically.
+                    _state.value = EngineState.Failed(modelPath, FailureReason.CRASHED_LAST_TIME)
+                    return@withLock
+                }
+                _state.value = EngineState.Loading(modelPath)
+                val start = SystemClock.elapsedRealtime()
 
-            for (backend in backends) {
-                // The guard's marker survives only if native code kills the process inside this call.
-                loadGuard.begin(modelPath, backend)
-                val created = try {
-                    tryCreateEngine(modelPath, backend)
-                } finally {
-                    loadGuard.end()
-                } ?: continue
-                engine = created
-                loadedPath = modelPath
-                loadedPreferGpu = preferGpu
-                loadedBackend = backend
-                val loadMs = SystemClock.elapsedRealtime() - start
-                Timber.i("Model loaded on %s in %d ms", backend, loadMs)
-                _state.value = EngineState.Ready(modelPath, backend, loadMs)
-                return@withLock
+                for (backend in backends) {
+                    // The guard's marker survives only if native code kills the process inside this call.
+                    loadGuard.begin(modelPath, backend)
+                    val created = try {
+                        tryCreateEngine(modelPath, backend, vision)
+                    } finally {
+                        loadGuard.end()
+                    } ?: continue
+                    engine = created
+                    loadedPath = modelPath
+                    loadedPreferGpu = preferGpu
+                    loadedBackend = backend
+                    loadedVision = vision
+                    val loadMs = SystemClock.elapsedRealtime() - start
+                    Timber.i("Model loaded on %s in %d ms", backend, loadMs)
+                    _state.value = EngineState.Ready(modelPath, backend, loadMs)
+                    return@withLock
+                }
+                _state.value = EngineState.Failed(modelPath, FailureReason.INIT_FAILED)
             }
-            _state.value = EngineState.Failed(modelPath, FailureReason.INIT_FAILED)
         }
-    }
 
     /**
      * Creates and initializes an engine on one backend, or returns null if that backend fails.
@@ -139,12 +144,15 @@ class LiteRtLmEngine @Inject constructor(
      * and is exactly why we fall back to CPU.
      */
     @Suppress("TooGenericExceptionCaught") // Native code can throw several unrelated exception types.
-    private fun tryCreateEngine(modelPath: String, backend: LlmBackend): Engine? {
+    private fun tryCreateEngine(modelPath: String, backend: LlmBackend, vision: Boolean): Engine? {
         val candidate = Engine(
             EngineConfig(
                 modelPath = modelPath,
                 backend = backend.toLiteRt(),
+                // The image encoder runs on the same hardware as the text model; null = not loaded.
+                visionBackend = if (vision) backend.toLiteRt() else null,
                 maxNumTokens = CONTEXT_WINDOW_TOKENS,
+                maxNumImages = if (vision) MAX_IMAGES_PER_PROMPT else null,
                 cacheDir = cacheDir,
             ),
         )
@@ -192,7 +200,7 @@ class LiteRtLmEngine @Inject constructor(
      *   `withContext` inside `flow {}` — that breaks the Flow's "context preservation" rule
      *   and throws at runtime.
      */
-    override fun generate(prompt: String, sessionId: Long): Flow<String> = flow {
+    override fun generate(prompt: String, sessionId: Long, imagePath: String?): Flow<String> = flow {
         lock.withLock {
             // Checked while holding the lock: nobody can replace the session between this check
             // and the generation below.
@@ -204,7 +212,14 @@ class LiteRtLmEngine @Inject constructor(
             var firstPieceAt = -1L
             var pieces = 0
             try {
-                conv.sendMessageAsync(prompt).collect { message ->
+                val request = if (imagePath == null) {
+                    Contents.of(prompt)
+                } else {
+                    check(loadedVision) { "load(vision = true) must succeed before sending an image" }
+                    // Picture first, then the question: the order Gemma's chat template expects.
+                    Contents.of(Content.ImageFile(imagePath), Content.Text(prompt))
+                }
+                conv.sendMessageAsync(request).collect { message ->
                     val text = message.text()
                     if (text.isNotEmpty()) {
                         if (firstPieceAt < 0) firstPieceAt = SystemClock.elapsedRealtime()
@@ -274,6 +289,7 @@ class LiteRtLmEngine @Inject constructor(
         loadedPath = null
         loadedPreferGpu = null
         loadedBackend = null
+        loadedVision = false
     }
 
     private fun LlmBackend.toLiteRt(): Backend = when (this) {
@@ -298,5 +314,8 @@ class LiteRtLmEngine @Inject constructor(
          */
         const val CONTEXT_WINDOW_TOKENS = 4096
         const val MILLIS_PER_SECOND = 1000.0
+
+        /** One picture per question keeps the image encoder's memory small. */
+        const val MAX_IMAGES_PER_PROMPT = 1
     }
 }

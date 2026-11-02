@@ -46,6 +46,8 @@ data class MessageEntity(
     val backend: String?,
     /** v5: the previous message on this branch (null for the first). Edits and regenerations add siblings. */
     val parentId: String? = null,
+    /** v7: path of the photo attached to a user question (app-private storage), or null. */
+    val imagePath: String? = null,
 )
 
 /**
@@ -69,6 +71,7 @@ fun MessageEntity.asModel() = Message(
     tokensPerSecond = tokensPerSecond,
     backend = backend,
     parentId = parentId,
+    imagePath = imagePath,
 )
 
 fun Message.asEntity() = MessageEntity(
@@ -81,4 +84,5 @@ fun Message.asEntity() = MessageEntity(
     tokensPerSecond = tokensPerSecond,
     backend = backend,
     parentId = parentId,
+    imagePath = imagePath,
 )

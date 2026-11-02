@@ -42,6 +42,9 @@ enum class ErrorKind {
     /** A file could not be opened or parsed. */
     FILE_UNREADABLE,
 
+    /** A photo was attached but the selected model can't read images. */
+    IMAGES_NOT_SUPPORTED,
+
     /** Anything we did not anticipate. */
     UNKNOWN,
 }

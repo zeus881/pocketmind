@@ -36,6 +36,7 @@ data class ChatUiState(
     val voice: VoiceUi = VoiceUi(),
     /** Id of the answer being read aloud, or null. */
     val speakingMessageId: String? = null,
+    val photo: PhotoUi = PhotoUi(),
 ) {
     val personaName: String? get() = personas.firstOrNull { it.id == personaId }?.name
 }
@@ -71,7 +72,22 @@ sealed interface ChatEvent {
 
     /** Voice input or read-aloud didn't work. */
     data class VoiceProblem(val kind: SpeechError) : ChatEvent
+
+    /** The picked file couldn't be read as an image. */
+    data object PhotoUnreadable : ChatEvent
 }
+
+/**
+ * The "Add photo" button and the photo waiting to be sent with the next question.
+ * [available] is false when the selected model can't read images (the button is then hidden).
+ */
+data class PhotoUi(
+    val available: Boolean = false,
+    /** The attached photo (a private copy), or null. */
+    val attached: String? = null,
+    /** The picked photo is being copied and scaled down. */
+    val preparing: Boolean = false,
+)
 
 /**
  * Voice input state. [transcript] is what the recognizer heard so far; every new transcript gets a

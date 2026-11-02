@@ -26,4 +26,8 @@ interface MessageDao {
 
     @Query("SELECT * FROM messages WHERE id = :id")
     suspend fun get(id: String): MessageEntity?
+
+    /** Every attached photo still referenced by a message (used to delete photos of deleted chats). */
+    @Query("SELECT imagePath FROM messages WHERE imagePath IS NOT NULL")
+    suspend fun imagePaths(): List<String>
 }

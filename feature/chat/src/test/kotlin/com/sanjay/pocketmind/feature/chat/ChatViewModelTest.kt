@@ -29,6 +29,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -59,6 +60,7 @@ class ChatViewModelTest {
     private val speechOut = FakeSpeechOutput()
 
     private fun viewModel(chatId: String? = null, draft: String? = null) = ChatViewModel(
+        repository,
         repository,
         exporter,
         personas,
@@ -94,6 +96,75 @@ class ChatViewModelTest {
 
         assertEquals(ChatEvent.VoiceProblem(SpeechError.NOTHING_HEARD), vm.events.first())
         assertFalse(vm.uiState.value.voice.listening)
+    }
+
+    @Test
+    fun `a photo is attached, sent with the question and then cleared`() = runTest(mainRule.testDispatcher) {
+        repository.imagesSupported = true
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+        assertTrue(vm.uiState.value.photo.available)
+
+        vm.attachPhoto("content://first")
+        advanceUntilIdle()
+        vm.attachPhoto("content://cat") // a second pick replaces the first
+        advanceUntilIdle()
+        assertEquals("/images/content://cat", vm.uiState.value.photo.attached)
+        assertEquals(listOf("/images/content://first"), repository.discardedImages)
+
+        vm.send("What is this?")
+        advanceUntilIdle()
+
+        assertEquals(listOf<String?>("/images/content://cat"), repository.sentImages)
+        assertNull(vm.uiState.value.photo.attached)
+    }
+
+    @Test
+    fun `an unreadable file is reported and nothing is attached`() = runTest(mainRule.testDispatcher) {
+        repository.imagesSupported = true
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+
+        vm.attachPhoto("file:///not-an-image")
+        advanceUntilIdle()
+
+        assertEquals(ChatEvent.PhotoUnreadable, vm.events.first())
+        assertNull(vm.uiState.value.photo.attached)
+    }
+
+    @Test
+    fun `without a vision model the photo is refused and the button hidden`() = runTest(mainRule.testDispatcher) {
+        repository.imagesSupported = true
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+        vm.attachPhoto("content://cat")
+        advanceUntilIdle()
+
+        repository.imagesSupported = false // the user switched to a text-only model meanwhile
+        vm.send("What is this?")
+        advanceUntilIdle()
+
+        assertEquals(ChatEvent.Error(ErrorKind.IMAGES_NOT_SUPPORTED), vm.events.first())
+        assertFalse(vm.uiState.value.photo.available)
+        assertNull(vm.uiState.value.photo.attached)
+        assertEquals(listOf("/images/content://cat"), repository.discardedImages)
+    }
+
+    @Test
+    fun `removing the attached photo discards its copy`() = runTest(mainRule.testDispatcher) {
+        repository.imagesSupported = true
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        vm.attachPhoto("content://cat")
+        advanceUntilIdle()
+
+        vm.removePhoto()
+        advanceUntilIdle()
+
+        assertNull(vm.uiState.value.photo.attached)
+        assertEquals(listOf("/images/content://cat"), repository.discardedImages)
     }
 
     @Test

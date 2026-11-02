@@ -55,4 +55,9 @@
     <string name="feature_chat_voice_permission">आवाज़ से इनपुट के लिए माइक्रोफ़ोन की अनुमति चाहिए।</string>
     <string name="feature_chat_voice_nothing_heard">समझ नहीं आया। कृपया फिर से कोशिश करें।</string>
     <string name="feature_chat_voice_failed">आवाज़ इनपुट रुक गया। कृपया फिर से कोशिश करें।</string>
+    <string name="feature_chat_add_photo">फ़ोटो जोड़ें</string>
+    <string name="feature_chat_remove_photo">फ़ोटो हटाएँ</string>
+    <string name="feature_chat_attached_photo">जोड़ी गई फ़ोटो</string>
+    <string name="feature_chat_photo_unreadable">यह फ़ाइल फ़ोटो के रूप में नहीं खुल सकी।</string>
+    <string name="feature_chat_images_not_supported">यह मॉडल फ़ोटो नहीं पढ़ सकता। Models में ऐसा मॉडल चुनें जो पढ़ सके (Gemma 4 E2B)।</string>
 </resources>

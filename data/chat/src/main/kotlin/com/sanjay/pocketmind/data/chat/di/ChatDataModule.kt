@@ -1,7 +1,10 @@
 package com.sanjay.pocketmind.data.chat.di
 
 import com.sanjay.pocketmind.data.chat.AndroidChatExporter
+import com.sanjay.pocketmind.data.chat.AndroidChatImageStore
 import com.sanjay.pocketmind.data.chat.ChatExporter
+import com.sanjay.pocketmind.data.chat.ChatImageStore
+import com.sanjay.pocketmind.data.chat.ChatPhotos
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import com.sanjay.pocketmind.data.chat.ConversationSummarizer
 import com.sanjay.pocketmind.data.chat.FolderRepository
@@ -32,4 +35,10 @@ internal abstract class ChatDataModule {
 
     @Binds
     abstract fun bindsPersonaRepository(repository: RoomPersonaRepository): PersonaRepository
+
+    @Binds
+    abstract fun bindsChatPhotos(repository: OfflineChatRepository): ChatPhotos
+
+    @Binds
+    abstract fun bindsChatImageStore(store: AndroidChatImageStore): ChatImageStore
 }

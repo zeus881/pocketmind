@@ -22,7 +22,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 13 Export, share-in, widget, quick-settings tile | DONE | 81 % (measured 81.3 %, 285 tests) | to verify on device: share text/PDF, widget (no titles when locked), tile, PDF export |
 | 14 Personas + prompt library | DONE | 81 % (measured 81.2 %, 294 tests) | Room v6; new module feature:personas; Pro gate comes in phase 20 |
 | 15 Voice in (on-device) and spoken answers | DONE | 81 % (measured 81.4 %, 308 tests) | new core:speech; Android 12+ on-device recognizer only; offline TTS voices only |
-| 16 Image questions (if the model supports vision) | NEXT | | |
+| 16 Image questions (if the model supports vision) | DONE | 81 % (measured 81.1 %, 329 tests) | vision verified in the file (Gemma 4 E2B only); Room v7; photo picker, no permission; to verify on device |
+| 17 Tool calling (calculator, date, units, notes) | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -148,6 +149,12 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   (Benchmark screen after temporarily changing `CONTEXT_WINDOW_TOKENS`). Until then it stays 4096.
 - **Screenshots on Linux (phase 10):** push the repo, run the GitHub Actions workflow **Record screenshots**, download
   the `golden-screenshots` artifact and commit the PNGs (fonts render slightly differently on Windows than on CI).
+- **Photo questions (phase 16):** with Gemma 4 E2B selected, attach a photo and ask about it (the first one reloads
+  the model with its image encoder). Engine check: `./gradlew :core:llm:connectedDebugAndroidTest
+  -Pandroid.testInstrumentationRunnerArguments.vision=true` (a solid red picture must be called "red"). Note the
+  RAM with and without the encoder (Android Studio profiler, or the Benchmark screen's peak memory) for
+  `docs/performance-budget.md`, and measure an image's real token cost (`Conversation.getTokenCount()` before and
+  after); the repository reserves 512 tokens until then.
 
 ### v1
 

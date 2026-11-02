@@ -40,6 +40,7 @@ class OfflineChatRepositoryTest {
     /** Records summary requests and answers with a predictable text. */
     private val summaryCalls = mutableListOf<Pair<String?, Int>>()
     private var summaryResult: String? = "S"
+    private val images = FakeChatImageStore()
 
     @Before
     fun setUp() {
@@ -59,6 +60,7 @@ class OfflineChatRepositoryTest {
                 summaryResult?.let { "$it${summaryCalls.size}" }
             },
             personas = RoomPersonaRepository(db.personaDao()) { now },
+            images = images,
         )
     }
 
@@ -355,5 +357,68 @@ class OfflineChatRepositoryTest {
         val results = repository.observeChats("lidar").first()
 
         assertEquals(listOf(a), results.map { it.chat.id })
+    }
+
+    private fun visionSettings() =
+        InferenceSettings("/model.litertlm", true, "SYS", SamplingParams(), supportsImages = true)
+
+    @Test
+    fun aPhotoIsSentWithTheQuestionAndLoadsTheImageEncoderOnce() = runTest {
+        settings = visionSettings()
+        val chatId = repository.createChat()
+        val photo = checkNotNull(repository.attachImage("content://cat"))
+
+        val answer = (repository.sendMessage(chatId, "What is this?", photo) as AppResult.Success).value.toList()
+        repository.saveAssistantMessage(chatId, answer.joinToString(""), MessageStatus.COMPLETE, null)
+        sendAndFinish(chatId, "And its colour?")
+
+        assertEquals(listOf("/images/cat", null), engine.images)
+        assertEquals(listOf(true), engine.visionLoads) // text after a photo reuses the vision model
+        assertEquals("/images/cat", repository.observeMessages(chatId).first().first().imagePath)
+    }
+
+    @Test
+    fun aPhotoIsRefusedWhenTheModelCannotReadImages() = runTest {
+        val chatId = repository.createChat()
+        val photo = checkNotNull(repository.attachImage("content://cat"))
+
+        val result = repository.sendMessage(chatId, "What is this?", photo)
+
+        assertEquals(ErrorKind.IMAGES_NOT_SUPPORTED, (result as AppResult.Failure).kind)
+        assertTrue(repository.observeMessages(chatId).first().isEmpty())
+        assertTrue(engine.loadedPaths.isEmpty())
+    }
+
+    @Test
+    fun aRebuiltConversationMentionsThePhotoAndRetryResendsIt() = runTest {
+        settings = visionSettings()
+        val chatId = repository.createChat()
+        val photo = checkNotNull(repository.attachImage("content://cat"))
+        val first = (repository.sendMessage(chatId, "What is this?", photo) as AppResult.Success).value.toList()
+        repository.saveAssistantMessage(chatId, first.joinToString(""), MessageStatus.STOPPED, null)
+
+        repository.regenerateLastAnswer(chatId)!!.let { (it as AppResult.Success).value.toList() }
+        assertEquals("/images/cat", engine.images.last())
+
+        repository.saveAssistantMessage(chatId, "A cat.", MessageStatus.COMPLETE, null)
+        engine.unload() // e.g. memory pressure: the next message rebuilds from Room
+        sendAndFinish(chatId, "Thanks")
+        assertTrue(engine.sessions.last().history.first().text.startsWith("[The user attached a photo"))
+    }
+
+    @Test
+    fun photosOfDeletedChatsAreCleanedUpButPendingOnesStay() = runTest {
+        settings = visionSettings()
+        val chatId = repository.createChat()
+        val sent = checkNotNull(repository.attachImage("content://old"))
+        (repository.sendMessage(chatId, "What is this?", sent) as AppResult.Success).value.toList()
+        repository.deleteChat(chatId)
+        val pending = checkNotNull(repository.attachImage("content://new"))
+
+        repository.createChat()
+
+        assertEquals(setOf(pending), images.stored)
+        repository.discardImage(pending)
+        assertTrue(images.stored.isEmpty())
     }
 }

@@ -17,6 +17,8 @@ complexity:
     thresholdInInterfaces: 20
     thresholdInObjects: 20
     ignorePrivate: true
+    # A class implementing an interface can't choose how many functions it has; the interface is counted itself.
+    ignoreOverridden: true
   CyclomaticComplexMethod:
     ignoreAnnotated: ['Composable']
 

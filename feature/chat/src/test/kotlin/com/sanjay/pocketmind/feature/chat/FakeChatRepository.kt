@@ -13,6 +13,7 @@ import com.sanjay.pocketmind.core.model.DeletedChat
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
+import com.sanjay.pocketmind.data.chat.ChatPhotos
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -21,7 +22,9 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 /** In-memory [ChatRepository] for ViewModel tests. */
-class FakeChatRepository : ChatRepository {
+class FakeChatRepository :
+    ChatRepository,
+    ChatPhotos {
     val chats = MutableStateFlow<Map<String, Chat>>(emptyMap())
     val messages = MutableStateFlow<List<Message>>(emptyList())
     override val engineState = MutableStateFlow<EngineState>(EngineState.Idle)
@@ -96,8 +99,23 @@ class FakeChatRepository : ChatRepository {
         return id
     }
 
-    override suspend fun sendMessage(chatId: String, text: String): AppResult<Flow<String>> {
+    /** Whether the "model" reads photos; [attachImage] returns `/images/<uri>` for readable uris. */
+    var imagesSupported = false
+    val sentImages = mutableListOf<String?>()
+    val discardedImages = mutableListOf<String>()
+
+    override suspend fun imagesSupported() = imagesSupported
+
+    override suspend fun attachImage(uri: String): String? = if (uri.startsWith("content://")) "/images/$uri" else null
+
+    override suspend fun discardImage(path: String) {
+        discardedImages += path
+    }
+
+    override suspend fun sendMessage(chatId: String, text: String, imagePath: String?): AppResult<Flow<String>> {
         if (!modelAvailable) return AppResult.Failure(ErrorKind.NO_MODEL)
+        if (imagePath != null && !imagesSupported) return AppResult.Failure(ErrorKind.IMAGES_NOT_SUPPORTED)
+        sentImages += imagePath
         add(chatId, TurnRole.USER, text, MessageStatus.COMPLETE)
         chats.value += chatId to chats.value.getValue(chatId).copy(title = text)
         return AppResult.Success(answer())

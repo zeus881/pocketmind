@@ -74,8 +74,10 @@ class HistoryViewModelTest {
         override suspend fun ensureModelLoaded(): AppResult<Unit> = AppResult.Success(Unit)
         override fun resetModelCrashProtection() = Unit
         override suspend fun createChat(personaId: String?) = "new"
-        override suspend fun sendMessage(chatId: String, text: String): AppResult<Flow<String>> =
+        override suspend fun sendMessage(chatId: String, text: String, imagePath: String?): AppResult<Flow<String>> =
             AppResult.Success(emptyFlow())
+
+        override suspend fun imagesSupported() = false
         override suspend fun regenerateLastAnswer(chatId: String): AppResult<Flow<String>>? = null
         override suspend fun saveAssistantMessage(
             chatId: String,

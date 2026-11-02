@@ -123,22 +123,29 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
                     resources.getString(event.kind.messageRes()),
                 )
 
+                ChatEvent.PhotoUnreadable -> snackbarHostState.showSnackbar(
+                    resources.getString(R.string.feature_chat_photo_unreadable),
+                )
+
                 is ChatEvent.Error -> {
                     haptics.reject()
                     // The action must be able to fix the problem: retrying can't create a missing
                     // model, and "Retry" (regenerate) makes no sense for a file that couldn't be saved.
                     val noModel = event.kind == ErrorKind.NO_MODEL
                     val fileError = event.kind == ErrorKind.FILE_UNREADABLE
+                    // Only another model can read the photo: offer the model manager.
+                    val needsVisionModel = event.kind == ErrorKind.IMAGES_NOT_SUPPORTED
                     val result = snackbarHostState.showSnackbar(
                         message = resources.getString(event.kind.messageRes()),
                         actionLabel = when {
                             fileError -> null
                             noModel -> resources.getString(R.string.feature_chat_get_model)
+                            needsVisionModel -> resources.getString(R.string.feature_chat_open_models)
                             else -> resources.getString(R.string.feature_chat_retry)
                         },
                     )
                     if (result == SnackbarResult.ActionPerformed) {
-                        if (noModel) onOpenModels() else viewModel.retry()
+                        if (noModel || needsVisionModel) onOpenModels() else viewModel.retry()
                     }
                 }
             }
@@ -159,6 +166,8 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
         onSelectPersona = viewModel::selectPersona,
         onMicClick = onMicClick,
         onToggleSpeak = viewModel::toggleSpeak,
+        onPhotoPicked = viewModel::attachPhoto,
+        onRemovePhoto = viewModel::removePhoto,
         onExport = { format ->
             val name = exportFileName(state.title, format)
             if (format == ExportFormat.MARKDOWN) saveMarkdown.launch(name) else savePdf.launch(name)
@@ -184,6 +193,8 @@ fun ChatContent(
     onSelectPersona: (String?) -> Unit = {},
     onMicClick: () -> Unit = {},
     onToggleSpeak: (messageId: String, text: String) -> Unit = { _, _ -> },
+    onPhotoPicked: (String) -> Unit = {},
+    onRemovePhoto: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -288,6 +299,9 @@ fun ChatContent(
                         prompts = state.prompts,
                         voice = state.voice,
                         onMicClick = onMicClick,
+                        photo = state.photo,
+                        onPhotoPicked = onPhotoPicked,
+                        onRemovePhoto = onRemovePhoto,
                         onStop = onStop,
                         modifier = Modifier.readableWidth(),
                     )
@@ -302,6 +316,7 @@ internal fun ErrorKind.messageRes(): Int = when (this) {
     ErrorKind.NO_MODEL -> R.string.feature_chat_no_model_title
     ErrorKind.MODEL_LOAD_FAILED -> R.string.feature_chat_model_failed
     ErrorKind.FILE_UNREADABLE -> R.string.feature_chat_export_failed
+    ErrorKind.IMAGES_NOT_SUPPORTED -> R.string.feature_chat_images_not_supported
     else -> R.string.feature_chat_generation_failed
 }
 

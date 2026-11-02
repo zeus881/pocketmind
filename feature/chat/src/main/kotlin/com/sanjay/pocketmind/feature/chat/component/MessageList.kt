@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -126,6 +127,17 @@ internal fun MessageList(
                 val versions = branches[message.id]
                 Column(Modifier.animateItem()) {
                     if (message.role == TurnRole.USER) {
+                        message.imagePath?.let { path ->
+                            PhotoThumbnail(
+                                path = path,
+                                size = PmSize.photoInBubble,
+                                contentDescription = stringResource(R.string.feature_chat_attached_photo),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentWidth(Alignment.End)
+                                    .padding(horizontal = PmSpacing.l, vertical = PmSpacing.xs),
+                            )
+                        }
                         UserBubble(message.text, canEdit = canChange, onEdit = { onEdit(message.id, it) })
                     } else {
                         AssistantAnswer(

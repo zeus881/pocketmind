@@ -46,6 +46,12 @@ object PmSize {
 
     /** Content width cap on large screens (tablets, foldables) so lines stay readable. */
     val readableContentWidth = 720.dp
+
+    /** Preview of a photo attached in the chat input. */
+    val photoChip = 64.dp
+
+    /** Longest side of a photo shown inside a question bubble. */
+    val photoInBubble = 220.dp
 }
 
 /** Corner shapes: small for chips, medium for cards, large for sheets and dialogs. */

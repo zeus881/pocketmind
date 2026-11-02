@@ -21,6 +21,11 @@ data class LlmModelInfo(
     val sha256: String,
     val minRamGb: Int,
     val license: String,
+    /**
+     * The file contains an image encoder, so the user can ask about photos. Checked by reading the
+     * file's section list (`tf_lite_vision_encoder`), never assumed from the model's name.
+     */
+    val supportsImages: Boolean = false,
 )
 
 /** What a model is used for. */

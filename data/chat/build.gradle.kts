@@ -13,6 +13,8 @@ dependencies {
     implementation(projects.core.common)
     implementation(projects.core.database)
     implementation(libs.androidx.core.ktx) // Canvas.withSave for the PDF export
+    // Photo orientation; the framework ExifInterface has parsing bugs on old Android versions.
+    implementation(libs.androidx.exifinterface)
 
     testImplementation(projects.core.testing)
     testImplementation(libs.robolectric)

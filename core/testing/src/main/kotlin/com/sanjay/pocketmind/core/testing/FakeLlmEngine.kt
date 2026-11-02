@@ -48,13 +48,23 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
     val loadedPaths = mutableListOf<String>()
     val sessions = mutableListOf<Session>()
     val prompts = mutableListOf<String>()
+
+    /** The image sent with each prompt (null for text-only prompts), in the same order as [prompts]. */
+    val images = mutableListOf<String?>()
+
+    /** The `vision` flag of each real (non no-op) load. */
+    val visionLoads = mutableListOf<Boolean>()
+    private var loadedVision = false
     var unloadCount = 0
         private set
 
-    override suspend fun load(modelPath: String, preferGpu: Boolean, expectedSizeBytes: Long?) {
-        // Same as the real engine: loading the already-loaded model is a no-op.
-        if ((state.value as? EngineState.Ready)?.modelPath == modelPath) return
+    override suspend fun load(modelPath: String, preferGpu: Boolean, expectedSizeBytes: Long?, vision: Boolean) {
+        // Same as the real engine: loading the already-loaded model is a no-op (unless vision is newly needed).
+        val sameModel = (state.value as? EngineState.Ready)?.modelPath == modelPath
+        if (sameModel && (loadedVision || !vision)) return
         loadedPaths += modelPath
+        visionLoads += vision
+        loadedVision = vision && !failLoad
         expectedSizes += expectedSizeBytes
         sessionId++
         state.value = EngineState.Loading(modelPath)
@@ -71,14 +81,16 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
         return ++sessionId
     }
 
-    override fun generate(prompt: String, sessionId: Long): Flow<String> = flow {
+    override fun generate(prompt: String, sessionId: Long, imagePath: String?): Flow<String> = flow {
         // Same ownership rule as the real engine.
         if (sessionId !=
             this@FakeLlmEngine.sessionId
         ) {
             throw SessionReplacedException(sessionId, this@FakeLlmEngine.sessionId)
         }
+        check(imagePath == null || loadedVision) { "load(vision = true) must succeed before sending an image" }
         prompts += prompt
+        images += imagePath
         for (piece in responsePieces) {
             if (pieceDelayMs > 0) delay(pieceDelayMs)
             emit(piece)
@@ -100,6 +112,7 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
     override suspend fun unload() {
         unloadCount++
         sessionId++
+        loadedVision = false
         state.value = EngineState.Idle
     }
 }

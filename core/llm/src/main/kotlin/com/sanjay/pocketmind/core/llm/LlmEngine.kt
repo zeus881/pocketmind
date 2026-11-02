@@ -42,8 +42,12 @@ interface LlmEngine {
      * Loads the model, trying GPU first when [preferGpu] and falling back to CPU. No-op if already loaded.
      * When [expectedSizeBytes] is given, a file of any other size is refused ([FailureReason.FILE_DAMAGED])
      * instead of being handed to native code.
+     *
+     * [vision] also loads the model's image encoder (only for models whose catalog entry says
+     * `supportsImages`). It costs extra memory, so text-only chats leave it off. A model loaded
+     * WITH vision also serves text requests; one loaded without it is reloaded when vision is asked for.
      */
-    suspend fun load(modelPath: String, preferGpu: Boolean, expectedSizeBytes: Long? = null)
+    suspend fun load(modelPath: String, preferGpu: Boolean, expectedSizeBytes: Long? = null, vision: Boolean = false)
 
     /**
      * Forgets backends that crashed the app while loading (see [LoadGuard]), so the next [load]
@@ -65,8 +69,11 @@ interface LlmEngine {
      * Sends [prompt] in session [sessionId] and streams the answer piece by piece.
      * Throws [SessionReplacedException] if another feature replaced that session in the meantime
      * (checked under the engine lock, so there is no gap between the check and the generation).
+     *
+     * [imagePath] attaches one picture (a JPEG in the app's private storage) to this prompt; the
+     * model must have been loaded with `vision = true`.
      */
-    fun generate(prompt: String, sessionId: Long): Flow<String>
+    fun generate(prompt: String, sessionId: Long, imagePath: String? = null): Flow<String>
 
     /** Frees the model's memory (also called when Android is low on memory). */
     suspend fun unload()

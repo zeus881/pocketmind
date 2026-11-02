@@ -15,6 +15,8 @@ data class InferenceSettings(
     val modelName: String = "",
     /** Exact size from the catalog; the engine refuses a file of any other size. Null = unknown. */
     val expectedSizeBytes: Long? = null,
+    /** The model can read photos (its catalog entry has `supportsImages`). */
+    val supportsImages: Boolean = false,
 )
 
 /**

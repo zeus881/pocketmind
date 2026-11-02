@@ -1,16 +1,24 @@
 package com.sanjay.pocketmind.feature.chat.component
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.MicOff
 import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.Bookmarks
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconButton
@@ -33,8 +41,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
+import com.sanjay.pocketmind.core.designsystem.theme.PmSize
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.SavedPrompt
+import com.sanjay.pocketmind.feature.chat.PhotoUi
 import com.sanjay.pocketmind.feature.chat.R
 import com.sanjay.pocketmind.feature.chat.VoiceUi
 
@@ -58,13 +68,77 @@ internal fun ChatInput(
     prompts: List<SavedPrompt> = emptyList(),
     voice: VoiceUi = VoiceUi(),
     onMicClick: () -> Unit = {},
+    photo: PhotoUi = PhotoUi(),
+    /** A content uri from the system photo picker. */
+    onPhotoPicked: (String) -> Unit = {},
+    onRemovePhoto: () -> Unit = {},
 ) {
     var text by rememberSaveable { mutableStateOf(initialText) }
     val haptics = rememberPmHaptics()
     // What the recognizer heard replaces the box's text; from then on the user can edit it.
     LaunchedEffect(voice.transcriptVersion) { voice.transcript?.let { text = it } }
+    // The system photo picker needs no storage permission: the app only sees the one photo picked.
+    val pickPhoto = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+        uri?.let { onPhotoPicked(it.toString()) }
+    }
+    Column(modifier = modifier.fillMaxWidth()) {
+        if (photo.attached != null || photo.preparing) {
+            AttachedPhoto(photo, onRemovePhoto, Modifier.padding(start = PmSpacing.l, top = PmSpacing.s))
+        }
+        InputRow(
+            text = text,
+            onTextChange = { text = it },
+            isGenerating = isGenerating,
+            prompts = prompts,
+            voice = voice,
+            onMicClick = onMicClick,
+            showPhotoButton = photo.available && !isGenerating,
+            onAddPhoto = {
+                pickPhoto.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+            onSend = {
+                haptics.confirm()
+                onSend(text)
+                text = ""
+            },
+            onStop = onStop,
+        )
+    }
+}
+
+@Composable
+private fun AttachedPhoto(photo: PhotoUi, onRemove: () -> Unit, modifier: Modifier = Modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
+        val path = photo.attached
+        if (path == null) {
+            Box(Modifier.size(PmSize.photoChip), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        } else {
+            PhotoThumbnail(path, PmSize.photoChip, stringResource(R.string.feature_chat_attached_photo))
+            IconButton(onClick = onRemove) {
+                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.feature_chat_remove_photo))
+            }
+        }
+    }
+}
+
+@Suppress("LongParameterList") // one row of controls; each callback is a distinct user action
+@Composable
+private fun InputRow(
+    text: String,
+    onTextChange: (String) -> Unit,
+    isGenerating: Boolean,
+    prompts: List<SavedPrompt>,
+    voice: VoiceUi,
+    onMicClick: () -> Unit,
+    showPhotoButton: Boolean,
+    onAddPhoto: () -> Unit,
+    onSend: () -> Unit,
+    onStop: () -> Unit,
+) {
     Row(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = PmSpacing.m, vertical = PmSpacing.s),
         verticalAlignment = Alignment.CenterVertically,
@@ -72,12 +146,20 @@ internal fun ChatInput(
         if (prompts.isNotEmpty()) {
             PromptLibraryButton(prompts) { prompt ->
                 // Insert at the end, so a half-typed message isn't lost.
-                text = if (text.isBlank()) prompt.text else "${text.trimEnd()} ${prompt.text}"
+                onTextChange(if (text.isBlank()) prompt.text else "${text.trimEnd()} ${prompt.text}")
+            }
+        }
+        if (showPhotoButton) {
+            IconButton(onClick = onAddPhoto) {
+                Icon(
+                    Icons.Outlined.AddPhotoAlternate,
+                    contentDescription = stringResource(R.string.feature_chat_add_photo),
+                )
             }
         }
         OutlinedTextField(
             value = text,
-            onValueChange = { text = it },
+            onValueChange = onTextChange,
             placeholder = { Text(stringResource(R.string.feature_chat_input_hint)) },
             maxLines = 5,
             // A pill, like the input of most messaging apps (shape token: extra large, 32 dp).
@@ -104,11 +186,7 @@ internal fun ChatInput(
             }
         } else {
             FilledIconButton(
-                onClick = {
-                    haptics.confirm()
-                    onSend(text)
-                    text = ""
-                },
+                onClick = onSend,
                 enabled = text.isNotBlank(),
             ) {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.feature_chat_send))

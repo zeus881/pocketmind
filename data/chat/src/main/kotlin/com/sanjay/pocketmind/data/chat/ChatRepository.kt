@@ -46,8 +46,14 @@ interface ChatRepository {
      * Saves the user's message and returns the stream of the assistant's answer.
      * Before generating it makes sure the model's conversation matches the saved history
      * (switching chats, after a stopped answer, or when the history must be trimmed).
+     *
+     * [imagePath] (from [ChatPhotos.attachImage]) sends a photo with the question. It fails with
+     * IMAGES_NOT_SUPPORTED when the selected model can't read images.
      */
-    suspend fun sendMessage(chatId: String, text: String): AppResult<Flow<String>>
+    suspend fun sendMessage(chatId: String, text: String, imagePath: String? = null): AppResult<Flow<String>>
+
+    /** True when the selected model can read photos (the chat then offers "Add photo"). */
+    suspend fun imagesSupported(): Boolean
 
     /**
      * Deletes the last assistant answer of the chat and generates it again for the last user
@@ -81,4 +87,20 @@ interface ChatRepository {
     suspend fun deleteChat(chatId: String): DeletedChat?
 
     suspend fun restoreChat(deleted: DeletedChat)
+}
+
+/**
+ * Photos attached in the chat input. A separate interface ("interface segregation"): the chat
+ * screen needs it, History doesn't. The same repository object implements both, because it must
+ * know which attached photos are not saved yet (so cleanup never deletes them).
+ */
+interface ChatPhotos {
+    /**
+     * Copies the photo behind the content [uri] into private storage for the next question.
+     * Returns its path, or null if the file isn't a readable image.
+     */
+    suspend fun attachImage(uri: String): String?
+
+    /** The user removed an attached photo before sending it. */
+    suspend fun discardImage(path: String)
 }
