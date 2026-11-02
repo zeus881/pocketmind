@@ -14,7 +14,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 5 Versioning + quick wins | DONE | 78 % (measured 78.3 %, 203 tests) | release APK 31.2 → 27.27 MB; version from git tag |
 | 6 StrictMode, LeakCanary, perf budget, Baseline Profile | DONE | 79 % (measured 79.6 %, 204 tests) | 2 main-thread disk reads fixed; benchmarks + Baseline Profile need the phone |
 | 7 Smarter context (summaries, context size) | DONE | 80 % (measured 80.1 %, 213 tests) | Room v4; 8k context deferred until memory is measured on a phone |
-| 8 Design system v2 | NEXT | | |
+| 8 Design system v2 | DONE | 80 % (measured 80.5 %, 217 tests) | tokens everywhere (92 raw dp replaced), checkDesignTokens in lint, dynamic-colour switch |
+| 9 Adaptive layouts, edge-to-edge, predictive back | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 

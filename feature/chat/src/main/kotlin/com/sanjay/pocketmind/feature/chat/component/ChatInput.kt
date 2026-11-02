@@ -21,6 +21,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.feature.chat.R
 
 /**
@@ -39,10 +41,11 @@ internal fun ChatInput(
     modifier: Modifier = Modifier,
 ) {
     var text by rememberSaveable { mutableStateOf("") }
+    val haptics = rememberPmHaptics()
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+            .padding(horizontal = PmSpacing.m, vertical = PmSpacing.s),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         OutlinedTextField(
@@ -53,7 +56,7 @@ internal fun ChatInput(
             keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
             modifier = Modifier
                 .weight(1f)
-                .padding(end = 8.dp),
+                .padding(end = PmSpacing.s),
         )
         if (isGenerating) {
             FilledIconButton(onClick = onStop) {
@@ -62,6 +65,7 @@ internal fun ChatInput(
         } else {
             FilledIconButton(
                 onClick = {
+                    haptics.confirm()
                     onSend(text)
                     text = ""
                 },

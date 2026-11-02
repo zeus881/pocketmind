@@ -15,6 +15,8 @@ data class UserSettings(
     val topK: Int = DEFAULT_TOP_K,
     val customSystemPrompt: String? = null,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    /** Android 12+: take the app's colours from the wallpaper ("Material You"); off = PocketMind brand colours. */
+    val dynamicColor: Boolean = true,
     val appLockEnabled: Boolean = false,
     /** How long the app may stay in the background before the lock comes back (0 = immediately). */
     val appLockTimeoutSeconds: Int = DEFAULT_LOCK_TIMEOUT_SECONDS,

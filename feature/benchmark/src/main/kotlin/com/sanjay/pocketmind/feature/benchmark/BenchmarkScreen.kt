@@ -46,6 +46,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.BenchmarkResult
 import com.sanjay.pocketmind.data.benchmark.BenchmarkProgress
 import java.text.DateFormat
@@ -123,19 +124,19 @@ fun BenchmarkContent(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding),
-            contentPadding = PaddingValues(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding = PaddingValues(PmSpacing.l),
+            verticalArrangement = Arrangement.spacedBy(PmSpacing.m),
         ) {
             item { RunCard(state, onRun, onCancel) }
             when {
-                state.isLoadingHistory -> item { LoadingState(Modifier.padding(32.dp)) }
+                state.isLoadingHistory -> item { LoadingState(Modifier.padding(PmSpacing.xxl)) }
 
                 state.runs.isEmpty() -> item {
                     EmptyState(
                         icon = Icons.Outlined.Speed,
                         title = stringResource(R.string.feature_benchmark_empty_title),
                         body = stringResource(R.string.feature_benchmark_empty_body),
-                        modifier = Modifier.padding(top = 32.dp),
+                        modifier = Modifier.padding(top = PmSpacing.xxl),
                     )
                 }
 
@@ -148,7 +149,7 @@ fun BenchmarkContent(
 @Composable
 private fun RunCard(state: BenchmarkUiState, onRun: () -> Unit, onCancel: () -> Unit) {
     Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(PmSpacing.l), verticalArrangement = Arrangement.spacedBy(PmSpacing.s)) {
             Text(stringResource(R.string.feature_benchmark_intro), style = MaterialTheme.typography.bodyMedium)
             val progress = state.progress
             if (progress == null) {
@@ -176,7 +177,7 @@ private fun RunCard(state: BenchmarkUiState, onRun: () -> Unit, onCancel: () -> 
 private fun ResultCard(run: BenchmarkResult, onShare: (BenchmarkResult) -> Unit, onDelete: (BenchmarkResult) -> Unit) {
     val date = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(run.createdAt))
     Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.padding(PmSpacing.l), verticalArrangement = Arrangement.spacedBy(PmSpacing.xs)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
                     Text("${run.modelName} · ${run.backend}", style = MaterialTheme.typography.titleMedium)

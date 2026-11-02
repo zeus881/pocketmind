@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Refresh
@@ -28,9 +27,10 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.mikepenz.markdown.m3.Markdown
-import com.mikepenz.markdown.model.markdownAnimations
-import com.mikepenz.markdown.model.rememberMarkdownState
+import com.sanjay.pocketmind.core.designsystem.component.MarkdownText
+import com.sanjay.pocketmind.core.designsystem.theme.PmBubbleShapes
+import com.sanjay.pocketmind.core.designsystem.theme.PmSize
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
@@ -62,8 +62,8 @@ internal fun MessageList(
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         reverseLayout = true,
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = PmSpacing.m, vertical = PmSpacing.s),
+        verticalArrangement = Arrangement.spacedBy(PmSpacing.s),
     ) {
         if (streamingText != null) {
             item(key = STREAMING_KEY) { StreamingBubble(streamingText) }
@@ -87,10 +87,10 @@ private fun UserBubble(text: String) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         Surface(
             color = MaterialTheme.colorScheme.primaryContainer,
-            shape = RoundedCornerShape(16.dp, 16.dp, 4.dp, 16.dp),
-            modifier = Modifier.widthIn(max = 320.dp),
+            shape = PmBubbleShapes.user,
+            modifier = Modifier.widthIn(max = PmSize.userBubbleMaxWidth),
         ) {
-            Text(text, Modifier.padding(12.dp), style = MaterialTheme.typography.bodyLarge)
+            Text(text, Modifier.padding(PmSpacing.m), style = MaterialTheme.typography.bodyLarge)
         }
     }
 }
@@ -102,13 +102,13 @@ private fun AssistantBubble(message: Message, showRetry: Boolean, onRetry: () ->
     Column(Modifier.fillMaxWidth()) {
         Surface(
             color = MaterialTheme.colorScheme.surfaceVariant,
-            shape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp),
+            shape = PmBubbleShapes.assistant,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            Column(Modifier.padding(12.dp)) {
+            Column(Modifier.padding(PmSpacing.m)) {
                 // immediate: a finished answer is parsed once, synchronously, so it never shows
                 // an empty frame when the streaming bubble is swapped for the saved one.
-                if (message.text.isNotBlank()) StableMarkdown(message.text, immediate = true)
+                if (message.text.isNotBlank()) MarkdownText(message.text, immediate = true)
                 when (message.status) {
                     MessageStatus.STOPPED -> StatusLabel(stringResource(R.string.feature_chat_status_stopped))
                     MessageStatus.FAILED -> StatusLabel(stringResource(R.string.feature_chat_status_failed))
@@ -125,7 +125,7 @@ private fun AssistantBubble(message: Message, showRetry: Boolean, onRetry: () ->
                     text = stringResource(R.string.feature_chat_stats, tps, backend),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 8.dp),
+                    modifier = Modifier.padding(start = PmSpacing.s),
                 )
             }
             if (message.text.isNotBlank()) {
@@ -149,39 +149,20 @@ private fun AssistantBubble(message: Message, showRetry: Boolean, onRetry: () ->
 private fun StreamingBubble(text: String) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
-        shape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp),
+        shape = PmBubbleShapes.assistant,
         // Full width from the first token, so the bubble grows only downwards and never
         // jumps sideways while the first line is being written. No live region here: the
         // chat screen's status line announces start and end once (AUDIT M-3).
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(12.dp)) {
+        Column(Modifier.padding(PmSpacing.m)) {
             if (text.isEmpty()) {
                 Text(stringResource(R.string.feature_chat_thinking), style = MaterialTheme.typography.bodyLarge)
             } else {
-                StableMarkdown(text)
+                MarkdownText(text)
             }
         }
     }
-}
-
-/**
- * Markdown that does not flicker while the text grows.
- *
- * Why the plain `Markdown(content = text)` flickered: every new piece of text started a
- * fresh background parse, and until it finished the old rendering was thrown away (an
- * empty frame), so the bubble blinked and jumped in height about 20 times a second.
- * `retainState = true` keeps showing the previous result until the new parse is ready, and
- * the size animation is switched off because re-animating the height on every token makes
- * the bubble wobble.
- */
-@Composable
-private fun StableMarkdown(text: String, modifier: Modifier = Modifier, immediate: Boolean = false) {
-    Markdown(
-        markdownState = rememberMarkdownState(text, retainState = true, immediate = immediate),
-        modifier = modifier,
-        animations = markdownAnimations(animateTextSize = { this }),
-    )
 }
 
 @Composable
@@ -190,6 +171,6 @@ private fun StatusLabel(text: String) {
         text = text,
         style = MaterialTheme.typography.labelMedium,
         color = MaterialTheme.colorScheme.error,
-        modifier = Modifier.padding(top = 4.dp),
+        modifier = Modifier.padding(top = PmSpacing.xs),
     )
 }

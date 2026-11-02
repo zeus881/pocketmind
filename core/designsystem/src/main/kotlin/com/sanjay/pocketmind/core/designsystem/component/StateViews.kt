@@ -4,12 +4,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -22,8 +20,8 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import com.sanjay.pocketmind.core.designsystem.R
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 
 /*
  * CLAUDE.md requires every screen to have loading, empty, error and content states.
@@ -37,10 +35,10 @@ fun LoadingState(modifier: Modifier = Modifier, message: String? = null) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(PmSpacing.xl)
             // liveRegion makes TalkBack announce the message when it appears or changes.
             .semantics { liveRegion = LiveRegionMode.Polite },
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(PmSpacing.l, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         CircularProgressIndicator()
@@ -63,17 +61,12 @@ fun EmptyState(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+            .padding(PmSpacing.xl),
+        verticalArrangement = Arrangement.spacedBy(PmSpacing.m, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Decorative: the title right below says the same thing, so TalkBack skips the icon.
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(56.dp),
-            tint = MaterialTheme.colorScheme.primary,
-        )
+        // Decorative: the title right below says the same thing, so TalkBack skips it.
+        PmIllustration(icon)
         Text(text = title, style = MaterialTheme.typography.titleLarge, textAlign = TextAlign.Center)
         if (body != null) {
             Text(
@@ -104,17 +97,12 @@ fun ErrorState(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp)
+            .padding(PmSpacing.xl)
             .semantics { liveRegion = LiveRegionMode.Assertive },
-        verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(PmSpacing.m, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Icon(
-            imageVector = Icons.Outlined.ErrorOutline,
-            contentDescription = null,
-            modifier = Modifier.size(56.dp),
-            tint = MaterialTheme.colorScheme.error,
-        )
+        PmIllustration(Icons.Outlined.ErrorOutline, tone = IllustrationTone.Error)
         Text(text = message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
         Button(onClick = onRetry) { Text(stringResource(R.string.core_designsystem_retry)) }
         if (secondaryActionLabel != null && onSecondaryAction != null) {

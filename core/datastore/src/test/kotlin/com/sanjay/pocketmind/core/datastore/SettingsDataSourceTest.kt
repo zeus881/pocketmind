@@ -69,4 +69,11 @@ class SettingsDataSourceTest {
         dataSource.setKeepModelLoadedMinutes(42)
         assertEquals(UserSettings.DEFAULT_KEEP_MODEL_MINUTES, dataSource.current().keepModelLoadedMinutes)
     }
+
+    @Test
+    fun dynamicColorIsOnByDefaultAndCanBeTurnedOff() = runTest {
+        assertEquals(true, dataSource.current().dynamicColor)
+        dataSource.setDynamicColor(false)
+        assertEquals(false, dataSource.current().dynamicColor)
+    }
 }

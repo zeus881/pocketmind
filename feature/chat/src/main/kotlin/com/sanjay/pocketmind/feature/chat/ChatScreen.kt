@@ -40,6 +40,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
 import com.sanjay.pocketmind.core.designsystem.component.ErrorState
+import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.feature.chat.component.ChatInput
 import com.sanjay.pocketmind.feature.chat.component.MessageList
@@ -59,12 +61,14 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
     val snackbarHostState = remember { SnackbarHostState() }
     // LocalResources (not LocalContext) so strings follow configuration changes like language.
     val resources = LocalResources.current
+    val haptics = rememberPmHaptics()
 
     // LaunchedEffect(Unit) starts once when the screen appears and is cancelled when it leaves.
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is ChatEvent.Error -> {
+                    haptics.reject()
                     // The action must be able to fix the problem: retrying can't create a missing model.
                     val noModel = event.kind == ErrorKind.NO_MODEL
                     val result = snackbarHostState.showSnackbar(
@@ -165,7 +169,7 @@ fun ChatContent(
                             text = stringResource(R.string.feature_chat_loading_model),
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier
-                                .padding(horizontal = 16.dp, vertical = 4.dp)
+                                .padding(horizontal = PmSpacing.l, vertical = PmSpacing.xs)
                                 .semantics { liveRegion = LiveRegionMode.Polite },
                         )
                     }
@@ -242,7 +246,7 @@ private fun GenerationStatus(isGenerating: Boolean) {
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier
-                .padding(horizontal = 16.dp)
+                .padding(horizontal = PmSpacing.l)
                 .semantics { liveRegion = LiveRegionMode.Polite },
         )
     }

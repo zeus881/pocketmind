@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.sanjay.pocketmind.core.common.result.ErrorKind
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.ModelKind
 import com.sanjay.pocketmind.data.models.ModelState
 import com.sanjay.pocketmind.data.models.ModelStatus
@@ -45,9 +46,9 @@ fun ModelCard(
     var confirmDelete by remember { mutableStateOf(false) }
 
     Card(modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(PmSpacing.l), verticalArrangement = Arrangement.spacedBy(PmSpacing.s)) {
             Text(info.displayName, style = MaterialTheme.typography.titleMedium)
-            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(PmSpacing.s)) {
                 if (isRecommended) Badge(stringResource(R.string.feature_models_recommended))
                 if (model.isSelected) Badge(stringResource(R.string.feature_models_in_use))
             }
@@ -173,14 +174,14 @@ private fun Badge(text: String) {
         Text(
             text = text,
             style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            modifier = Modifier.padding(horizontal = PmSpacing.s, vertical = PmSpacing.xs),
         )
     }
 }
 
 @Composable
 private fun ButtonRow(content: @Composable () -> Unit) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) { content() }
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(PmSpacing.s)) { content() }
 }
 
 private const val PERCENT = 100

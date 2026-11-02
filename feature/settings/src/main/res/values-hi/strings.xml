@@ -50,4 +50,6 @@
         <item quantity="one">%d मिनट तक</item>
         <item quantity="other">%d मिनट तक</item>
     </plurals>
+    <string name="feature_settings_dynamic_color">वॉलपेपर से रंग</string>
+    <string name="feature_settings_dynamic_color_hint">बंद: PocketMind के रंग इस्तेमाल करें।</string>
 </resources>

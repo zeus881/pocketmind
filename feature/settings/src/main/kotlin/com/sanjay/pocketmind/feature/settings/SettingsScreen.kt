@@ -1,5 +1,6 @@
 package com.sanjay.pocketmind.feature.settings
 
+import android.os.Build
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -47,6 +48,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.ThemeMode
 import com.sanjay.pocketmind.core.model.UserSettings
 import java.util.Locale
@@ -95,6 +98,15 @@ private fun SettingsContent(state: SettingsUiState, vm: SettingsViewModel, navig
 
             Section(R.string.feature_settings_section_appearance)
             ThemeChooser(s.themeMode, vm::setThemeMode)
+            // Wallpaper colours exist only on Android 12+; older phones always use the brand colours.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                SwitchRow(
+                    title = stringResource(R.string.feature_settings_dynamic_color),
+                    subtitle = stringResource(R.string.feature_settings_dynamic_color_hint),
+                    checked = s.dynamicColor,
+                    onChange = vm::setDynamicColor,
+                )
+            }
 
             Section(R.string.feature_settings_section_downloads)
             SwitchRow(
@@ -110,7 +122,7 @@ private fun SettingsContent(state: SettingsUiState, vm: SettingsViewModel, navig
             Text(
                 text = stringResource(R.string.feature_settings_privacy_statement),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier = Modifier.padding(horizontal = PmSpacing.l, vertical = PmSpacing.s),
             )
 
             Section(R.string.feature_settings_section_tools)
@@ -130,13 +142,13 @@ private fun SettingsContent(state: SettingsUiState, vm: SettingsViewModel, navig
 
 @Composable
 private fun Section(titleRes: Int) {
-    HorizontalDivider(Modifier.padding(top = 8.dp))
+    HorizontalDivider(Modifier.padding(top = PmSpacing.s))
     Text(
         text = stringResource(titleRes),
         style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
-            .padding(start = 16.dp, top = 16.dp, bottom = 4.dp)
+            .padding(start = PmSpacing.l, top = PmSpacing.l, bottom = PmSpacing.xs)
             .semantics { heading() },
     )
 }
@@ -153,12 +165,16 @@ private fun NavRow(title: String, subtitle: String, onClick: () -> Unit) {
 
 @Composable
 private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChange: (Boolean) -> Unit) {
+    val haptics = rememberPmHaptics()
     // The whole row toggles: large touch target and one TalkBack announcement ("Switch, on").
     ListItem(
         headlineContent = { Text(title) },
         supportingContent = { Text(subtitle) },
         trailingContent = { Switch(checked = checked, onCheckedChange = null) },
-        modifier = Modifier.toggleable(value = checked, role = Role.Switch, onValueChange = onChange),
+        modifier = Modifier.toggleable(value = checked, role = Role.Switch) { on ->
+            haptics.toggle(on)
+            onChange(on)
+        },
     )
 }
 
@@ -169,7 +185,7 @@ private fun SwitchRow(title: String, subtitle: String, checked: Boolean, onChang
 @Composable
 private fun TemperatureSlider(saved: Float, onSave: (Float) -> Unit) {
     var value by remember(saved) { mutableFloatStateOf(saved) }
-    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+    Column(Modifier.padding(horizontal = PmSpacing.l, vertical = PmSpacing.s)) {
         Text(stringResource(R.string.feature_settings_temperature, String.format(Locale.US, "%.1f", value)))
         Text(stringResource(R.string.feature_settings_temperature_hint), style = MaterialTheme.typography.bodySmall)
         Slider(
@@ -184,7 +200,7 @@ private fun TemperatureSlider(saved: Float, onSave: (Float) -> Unit) {
 @Composable
 private fun TopKSlider(saved: Int, onSave: (Int) -> Unit) {
     var value by remember(saved) { mutableFloatStateOf(saved.toFloat()) }
-    Column(Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+    Column(Modifier.padding(horizontal = PmSpacing.l, vertical = PmSpacing.s)) {
         Text(stringResource(R.string.feature_settings_top_k, value.roundToInt()))
         Text(stringResource(R.string.feature_settings_top_k_hint), style = MaterialTheme.typography.bodySmall)
         Slider(
@@ -264,7 +280,7 @@ private fun LockTimeoutChooser(current: Int, onChange: (Int) -> Unit) {
     Text(
         text = stringResource(R.string.feature_settings_lock_after),
         style = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+        modifier = Modifier.padding(start = PmSpacing.l, top = PmSpacing.s),
     )
     Column(Modifier.selectableGroup()) {
         UserSettings.LOCK_TIMEOUT_OPTIONS.forEach { seconds ->
@@ -299,12 +315,12 @@ private fun KeepModelChooser(current: Int, onChange: (Int) -> Unit) {
     Text(
         text = stringResource(R.string.feature_settings_keep_model),
         style = MaterialTheme.typography.bodyLarge,
-        modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp),
+        modifier = Modifier.padding(start = PmSpacing.l, top = PmSpacing.s, end = PmSpacing.l),
     )
     Text(
         text = stringResource(R.string.feature_settings_keep_model_hint),
         style = MaterialTheme.typography.bodySmall,
-        modifier = Modifier.padding(horizontal = 16.dp),
+        modifier = Modifier.padding(horizontal = PmSpacing.l),
     )
     Column(Modifier.selectableGroup()) {
         UserSettings.KEEP_MODEL_OPTIONS.forEach { minutes ->

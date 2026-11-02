@@ -49,6 +49,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.ErrorState
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.feature.models.component.ModelActions
 import com.sanjay.pocketmind.feature.models.component.ModelCard
 
@@ -152,8 +153,8 @@ fun ModelsContent(
 
             else -> LazyColumn(
                 modifier = modifier,
-                contentPadding = PaddingValues(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                contentPadding = PaddingValues(PmSpacing.l),
+                verticalArrangement = Arrangement.spacedBy(PmSpacing.m),
             ) {
                 item { DeviceCard(state) }
                 item { MobileDataRow(state.allowMobileData, onAllowMobileData) }
@@ -186,7 +187,7 @@ fun ModelsContent(
 private fun DeviceCard(state: ModelsUiState) {
     val recommended = state.chatModels.firstOrNull { it.info.id == state.recommendedId }?.info?.displayName
     Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(Modifier.padding(PmSpacing.l), verticalArrangement = Arrangement.spacedBy(PmSpacing.xs)) {
             Text(
                 stringResource(R.string.feature_models_device_ram, state.deviceRamGb),
                 style = MaterialTheme.typography.titleMedium,
@@ -210,7 +211,7 @@ private fun MobileDataRow(checked: Boolean, onChange: (Boolean) -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .toggleable(value = checked, onValueChange = onChange, role = Role.Switch)
-            .padding(vertical = 8.dp),
+            .padding(vertical = PmSpacing.s),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
@@ -232,7 +233,7 @@ private fun SectionHeader(text: String) {
         style = MaterialTheme.typography.titleSmall,
         color = MaterialTheme.colorScheme.primary,
         modifier = Modifier
-            .padding(top = 8.dp)
+            .padding(top = PmSpacing.s)
             .semantics { heading() },
     )
 }

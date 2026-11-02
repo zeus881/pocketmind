@@ -20,6 +20,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sanjay.pocketmind.R
+import com.sanjay.pocketmind.core.designsystem.theme.PmSize
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 
 /**
  * Shown instead of the app while the optional app lock is active. The prompt opens
@@ -32,11 +34,11 @@ fun LockScreen(onUnlock: () -> Unit) {
         Column(
             Modifier
                 .fillMaxSize()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+                .padding(PmSpacing.xl),
+            verticalArrangement = Arrangement.spacedBy(PmSpacing.l, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Icon(Icons.Outlined.Lock, contentDescription = null, modifier = Modifier.size(64.dp))
+            Icon(Icons.Outlined.Lock, contentDescription = null, modifier = Modifier.size(PmSize.heroIcon))
             Text(
                 stringResource(R.string.lock_title),
                 style = MaterialTheme.typography.headlineSmall,

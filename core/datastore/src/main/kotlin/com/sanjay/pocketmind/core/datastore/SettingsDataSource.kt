@@ -39,6 +39,7 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
             customSystemPrompt = prefs[Keys.SYSTEM_PROMPT],
             themeMode = prefs[Keys.THEME]?.let { name -> ThemeMode.entries.firstOrNull { it.name == name } }
                 ?: ThemeMode.SYSTEM,
+            dynamicColor = prefs[Keys.DYNAMIC_COLOR] ?: true,
             appLockEnabled = prefs[Keys.APP_LOCK] ?: false,
             appLockTimeoutSeconds = prefs[Keys.APP_LOCK_TIMEOUT] ?: UserSettings.DEFAULT_LOCK_TIMEOUT_SECONDS,
             keepModelLoadedMinutes = prefs[Keys.KEEP_MODEL_MINUTES] ?: UserSettings.DEFAULT_KEEP_MODEL_MINUTES,
@@ -73,6 +74,8 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
 
     suspend fun setThemeMode(mode: ThemeMode) = update { it[Keys.THEME] = mode.name }
 
+    suspend fun setDynamicColor(enabled: Boolean) = update { it[Keys.DYNAMIC_COLOR] = enabled }
+
     suspend fun setAppLockEnabled(enabled: Boolean) = update { it[Keys.APP_LOCK] = enabled }
 
     /** Only the values offered in Settings are accepted; anything else falls back to the default. */
@@ -105,6 +108,7 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
         val TOP_K = intPreferencesKey("top_k")
         val SYSTEM_PROMPT = stringPreferencesKey("system_prompt")
         val THEME = stringPreferencesKey("theme_mode")
+        val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
         val APP_LOCK = booleanPreferencesKey("app_lock")
         val APP_LOCK_TIMEOUT = intPreferencesKey("app_lock_timeout_s")
         val KEEP_MODEL_MINUTES = intPreferencesKey("keep_model_loaded_min")

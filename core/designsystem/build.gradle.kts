@@ -9,4 +9,6 @@ android {
 
 dependencies {
     implementation(projects.core.model)
+    // MarkdownText: the one Markdown renderer every screen uses.
+    api(libs.markdown.renderer.m3)
 }

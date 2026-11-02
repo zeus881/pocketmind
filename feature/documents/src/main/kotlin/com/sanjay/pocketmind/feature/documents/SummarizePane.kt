@@ -38,6 +38,8 @@ import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
 import com.sanjay.pocketmind.core.designsystem.component.ErrorState
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.component.MarkdownText
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.data.documents.SummaryProgress
 import kotlinx.coroutines.launch
 
@@ -68,8 +70,8 @@ private fun SummarizingContent(state: SummarizeUiState.Summarizing, onCancel: ()
     Column(
         Modifier
             .fillMaxSize()
-            .padding(24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .padding(PmSpacing.xl),
+        verticalArrangement = Arrangement.spacedBy(PmSpacing.l),
     ) {
         Text(state.documentName, style = MaterialTheme.typography.titleMedium)
         Text(pluralStringResource(R.plurals.feature_documents_pages, state.pageCount, state.pageCount))
@@ -101,8 +103,8 @@ private fun SummaryContent(state: SummarizeUiState.Done, onPickPdf: () -> Unit) 
         Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(PmSpacing.l),
+        verticalArrangement = Arrangement.spacedBy(PmSpacing.m),
     ) {
         Text(state.documentName, style = MaterialTheme.typography.titleMedium)
         Text(
@@ -111,7 +113,7 @@ private fun SummaryContent(state: SummarizeUiState.Done, onPickPdf: () -> Unit) 
             style = MaterialTheme.typography.bodySmall,
         )
         Card(Modifier.fillMaxWidth()) {
-            StableMarkdown(state.summary, modifier = Modifier.padding(16.dp))
+            MarkdownText(state.summary, modifier = Modifier.padding(PmSpacing.l))
         }
         Row {
             IconButton(onClick = {

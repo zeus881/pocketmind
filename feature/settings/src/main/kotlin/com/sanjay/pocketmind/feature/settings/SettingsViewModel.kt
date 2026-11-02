@@ -75,6 +75,8 @@ class SettingsViewModel @Inject constructor(
 
     fun setKeepModelLoaded(minutes: Int) = save { settings.setKeepModelLoadedMinutes(minutes) }
 
+    fun setDynamicColor(enabled: Boolean) = save { settings.setDynamicColor(enabled) }
+
     private fun save(block: suspend () -> Unit) {
         viewModelScope.launch { block() }
     }

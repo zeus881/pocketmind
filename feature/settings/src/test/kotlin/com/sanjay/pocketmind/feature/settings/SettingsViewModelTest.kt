@@ -86,4 +86,32 @@ class SettingsViewModelTest {
         advanceUntilIdle()
         assertNull(settings.current().customSystemPrompt)
     }
+
+    @Test
+    fun privacyDownloadAndAppearanceChangesAreSaved() = runTest {
+        viewModel.setAllowMobileData(true)
+        viewModel.setAppLock(true)
+        viewModel.setAppLockTimeout(300)
+        viewModel.setKeepModelLoaded(15)
+        viewModel.setDynamicColor(false)
+        advanceUntilIdle()
+
+        val s = settings.current()
+        assertEquals(true, s.allowMobileData)
+        assertEquals(true, s.appLockEnabled)
+        assertEquals(300, s.appLockTimeoutSeconds)
+        assertEquals(15, s.keepModelLoadedMinutes)
+        assertEquals(false, s.dynamicColor)
+    }
+
+    @Test
+    fun resetSystemPromptGoesBackToTheDefault() = runTest {
+        viewModel.setSystemPrompt("Custom")
+        advanceUntilIdle()
+
+        viewModel.resetSystemPrompt()
+        advanceUntilIdle()
+
+        assertNull(settings.current().customSystemPrompt)
+    }
 }

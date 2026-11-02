@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.data.documents.Language
 import com.sanjay.pocketmind.data.documents.Languages
 import java.util.Locale
@@ -70,8 +71,8 @@ private fun TranslateContent(state: TranslateUiState, vm: TranslateViewModel) {
                 .padding(padding)
                 .imePadding()
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+                .padding(PmSpacing.l),
+            verticalArrangement = Arrangement.spacedBy(PmSpacing.m),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 LanguagePicker(R.string.feature_translate_from, state.from, vm::setFrom, Modifier.weight(1f))
@@ -103,7 +104,7 @@ private fun TranslateContent(state: TranslateUiState, vm: TranslateViewModel) {
             }
             if (state.output.isNotEmpty()) {
                 Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp)) {
+                    Column(Modifier.padding(PmSpacing.l)) {
                         // SelectionContainer: the user can long-press to select part of the text.
                         SelectionContainer {
                             Text(

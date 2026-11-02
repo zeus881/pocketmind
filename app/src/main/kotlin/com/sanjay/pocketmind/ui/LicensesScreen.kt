@@ -25,6 +25,7 @@ import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.sanjay.pocketmind.R
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -66,12 +67,12 @@ fun LicensesScreen(onBack: () -> Unit) {
             Card(
                 Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(PmSpacing.l),
             ) {
                 Text(
                     stringResource(R.string.licenses_models),
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(PmSpacing.l),
                 )
             }
             val loaded = libs

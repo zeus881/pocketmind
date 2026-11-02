@@ -45,6 +45,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sanjay.pocketmind.core.designsystem.theme.PmSize
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import kotlinx.coroutines.launch
 
 private const val PAGE_COUNT = 4
@@ -86,11 +88,11 @@ fun OnboardingContent(state: OnboardingUiState, onGetStarted: () -> Unit) {
         Modifier
             .fillMaxSize()
             .safeDrawingPadding()
-            .padding(24.dp),
+            .padding(PmSpacing.xl),
     ) {
         HorizontalPager(state = pager, modifier = Modifier.weight(1f)) { index -> PageContent(pages[index]) }
         PageDots(current = pager.currentPage)
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(PmSpacing.l))
         val isLast = pager.currentPage == PAGE_COUNT - 1
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             if (!isLast) {
@@ -118,13 +120,13 @@ private fun PageContent(page: Page) {
         Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState()), // large fonts must never cut text off
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
+        verticalArrangement = Arrangement.spacedBy(PmSpacing.l, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Icon(
             imageVector = page.icon,
             contentDescription = null, // decorative: the title says the same
-            modifier = Modifier.size(72.dp),
+            modifier = Modifier.size(PmSize.heroIcon),
             tint = MaterialTheme.colorScheme.primary,
         )
         Text(
@@ -151,8 +153,8 @@ private fun PageDots(current: Int) {
             val color = if (index == current) colors.primary else colors.outlineVariant
             Box(
                 Modifier
-                    .padding(4.dp)
-                    .size(8.dp)
+                    .padding(PmSpacing.xs)
+                    .size(PmSpacing.s)
                     .clip(CircleShape)
                     .background(color),
             )

@@ -63,7 +63,10 @@ class MainActivity : FragmentActivity() {
                     )
                 }
 
-                is MainUiState.Ready -> PocketMindTheme(themeMode = current.settings.themeMode) {
+                is MainUiState.Ready -> PocketMindTheme(
+                    themeMode = current.settings.themeMode,
+                    dynamicColor = current.settings.dynamicColor,
+                ) {
                     // The start screen is decided ONCE; later settings changes must not reset navigation.
                     val start = remember { if (current.settings.onboardingDone) ChatRoute() else OnboardingRoute }
                     HideRecentsPreview(current.settings.appLockEnabled)

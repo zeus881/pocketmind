@@ -132,6 +132,36 @@ tasks.register("testDebugUnitTest") {
     dependsOn(gradle.includedBuild("build-logic").task(":convention:test"))
 }
 
+// ---------- Design-token guard ----------
+// Screens must use the design system's tokens (PmSpacing, PmSize, MaterialTheme colours), never
+// raw "16.dp" or "Color(0xFF…)": that is what keeps every screen on the same grid and palette.
+// Runs with `./gradlew lint` (a root task named lint depends on it). Design tokens themselves
+// live in core:designsystem, which is not scanned.
+val checkDesignTokens = tasks.register("checkDesignTokens") {
+    description = "Fails if app or feature screens use raw dp values or colours instead of design tokens."
+    val sources = fileTree(rootDir) {
+        include("app/src/main/**/*.kt", "feature/*/src/main/**/*.kt")
+    }
+    val root = rootDir
+    inputs.files(sources)
+    doLast {
+        val rawDp = Regex("""(?<![\w.])\d+(\.\d+)?\.dp\b""")
+        val rawColor = Regex("""Color\(0x""")
+        val problems = sources.files.sortedBy { it.path }.flatMap { file ->
+            file.readLines().mapIndexedNotNull { index, line ->
+                val raw = rawDp.containsMatchIn(line) || rawColor.containsMatchIn(line)
+                if (raw) "${file.relativeTo(root)}:${index + 1}: ${line.trim()}" else null
+            }
+        }
+        check(problems.isEmpty()) { "Use design tokens instead of raw values:\n" + problems.joinToString("\n") }
+    }
+}
+
+tasks.register("lint") {
+    description = "Root part of `./gradlew lint`: the design-token guard."
+    dependsOn(checkDesignTokens)
+}
+
 // ---------- Architecture guard ----------
 // Fails the build if a module breaks the dependency rules from CLAUDE.md:
 //   feature -> data, core   (never feature -> feature)

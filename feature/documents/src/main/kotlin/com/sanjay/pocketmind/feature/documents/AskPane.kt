@@ -46,6 +46,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import com.sanjay.pocketmind.core.designsystem.component.MarkdownText
+import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.data.documents.rag.GroundedPrompt
 import com.sanjay.pocketmind.data.documents.rag.IndexProgress
 import com.sanjay.pocketmind.data.documents.rag.IndexedDocument
@@ -84,8 +86,8 @@ private fun AskContent(state: AskUiState, actions: AskActions) {
             .fillMaxSize()
             .imePadding()
             .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+            .padding(PmSpacing.l),
+        verticalArrangement = Arrangement.spacedBy(PmSpacing.m),
     ) {
         state.indexing?.let { IndexingCard(it) }
         DocumentList(state.documents, state.selectedId, actions)
@@ -124,7 +126,7 @@ private fun AskContent(state: AskUiState, actions: AskActions) {
 @Composable
 private fun IndexingCard(progress: IndexProgress) {
     Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(PmSpacing.l), verticalArrangement = Arrangement.spacedBy(PmSpacing.s)) {
             val label = when (progress) {
                 is IndexProgress.Embedding -> {
                     LinearProgressIndicator(
@@ -160,7 +162,7 @@ private fun DocumentList(documents: List<IndexedDocument>, selectedId: String?, 
                 Column(
                     Modifier
                         .weight(1f)
-                        .padding(start = 8.dp),
+                        .padding(start = PmSpacing.s),
                 ) {
                     Text(doc.name, style = MaterialTheme.typography.bodyLarge)
                     Text(
@@ -184,15 +186,15 @@ private fun AnswerCard(
     onOpenSource: (SourceChunk) -> Unit,
 ) {
     Card(Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Column(Modifier.padding(PmSpacing.l), verticalArrangement = Arrangement.spacedBy(PmSpacing.s)) {
             if (answer.isBlank()) {
                 Text(stringResource(R.string.feature_documents_searching))
             } else {
-                StableMarkdown(answer, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
+                MarkdownText(answer)
             }
             if (sources.isNotEmpty()) {
                 Text(stringResource(R.string.feature_documents_sources), style = MaterialTheme.typography.labelLarge)
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(PmSpacing.s)) {
                     sources.sortedBy { it.startPage }.forEach { source ->
                         val cited = (source.startPage..source.endPage).any { it in citedPages }
                         FilterChip(
