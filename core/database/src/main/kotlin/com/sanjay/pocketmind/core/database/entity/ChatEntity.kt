@@ -30,6 +30,8 @@ data class ChatEntity(
     @ColumnInfo(defaultValue = "0") val pinned: Boolean = false,
     val folderId: String? = null,
     val currentLeafId: String? = null,
+    /** v6: the persona the chat uses (built-in id like "builtin:coder", or a custom persona's id). */
+    val personaId: String? = null,
 )
 
 fun ChatEntity.asModel() = Chat(
@@ -40,6 +42,7 @@ fun ChatEntity.asModel() = Chat(
     pinned = pinned,
     folderId = folderId,
     currentLeafId = currentLeafId,
+    personaId = personaId,
 )
 
 fun Chat.asEntity() = ChatEntity(
@@ -50,6 +53,7 @@ fun Chat.asEntity() = ChatEntity(
     pinned = pinned,
     folderId = folderId,
     currentLeafId = currentLeafId,
+    personaId = personaId,
 )
 
 /** Table `folders`: named groups of chats. */

@@ -52,4 +52,6 @@
     </plurals>
     <string name="feature_settings_dynamic_color">Colours from your wallpaper</string>
     <string name="feature_settings_dynamic_color_hint">Off: use the PocketMind colours.</string>
+    <string name="feature_settings_personas">Personas and prompts</string>
+    <string name="feature_settings_personas_hint">Ways of answering, and prompts you use often</string>
 </resources>

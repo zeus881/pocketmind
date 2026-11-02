@@ -32,7 +32,7 @@ val coveredModules = listOf(
     ":core:model", ":core:common", ":core:designsystem", ":core:llm", ":core:database", ":core:datastore",
     ":data:chat", ":data:models", ":data:benchmark", ":data:documents",
     ":feature:chat", ":feature:history", ":feature:models", ":feature:settings",
-    ":feature:benchmark", ":feature:onboarding", ":feature:documents", ":feature:translate",
+    ":feature:benchmark", ":feature:onboarding", ":feature:documents", ":feature:translate", ":feature:personas",
 )
 
 dependencies {

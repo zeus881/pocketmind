@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_personas_title">पर्सोना और प्रॉम्प्ट</string>
+    <string name="feature_personas_back">वापस</string>
+    <string name="feature_personas_section_personas">पर्सोना</string>
+    <string name="feature_personas_section_prompts">सहेजे हुए प्रॉम्प्ट</string>
+    <string name="feature_personas_built_in">पहले से मौजूद</string>
+    <string name="feature_personas_new_persona">नया पर्सोना</string>
+    <string name="feature_personas_new_prompt">नया प्रॉम्प्ट</string>
+    <string name="feature_personas_edit">बदलें</string>
+    <string name="feature_personas_delete">%1$s हटाएँ</string>
+    <string name="feature_personas_name">नाम</string>
+    <string name="feature_personas_instructions">निर्देश (यह कैसे जवाब दे?)</string>
+    <string name="feature_personas_own_creativity">अपना रचनात्मकता स्तर</string>
+    <string name="feature_personas_creativity">रचनात्मकता: %1$s</string>
+    <string name="feature_personas_prompt_title">शीर्षक</string>
+    <string name="feature_personas_prompt_text">प्रॉम्प्ट का पाठ</string>
+    <string name="feature_personas_no_prompts">अभी कोई सहेजा हुआ प्रॉम्प्ट नहीं। सहेजे गए प्रॉम्प्ट चैट इनपुट से डाले जा सकते हैं।</string>
+    <string name="feature_personas_save">सहेजें</string>
+    <string name="feature_personas_cancel">रद्द करें</string>
+</resources>

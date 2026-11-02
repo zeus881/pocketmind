@@ -7,7 +7,9 @@ import com.sanjay.pocketmind.data.chat.ConversationSummarizer
 import com.sanjay.pocketmind.data.chat.FolderRepository
 import com.sanjay.pocketmind.data.chat.LlmConversationSummarizer
 import com.sanjay.pocketmind.data.chat.OfflineChatRepository
+import com.sanjay.pocketmind.data.chat.PersonaRepository
 import com.sanjay.pocketmind.data.chat.RoomFolderRepository
+import com.sanjay.pocketmind.data.chat.RoomPersonaRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -27,4 +29,7 @@ internal abstract class ChatDataModule {
 
     @Binds
     abstract fun bindsChatExporter(exporter: AndroidChatExporter): ChatExporter
+
+    @Binds
+    abstract fun bindsPersonaRepository(repository: RoomPersonaRepository): PersonaRepository
 }

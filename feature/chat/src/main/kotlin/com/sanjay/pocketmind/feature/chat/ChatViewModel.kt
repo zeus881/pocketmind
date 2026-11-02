@@ -12,8 +12,11 @@ import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
+import com.sanjay.pocketmind.core.model.Persona
+import com.sanjay.pocketmind.core.model.SavedPrompt
 import com.sanjay.pocketmind.data.chat.ChatExporter
 import com.sanjay.pocketmind.data.chat.ChatRepository
+import com.sanjay.pocketmind.data.chat.PersonaRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
@@ -55,6 +58,7 @@ import timber.log.Timber
 class ChatViewModel @Inject constructor(
     private val repository: ChatRepository,
     private val exporter: ChatExporter,
+    personaRepository: PersonaRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -99,23 +103,40 @@ class ChatViewModel @Inject constructor(
             }
         }
     }
-    private val title = chatId.flatMapLatest { id ->
-        if (id == null) flowOf(null) else repository.observeChat(id).map { it?.title }
+    private val chat = chatId.flatMapLatest { id -> if (id == null) flowOf(null) else repository.observeChat(id) }
+    private val title = chat.map { it?.title }
+
+    /** Persona picked on the welcome screen for the NEXT new chat. */
+    private val pickedPersona = MutableStateFlow<String?>(null)
+
+    private val personaUi: Flow<PersonaUi> = combine(
+        personaRepository.observePersonas(),
+        personaRepository.observePrompts(),
+        pickedPersona,
+        chat,
+        chatId,
+    ) { personas, prompts, picked, current, id ->
+        PersonaUi(personas, prompts, if (id == null) picked else current?.personaId)
     }
 
+    private data class PersonaUi(val personas: List<Persona>, val prompts: List<SavedPrompt>, val personaId: String?)
+
     val uiState: StateFlow<ChatUiState> = combine(
-        chatId,
-        title,
+        combine(chatId, title, ::Pair),
         conversation,
         streaming,
         modelUi,
-    ) { id, title, (list, versions), live, model ->
+        personaUi,
+    ) { (id, title), (list, versions), live, model, persona ->
         ChatUiState(
             chatId = id,
             title = title,
             messages = list,
             branches = versions,
             draft = draft,
+            personas = persona.personas,
+            personaId = persona.personaId,
+            prompts = persona.prompts,
             streamingText = live,
             isGenerating = live != null,
             model = model,
@@ -161,7 +182,7 @@ class ChatViewModel @Inject constructor(
         if (prompt.isEmpty() || generationJob?.isActive == true) return
         generationJob = viewModelScope.launch {
             val isNewChat = chatId.value == null
-            val id = chatId.value ?: repository.createChat().also { chatId.value = it }
+            val id = chatId.value ?: repository.createChat(pickedPersona.value).also { chatId.value = it }
             streaming.value = "" // shows the "thinking" bubble immediately
             when (val result = guarded { repository.sendMessage(id, prompt) }) {
                 is AppResult.Success -> collectAnswer(id, result.value)
@@ -265,6 +286,12 @@ class ChatViewModel @Inject constructor(
     fun newChat() {
         stop()
         chatId.value = null
+        pickedPersona.value = null
+    }
+
+    /** Picks how the NEXT new chat answers (welcome screen). An existing chat keeps its persona. */
+    fun selectPersona(personaId: String?) {
+        if (chatId.value == null) pickedPersona.value = personaId
     }
 
     /**

@@ -54,6 +54,7 @@ internal class OfflineChatRepository @Inject constructor(
     private val settingsSource: InferenceSettingsSource,
     private val clock: Clock,
     private val summarizer: ConversationSummarizer,
+    private val personas: PersonaRepository,
 ) : ChatRepository {
 
     /** What the engine's current conversation was built for. */
@@ -123,6 +124,19 @@ internal class OfflineChatRepository @Inject constructor(
         is AppResult.Success -> AppResult.Success(Unit)
     }
 
+    /**
+     * The settings for one chat: a chat started with a persona answers with that persona's
+     * instructions (plus the honesty and safety rules every answer keeps) and, if the persona
+     * has one, its own temperature. The model stays the same.
+     */
+    private suspend fun settingsFor(chatId: String, base: InferenceSettings): InferenceSettings {
+        val persona = chatDao.get(chatId)?.personaId?.let { personas.persona(it) } ?: return base
+        return base.copy(
+            systemPrompt = "${persona.instructions}\n\n$PERSONA_RULES",
+            sampling = persona.temperature?.let { base.sampling.copy(temperature = it.toDouble()) } ?: base.sampling,
+        )
+    }
+
     /** Reads the current settings and loads that model. Returns the settings on success. */
     private suspend fun loadSelectedModel(): AppResult<InferenceSettings> {
         val settings = settingsSource.current() ?: return AppResult.Failure(ErrorKind.NO_MODEL)
@@ -134,17 +148,17 @@ internal class OfflineChatRepository @Inject constructor(
 
     override fun resetModelCrashProtection() = engine.resetCrashProtection()
 
-    override suspend fun createChat(): String {
+    override suspend fun createChat(personaId: String?): String {
         val now = nextTimestamp()
         val id = UUID.randomUUID().toString()
-        chatDao.upsert(Chat(id, title = "", createdAt = now, updatedAt = now).asEntity())
+        chatDao.upsert(Chat(id, title = "", createdAt = now, updatedAt = now, personaId = personaId).asEntity())
         return id
     }
 
     override suspend fun sendMessage(chatId: String, text: String): AppResult<Flow<String>> {
         val settings = when (val loaded = loadSelectedModel()) {
             is AppResult.Failure -> return loaded
-            is AppResult.Success -> loaded.value
+            is AppResult.Success -> settingsFor(chatId, loaded.value)
         }
         val session = sessionLock.withLock {
             // History BEFORE the new message: the new message is sent as the prompt itself.
@@ -177,7 +191,7 @@ internal class OfflineChatRepository @Inject constructor(
     override suspend fun regenerateLastAnswer(chatId: String): AppResult<Flow<String>>? {
         val settings = when (val loaded = loadSelectedModel()) {
             is AppResult.Failure -> return loaded
-            is AppResult.Success -> loaded.value
+            is AppResult.Success -> settingsFor(chatId, loaded.value)
         }
         val prompt = sessionLock.withLock {
             val messages = currentPath(chatId)
@@ -224,7 +238,7 @@ internal class OfflineChatRepository @Inject constructor(
     override suspend fun editAndResend(chatId: String, messageId: String, newText: String): AppResult<Flow<String>> {
         val settings = when (val loaded = loadSelectedModel()) {
             is AppResult.Failure -> return loaded
-            is AppResult.Success -> loaded.value
+            is AppResult.Success -> settingsFor(chatId, loaded.value)
         }
         val session = sessionLock.withLock {
             val path = currentPath(chatId)
@@ -388,5 +402,9 @@ internal class OfflineChatRepository @Inject constructor(
         const val PERCENT = 100
 
         const val SUMMARY_HEADER = "Summary of the earlier part of this conversation:"
+
+        /** Appended to every persona's instructions, including the user's own. */
+        const val PERSONA_RULES = "You run fully offline on the user's phone. Answer the user's latest message. " +
+            "If you are not sure about something, say so instead of guessing. Refuse requests that could cause harm."
     }
 }

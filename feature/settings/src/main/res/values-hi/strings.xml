@@ -52,4 +52,6 @@
     </plurals>
     <string name="feature_settings_dynamic_color">वॉलपेपर से रंग</string>
     <string name="feature_settings_dynamic_color_hint">बंद: PocketMind के रंग इस्तेमाल करें।</string>
+    <string name="feature_settings_personas">पर्सोना और प्रॉम्प्ट</string>
+    <string name="feature_settings_personas_hint">जवाब देने के तरीके, और बार-बार इस्तेमाल होने वाले प्रॉम्प्ट</string>
 </resources>

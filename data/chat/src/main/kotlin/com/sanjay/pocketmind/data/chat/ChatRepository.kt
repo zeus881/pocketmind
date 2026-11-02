@@ -39,8 +39,8 @@ interface ChatRepository {
     /** Lets the next load retry backends that crashed the app before (the user chose "Try again"). */
     fun resetModelCrashProtection()
 
-    /** Creates an empty chat and returns its id. */
-    suspend fun createChat(): String
+    /** Creates an empty chat (answering as [personaId], or as the default assistant) and returns its id. */
+    suspend fun createChat(personaId: String? = null): String
 
     /**
      * Saves the user's message and returns the stream of the assistant's answer.

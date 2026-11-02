@@ -98,6 +98,11 @@ internal fun SettingsContent(state: SettingsUiState, vm: SettingsActions, naviga
             TemperatureSlider(s.temperature, vm::setTemperature)
             TopKSlider(s.topK, vm::setTopK)
             SystemPromptRow(state.effectiveSystemPrompt, isCustom = s.customSystemPrompt != null, vm)
+            NavRow(
+                title = stringResource(R.string.feature_settings_personas),
+                subtitle = stringResource(R.string.feature_settings_personas_hint),
+                onClick = navigation.onOpenPersonas,
+            )
 
             Section(R.string.feature_settings_section_appearance)
             ThemeChooser(s.themeMode, vm::setThemeMode)

@@ -60,5 +60,6 @@ include(":feature:benchmark")
 include(":feature:onboarding")
 include(":feature:documents")
 include(":feature:translate")
+include(":feature:personas")
 
 include(":benchmark")

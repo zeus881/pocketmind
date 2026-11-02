@@ -90,9 +90,9 @@ class FakeChatRepository : ChatRepository {
         if (loadFailure == FailureReason.CRASHED_LAST_TIME) loadFailure = null
     }
 
-    override suspend fun createChat(): String {
+    override suspend fun createChat(personaId: String?): String {
         val id = "chat${nextId++}"
-        chats.value += id to Chat(id, "", 0, 0)
+        chats.value += id to Chat(id, "", 0, 0, personaId = personaId)
         return id
     }
 

@@ -8,12 +8,17 @@ import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
+import com.sanjay.pocketmind.core.model.Persona
+import com.sanjay.pocketmind.core.model.SavedPrompt
 import com.sanjay.pocketmind.core.model.TurnRole
 import com.sanjay.pocketmind.core.testing.MainDispatcherRule
 import com.sanjay.pocketmind.data.chat.ChatExporter
+import com.sanjay.pocketmind.data.chat.PersonaRepository
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -37,11 +42,44 @@ class ChatViewModelTest {
     /** android.net.Uri has no real implementation in JVM tests; the fake exporter never reads it. */
     private val anyUri: Uri = mockk()
 
+    private val personas = object : PersonaRepository {
+        val list = listOf(Persona("builtin:coder", "Coder", "code", 0.2f, builtIn = true))
+        override fun observePersonas(): Flow<List<Persona>> = flowOf(list)
+        override suspend fun persona(id: String) = list.firstOrNull { it.id == id }
+        override suspend fun savePersona(id: String?, name: String, instructions: String, temperature: Float?) = null
+        override suspend fun deletePersona(id: String) = Unit
+        override fun observePrompts(): Flow<List<SavedPrompt>> = flowOf(listOf(SavedPrompt("p", "Email", "Write")))
+        override suspend fun savePrompt(id: String?, title: String, text: String) = null
+        override suspend fun deletePrompt(id: String) = Unit
+    }
+
     private fun viewModel(chatId: String? = null, draft: String? = null) = ChatViewModel(
         repository,
         exporter,
+        personas,
         SavedStateHandle(mapOf(ChatViewModel.CHAT_ID_KEY to chatId, ChatViewModel.DRAFT_KEY to draft)),
     )
+
+    @Test
+    fun `a persona picked on the welcome screen is used for the new chat`() = runTest(mainRule.testDispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+        assertEquals(listOf("Coder"), vm.uiState.value.personas.map { it.name })
+        assertEquals(listOf("Email"), vm.uiState.value.prompts.map { it.title })
+
+        vm.selectPersona("builtin:coder")
+        advanceUntilIdle()
+        assertEquals("Coder", vm.uiState.value.personaName)
+        vm.send("Sort a list")
+        advanceUntilIdle()
+
+        assertEquals("builtin:coder", repository.chats.value.values.single().personaId)
+        // Once the chat exists, its persona can't be switched from the welcome chips.
+        vm.selectPersona(null)
+        advanceUntilIdle()
+        assertEquals("builtin:coder", vm.uiState.value.personaId)
+    }
 
     private class FakeExporter : ChatExporter {
         val written = mutableListOf<Pair<String, Int>>()

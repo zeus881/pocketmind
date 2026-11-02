@@ -108,6 +108,7 @@ dependencies {
     implementation(projects.feature.onboarding)
     implementation(projects.feature.documents)
     implementation(projects.feature.translate)
+    implementation(projects.feature.personas)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

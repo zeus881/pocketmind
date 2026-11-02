@@ -4,6 +4,8 @@ import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Message
+import com.sanjay.pocketmind.core.model.Persona
+import com.sanjay.pocketmind.core.model.SavedPrompt
 
 /**
  * Everything the chat screen draws, in one immutable object.
@@ -24,7 +26,15 @@ data class ChatUiState(
     val model: ModelUi = ModelUi.Loading,
     /** Text shared from another app ("Share → PocketMind"): pre-filled in the input, not sent automatically. */
     val draft: String = "",
-)
+    /** Personas to choose from when starting a chat (built-in first). */
+    val personas: List<Persona> = emptyList(),
+    /** The persona of this chat; for a new chat, the one picked on the welcome screen. Null = default assistant. */
+    val personaId: String? = null,
+    /** The prompt library, insertable from the input box. */
+    val prompts: List<SavedPrompt> = emptyList(),
+) {
+    val personaName: String? get() = personas.firstOrNull { it.id == personaId }?.name
+}
 
 /** File formats a chat can be exported to. */
 enum class ExportFormat(val mimeType: String, val extension: String) {

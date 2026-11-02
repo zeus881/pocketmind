@@ -5,4 +5,5 @@ data class SettingsNavigation(
     val onOpenModels: () -> Unit,
     val onOpenBenchmark: () -> Unit,
     val onOpenLicenses: () -> Unit,
+    val onOpenPersonas: () -> Unit = {},
 )

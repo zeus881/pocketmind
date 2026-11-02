@@ -16,6 +16,8 @@ data class Chat(
      * this message back to the first one. Null for an empty chat.
      */
     val currentLeafId: String? = null,
+    /** The persona this chat was started with (null = the default assistant). */
+    val personaId: String? = null,
 )
 
 /** A named group of chats in History. */

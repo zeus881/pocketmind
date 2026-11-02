@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -57,6 +58,7 @@ import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.llm.FailureReason
+import com.sanjay.pocketmind.core.model.Persona
 import com.sanjay.pocketmind.feature.chat.component.ChatInput
 import com.sanjay.pocketmind.feature.chat.component.MessageList
 import kotlinx.coroutines.delay
@@ -125,6 +127,7 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
         onOpenModels = onOpenModels,
         onEdit = viewModel::edit,
         onShowVersion = viewModel::showVersion,
+        onSelectPersona = viewModel::selectPersona,
         onExport = { format ->
             val name = exportFileName(state.title, format)
             if (format == ExportFormat.MARKDOWN) saveMarkdown.launch(name) else savePdf.launch(name)
@@ -147,6 +150,7 @@ fun ChatContent(
     onEdit: (messageId: String, newText: String) -> Unit = { _, _ -> },
     onShowVersion: (messageId: String, offset: Int) -> Unit = { _, _ -> },
     onExport: (ExportFormat) -> Unit = {},
+    onSelectPersona: (String?) -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -154,11 +158,20 @@ fun ChatContent(
             TopAppBar(
                 title = {
                     val newChat = stringResource(R.string.feature_chat_new_chat)
-                    Text(
-                        text = state.title?.takeIf { it.isNotBlank() } ?: newChat,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    Column {
+                        Text(
+                            text = state.title?.takeIf { it.isNotBlank() } ?: newChat,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                        state.personaName?.let { name ->
+                            Text(
+                                text = name,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
                 },
                 actions = {
                     IconButton(onClick = onNewChat) {
@@ -214,7 +227,12 @@ fun ChatContent(
                     }
                     Box(Modifier.weight(1f)) {
                         if (state.messages.isEmpty() && state.streamingText == null) {
-                            ChatWelcome(onSuggestion = onSend)
+                            ChatWelcome(
+                                onSuggestion = onSend,
+                                personas = state.personas,
+                                selectedPersonaId = state.personaId,
+                                onSelectPersona = onSelectPersona,
+                            )
                         } else {
                             MessageList(
                                 messages = state.messages,
@@ -232,6 +250,7 @@ fun ChatContent(
                         isGenerating = state.isGenerating,
                         onSend = onSend,
                         initialText = state.draft,
+                        prompts = state.prompts,
                         onStop = onStop,
                         modifier = Modifier.readableWidth(),
                     )
@@ -300,7 +319,12 @@ private const val READY_VISIBLE_MS = 3_000L
  * prompts. Suggestions answer the blank-page question "what can I ask?"; tapping one sends it.
  */
 @Composable
-private fun ChatWelcome(onSuggestion: (String) -> Unit) {
+private fun ChatWelcome(
+    onSuggestion: (String) -> Unit,
+    personas: List<Persona>,
+    selectedPersonaId: String?,
+    onSelectPersona: (String?) -> Unit,
+) {
     val suggestions = listOf(
         stringResource(R.string.feature_chat_suggestion_explain),
         stringResource(R.string.feature_chat_suggestion_code),
@@ -328,6 +352,31 @@ private fun ChatWelcome(onSuggestion: (String) -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
+        if (personas.isNotEmpty()) {
+            // "Answer as": the default assistant or a persona, for this new chat.
+            Text(
+                stringResource(R.string.feature_chat_answer_as),
+                style = MaterialTheme.typography.labelLarge,
+                modifier = Modifier.padding(top = PmSpacing.s),
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(PmSpacing.s, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(PmSpacing.s),
+            ) {
+                FilterChip(
+                    selected = selectedPersonaId == null,
+                    onClick = { onSelectPersona(null) },
+                    label = { Text(stringResource(R.string.feature_chat_persona_default)) },
+                )
+                personas.forEach { persona ->
+                    FilterChip(
+                        selected = persona.id == selectedPersonaId,
+                        onClick = { onSelectPersona(persona.id) },
+                        label = { Text(persona.name) },
+                    )
+                }
+            }
+        }
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(PmSpacing.s, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(PmSpacing.s),

@@ -58,6 +58,7 @@ class OfflineChatRepositoryTest {
                 summaryCalls += previous to turns.size
                 summaryResult?.let { "$it${summaryCalls.size}" }
             },
+            personas = RoomPersonaRepository(db.personaDao()) { now },
         )
     }
 
@@ -107,6 +108,30 @@ class OfflineChatRepositoryTest {
         assertEquals(listOf(a), repository.observeChats("quadcop").first().map { it.chat.id })
         // "%" is a literal percent sign, not "anything": only the "50%" chat matches.
         assertEquals(listOf(b), repository.observeChats("%").first().map { it.chat.id })
+    }
+
+    @Test
+    fun aChatStartedWithAPersonaAnswersWithItsInstructionsAndTemperature() = runTest {
+        val chatId = repository.createChat(personaId = "builtin:coder")
+
+        sendAndFinish(chatId, "Reverse a string in Kotlin")
+
+        val session = engine.sessions.last()
+        assertTrue(session.systemPrompt.startsWith("You are PocketMind in Coder mode"))
+        assertTrue(session.systemPrompt.contains("Refuse requests that could cause harm"))
+        assertEquals(0.2, session.sampling.temperature, 0.0001)
+    }
+
+    @Test
+    fun aDeletedCustomPersonaFallsBackToTheDefaultPrompt() = runTest {
+        val personas = RoomPersonaRepository(db.personaDao()) { now }
+        val pirate = personas.savePersona(null, "Pirate", "Talk like a pirate.", null)!!
+        val chatId = repository.createChat(personaId = pirate)
+        personas.deletePersona(pirate)
+
+        sendAndFinish(chatId, "hello")
+
+        assertEquals("SYS", engine.sessions.last().systemPrompt)
     }
 
     @Test

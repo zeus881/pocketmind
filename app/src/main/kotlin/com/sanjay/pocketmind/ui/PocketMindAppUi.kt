@@ -34,6 +34,8 @@ import com.sanjay.pocketmind.feature.models.navigation.modelsScreen
 import com.sanjay.pocketmind.feature.models.navigation.navigateToModels
 import com.sanjay.pocketmind.feature.onboarding.navigation.OnboardingRoute
 import com.sanjay.pocketmind.feature.onboarding.navigation.onboardingScreen
+import com.sanjay.pocketmind.feature.personas.navigation.navigateToPersonas
+import com.sanjay.pocketmind.feature.personas.navigation.personasScreen
 import com.sanjay.pocketmind.feature.settings.SettingsNavigation
 import com.sanjay.pocketmind.feature.settings.navigation.settingsScreen
 import com.sanjay.pocketmind.feature.translate.navigation.translateScreen
@@ -129,8 +131,10 @@ fun PocketMindAppUi(
                     onOpenModels = { navController.navigateToModels() },
                     onOpenBenchmark = { navController.navigateToBenchmark() },
                     onOpenLicenses = { navController.navigate(LicensesRoute) },
+                    onOpenPersonas = { navController.navigateToPersonas() },
                 ),
             )
+            personasScreen(onBack = { navController.popBackStack() })
             licensesScreen(onBack = { navController.popBackStack() })
             modelsScreen(onBack = { navController.popBackStack() })
             benchmarkScreen(onBack = { navController.popBackStack() })

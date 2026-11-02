@@ -9,6 +9,7 @@ import com.sanjay.pocketmind.core.database.dao.ChatDao
 import com.sanjay.pocketmind.core.database.dao.DocumentDao
 import com.sanjay.pocketmind.core.database.dao.FolderDao
 import com.sanjay.pocketmind.core.database.dao.MessageDao
+import com.sanjay.pocketmind.core.database.dao.PersonaDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -41,4 +42,7 @@ object DatabaseModule {
 
     @Provides
     fun providesFolderDao(db: PocketMindDatabase): FolderDao = db.folderDao()
+
+    @Provides
+    fun providesPersonaDao(db: PocketMindDatabase): PersonaDao = db.personaDao()
 }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_personas_title">Personas and prompts</string>
+    <string name="feature_personas_back">Back</string>
+    <string name="feature_personas_section_personas">Personas</string>
+    <string name="feature_personas_section_prompts">Saved prompts</string>
+    <string name="feature_personas_built_in">Built in</string>
+    <string name="feature_personas_new_persona">New persona</string>
+    <string name="feature_personas_new_prompt">New prompt</string>
+    <string name="feature_personas_edit">Edit</string>
+    <string name="feature_personas_delete">Delete %1$s</string>
+    <string name="feature_personas_name">Name</string>
+    <string name="feature_personas_instructions">Instructions (how should it answer?)</string>
+    <string name="feature_personas_own_creativity">Own creativity level</string>
+    <string name="feature_personas_creativity">Creativity: %1$s</string>
+    <string name="feature_personas_prompt_title">Title</string>
+    <string name="feature_personas_prompt_text">Prompt text</string>
+    <string name="feature_personas_no_prompts">No saved prompts yet. Saved prompts can be inserted from the chat input.</string>
+    <string name="feature_personas_save">Save</string>
+    <string name="feature_personas_cancel">Cancel</string>
+</resources>

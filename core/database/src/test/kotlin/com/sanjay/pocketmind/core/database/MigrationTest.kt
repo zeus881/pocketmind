@@ -50,6 +50,9 @@ class MigrationTest {
     @Test
     fun migrateFrom4KeepsChats() = runTest { migrateAndCheck(fromVersion = 4) }
 
+    @Test
+    fun migrateFrom5KeepsChats() = runTest { migrateAndCheck(fromVersion = 5) }
+
     /** v4 → v5 is a manual migration: check the data it derives, not just that it opens. */
     @Test
     fun migrateFrom4LinksMessagesSetsTheBranchAndIndexesText() = runTest {
@@ -108,6 +111,10 @@ class MigrationTest {
                 sqlite.execSQL(entity.jsonObject.string("createSql").replace("\${TABLE_NAME}", table))
                 entity.jsonObject["indices"]?.jsonArray?.forEach { index ->
                     sqlite.execSQL(index.jsonObject.string("createSql").replace("\${TABLE_NAME}", table))
+                }
+                // FTS tables (v5+) come with the triggers that keep them in sync.
+                entity.jsonObject["contentSyncTriggers"]?.jsonArray?.forEach {
+                    sqlite.execSQL(it.jsonPrimitive.content)
                 }
             }
             // Room's bookkeeping table + that version's identity hash, exactly as Room wrote them.

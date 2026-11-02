@@ -44,4 +44,7 @@
     <string name="feature_chat_exported">Chat saved</string>
     <string name="feature_chat_export_failed">The chat could not be saved to that file.</string>
 
+    <string name="feature_chat_answer_as">Answer as</string>
+    <string name="feature_chat_persona_default">Assistant</string>
+    <string name="feature_chat_prompt_library">Insert a saved prompt</string>
 </resources>

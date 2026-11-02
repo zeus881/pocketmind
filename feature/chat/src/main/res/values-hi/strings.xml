@@ -44,4 +44,7 @@
     <string name="feature_chat_exported">चैट सहेजी गई</string>
     <string name="feature_chat_export_failed">चैट उस फ़ाइल में सहेजी नहीं जा सकी।</string>
 
+    <string name="feature_chat_answer_as">किस रूप में जवाब दे</string>
+    <string name="feature_chat_persona_default">सहायक</string>
+    <string name="feature_chat_prompt_library">सहेजा हुआ प्रॉम्प्ट डालें</string>
 </resources>
