@@ -33,4 +33,14 @@
     <string name="feature_settings_privacy_statement">PocketMind has no account, no analytics and no ads. Chats, documents and settings stay on this phone and are excluded from backups. The only internet connection is the model download from Hugging Face over HTTPS.</string>
     <string name="feature_settings_licenses">Open-source licences</string>
     <string name="feature_settings_licenses_hint">Libraries and models used by PocketMind</string>
+    <string name="feature_settings_lock_after">Lock again after leaving the app</string>
+    <string name="feature_settings_lock_immediately">Immediately</string>
+    <plurals name="feature_settings_lock_seconds">
+        <item quantity="one">After %d second</item>
+        <item quantity="other">After %d seconds</item>
+    </plurals>
+    <plurals name="feature_settings_lock_minutes">
+        <item quantity="one">After %d minute</item>
+        <item quantity="other">After %d minutes</item>
+    </plurals>
 </resources>

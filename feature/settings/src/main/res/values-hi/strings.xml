@@ -33,4 +33,14 @@
     <string name="feature_settings_privacy_statement">PocketMind में कोई अकाउंट, एनालिटिक्स या विज्ञापन नहीं है। चैट, दस्तावेज़ और सेटिंग्स इसी फ़ोन पर रहती हैं और बैकअप में शामिल नहीं होतीं। इंटरनेट का इकलौता इस्तेमाल Hugging Face से HTTPS पर मॉडल डाउनलोड करना है।</string>
     <string name="feature_settings_licenses">ओपन-सोर्स लाइसेंस</string>
     <string name="feature_settings_licenses_hint">PocketMind में इस्तेमाल लाइब्रेरी और मॉडल</string>
+    <string name="feature_settings_lock_after">ऐप छोड़ने के बाद फिर से लॉक करें</string>
+    <string name="feature_settings_lock_immediately">तुरंत</string>
+    <plurals name="feature_settings_lock_seconds">
+        <item quantity="one">%d सेकंड बाद</item>
+        <item quantity="other">%d सेकंड बाद</item>
+    </plurals>
+    <plurals name="feature_settings_lock_minutes">
+        <item quantity="one">%d मिनट बाद</item>
+        <item quantity="other">%d मिनट बाद</item>
+    </plurals>
 </resources>

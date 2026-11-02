@@ -38,6 +38,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
@@ -104,6 +105,7 @@ private fun SettingsContent(state: SettingsUiState, vm: SettingsViewModel, navig
 
             Section(R.string.feature_settings_section_privacy)
             AppLockRow(s.appLockEnabled, vm::setAppLock)
+            if (s.appLockEnabled) LockTimeoutChooser(s.appLockTimeoutSeconds, vm::setAppLockTimeout)
             Text(
                 text = stringResource(R.string.feature_settings_privacy_statement),
                 style = MaterialTheme.typography.bodyMedium,
@@ -254,6 +256,41 @@ private fun AppLockRow(enabled: Boolean, onChange: (Boolean) -> Unit) {
         )
     }
 }
+
+/** "Lock after: immediately / 30 s / 1 min / 5 min" as one radio group. */
+@Composable
+private fun LockTimeoutChooser(current: Int, onChange: (Int) -> Unit) {
+    Text(
+        text = stringResource(R.string.feature_settings_lock_after),
+        style = MaterialTheme.typography.bodyLarge,
+        modifier = Modifier.padding(start = 16.dp, top = 8.dp),
+    )
+    Column(Modifier.selectableGroup()) {
+        UserSettings.LOCK_TIMEOUT_OPTIONS.forEach { seconds ->
+            val label = when (seconds) {
+                0 -> stringResource(R.string.feature_settings_lock_immediately)
+
+                else -> if (seconds < SECONDS_PER_MINUTE) {
+                    pluralStringResource(R.plurals.feature_settings_lock_seconds, seconds, seconds)
+                } else {
+                    val minutes = seconds / SECONDS_PER_MINUTE
+                    pluralStringResource(R.plurals.feature_settings_lock_minutes, minutes, minutes)
+                }
+            }
+            ListItem(
+                headlineContent = { Text(label) },
+                leadingContent = { RadioButton(selected = current == seconds, onClick = null) },
+                modifier = Modifier.selectable(
+                    selected = current == seconds,
+                    role = Role.RadioButton,
+                    onClick = { onChange(seconds) },
+                ),
+            )
+        }
+    }
+}
+
+private const val SECONDS_PER_MINUTE = 60
 
 @Composable
 private fun ThemeChooser(current: ThemeMode, onChange: (ThemeMode) -> Unit) {

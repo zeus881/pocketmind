@@ -16,6 +16,8 @@ data class UserSettings(
     val customSystemPrompt: String? = null,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
     val appLockEnabled: Boolean = false,
+    /** How long the app may stay in the background before the lock comes back (0 = immediately). */
+    val appLockTimeoutSeconds: Int = DEFAULT_LOCK_TIMEOUT_SECONDS,
 ) {
     companion object {
         /**
@@ -28,5 +30,14 @@ data class UserSettings(
         const val MAX_TEMPERATURE = 1.5f
         const val MIN_TOP_K = 1
         const val MAX_TOP_K = 100
+
+        /**
+         * 30 s by default: switching to another app for a moment (or picking a PDF in the system
+         * file picker) shouldn't demand a fingerprint, but a phone left on a table locks soon.
+         */
+        const val DEFAULT_LOCK_TIMEOUT_SECONDS = 30
+
+        /** The choices offered in Settings, in seconds. */
+        val LOCK_TIMEOUT_OPTIONS = listOf(0, 30, 60, 300)
     }
 }

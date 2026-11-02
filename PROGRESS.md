@@ -8,7 +8,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 |---|---|---|---|
 | 0 Foundations: Kover, config cache, Dependabot, CI coverage, perf budget | DONE | 66 % (measured 66.8 %) | `koverVerifyApp` = debug-only merged variant |
 | 1 Crash-loop guard + model integrity | DONE | 67 % (measured 67.0 %, 158 tests) | to verify on device: damaged-file message, "Check file" time |
-| 2 App lock overlay + grace period | NEXT | | |
+| 2 App lock overlay + grace period | DONE | 67 % (measured 67.9 %, 172 tests) | KSP incremental off (lost Hilt outputs); to verify on device: lock + PDF picker, Recents thumbnail |
+| 3 Memory policy + download robustness | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 

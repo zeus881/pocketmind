@@ -100,4 +100,5 @@ dependencies {
 
     testImplementation(projects.core.testing)
     testImplementation(libs.turbine)
+    testImplementation(libs.androidx.datastore.preferences)
 }

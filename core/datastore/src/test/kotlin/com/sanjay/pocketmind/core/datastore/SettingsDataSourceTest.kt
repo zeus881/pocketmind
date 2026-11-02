@@ -51,4 +51,13 @@ class SettingsDataSourceTest {
         dataSource.setCustomSystemPrompt("   ")
         assertNull(dataSource.current().customSystemPrompt)
     }
+
+    @Test
+    fun lockTimeoutAcceptsOnlyOfferedValues() = runTest {
+        assertEquals(UserSettings.DEFAULT_LOCK_TIMEOUT_SECONDS, dataSource.current().appLockTimeoutSeconds)
+        dataSource.setAppLockTimeoutSeconds(300)
+        assertEquals(300, dataSource.current().appLockTimeoutSeconds)
+        dataSource.setAppLockTimeoutSeconds(7) // not an option: falls back to the default
+        assertEquals(UserSettings.DEFAULT_LOCK_TIMEOUT_SECONDS, dataSource.current().appLockTimeoutSeconds)
+    }
 }

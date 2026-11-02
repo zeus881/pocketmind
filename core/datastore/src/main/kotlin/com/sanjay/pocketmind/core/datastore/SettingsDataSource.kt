@@ -40,6 +40,7 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
             themeMode = prefs[Keys.THEME]?.let { name -> ThemeMode.entries.firstOrNull { it.name == name } }
                 ?: ThemeMode.SYSTEM,
             appLockEnabled = prefs[Keys.APP_LOCK] ?: false,
+            appLockTimeoutSeconds = prefs[Keys.APP_LOCK_TIMEOUT] ?: UserSettings.DEFAULT_LOCK_TIMEOUT_SECONDS,
         )
     }
 
@@ -73,6 +74,12 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
 
     suspend fun setAppLockEnabled(enabled: Boolean) = update { it[Keys.APP_LOCK] = enabled }
 
+    /** Only the values offered in Settings are accepted; anything else falls back to the default. */
+    suspend fun setAppLockTimeoutSeconds(seconds: Int) = update {
+        it[Keys.APP_LOCK_TIMEOUT] = seconds.takeIf { s -> s in UserSettings.LOCK_TIMEOUT_OPTIONS }
+            ?: UserSettings.DEFAULT_LOCK_TIMEOUT_SECONDS
+    }
+
     /**
      * Applies [block] in one DataStore transaction. Returns Unit on purpose: DataStore's own
      * `edit` returns its `Preferences` type, which would leak DataStore into every caller's API.
@@ -92,5 +99,6 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
         val SYSTEM_PROMPT = stringPreferencesKey("system_prompt")
         val THEME = stringPreferencesKey("theme_mode")
         val APP_LOCK = booleanPreferencesKey("app_lock")
+        val APP_LOCK_TIMEOUT = intPreferencesKey("app_lock_timeout_s")
     }
 }
