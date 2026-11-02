@@ -47,14 +47,40 @@ class MigrationTest {
     @Test
     fun migrateFrom3KeepsChats() = runTest { migrateAndCheck(fromVersion = 3) }
 
+    @Test
+    fun migrateFrom4KeepsChats() = runTest { migrateAndCheck(fromVersion = 4) }
+
+    /** v4 → v5 is a manual migration: check the data it derives, not just that it opens. */
+    @Test
+    fun migrateFrom4LinksMessagesSetsTheBranchAndIndexesText() = runTest {
+        val name = "migration-v4-branches.db"
+        createOldDatabase(name, 4) { sqlite ->
+            sqlite.execSQL(
+                "INSERT INTO messages (id, chatId, role, text, createdAt, status, tokensPerSecond, backend) " +
+                    "VALUES ('m2', 'c1', 'ASSISTANT', 'Quadcopters use gyroscopes', 2, 'COMPLETE', NULL, NULL)",
+            )
+            sqlite.execSQL(
+                "INSERT INTO messages (id, chatId, role, text, createdAt, status, tokensPerSecond, backend) " +
+                    "VALUES ('m3', 'c1', 'USER', 'thanks', 3, 'COMPLETE', NULL, NULL)",
+            )
+        }
+        val db = open(name)
+
+        val messages = db.messageDao().getAll("c1")
+        assertEquals(listOf(null, "m1", "m2"), messages.map { it.parentId })
+        assertEquals("m3", db.chatDao().get("c1")?.currentLeafId)
+        val found = db.chatDao().observeSummaries("gyro", "gyro", "\"gyro*\"").first()
+        assertEquals(listOf("c1"), found.map { it.id })
+        assertEquals("thanks", found.single().lastMessage)
+        db.close()
+    }
+
     private suspend fun migrateAndCheck(fromVersion: Int) {
         val name = "migration-from-$fromVersion.db"
         createOldDatabase(name, fromVersion)
 
-        val db = Room.databaseBuilder(context, PocketMindDatabase::class.java, name)
-            .allowMainThreadQueries()
-            .build()
-        val chats = db.chatDao().observeSummaries("").first() // opening triggers migrate + validate
+        val db = open(name)
+        val chats = db.chatDao().observeSummaries("", "", "").first() // opening triggers migrate + validate
         assertEquals(listOf("Old chat"), chats.map { it.title })
         assertEquals("hello", chats.single().lastMessage)
         assertTrue(db.benchmarkDao().observeAll().first().isEmpty())
@@ -66,7 +92,13 @@ class MigrationTest {
         db.close()
     }
 
-    private fun createOldDatabase(name: String, version: Int) {
+    /** Opens with today's database class and the same migrations the app uses. */
+    private fun open(name: String) = Room.databaseBuilder(context, PocketMindDatabase::class.java, name)
+        .apply { Migrations.ALL.forEach { addMigrations(it) } }
+        .allowMainThreadQueries()
+        .build()
+
+    private fun createOldDatabase(name: String, version: Int, extra: (SQLiteDatabase) -> Unit = {}) {
         val schema = Json.parseToJsonElement(File(SCHEMA_DIR, "$version.json").readText()).jsonObject
         val database = schema.getValue("database").jsonObject
         val file = context.getDatabasePath(name).apply { parentFile?.mkdirs() }
@@ -86,6 +118,7 @@ class MigrationTest {
                 "INSERT INTO messages (id, chatId, role, text, createdAt, status, tokensPerSecond, backend) " +
                     "VALUES ('m1', 'c1', 'USER', 'hello', 1, 'COMPLETE', NULL, NULL)",
             )
+            extra(sqlite)
         }
     }
 

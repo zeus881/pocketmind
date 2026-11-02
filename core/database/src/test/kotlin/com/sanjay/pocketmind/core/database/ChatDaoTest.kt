@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.sanjay.pocketmind.core.database.dao.ChatDao
 import com.sanjay.pocketmind.core.database.dao.MessageDao
 import com.sanjay.pocketmind.core.database.entity.ChatEntity
+import com.sanjay.pocketmind.core.database.entity.FolderEntity
 import com.sanjay.pocketmind.core.database.entity.MessageEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -54,7 +55,7 @@ class ChatDaoTest {
         messageDao.upsert(message("m1", "a", "first", at = 1))
         messageDao.upsert(message("m2", "a", "second", at = 2))
 
-        val rows = chatDao.observeSummaries("").first()
+        val rows = chatDao.observeSummaries("", "", "").first()
 
         assertEquals(listOf("b", "a"), rows.map { it.id })
         assertEquals("second", rows[1].lastMessage)
@@ -68,7 +69,7 @@ class ChatDaoTest {
         messageDao.upsert(message("m1", "b", "How long do I boil eggs for a drone pilot?", at = 1))
         chatDao.upsert(chat("c", "Taxes", updatedAt = 3))
 
-        val rows = chatDao.observeSummaries("drone").first()
+        val rows = chatDao.observeSummaries("drone", "drone", "\"drone*\"").first()
 
         assertEquals(setOf("a", "b"), rows.map { it.id }.toSet())
     }
@@ -101,5 +102,37 @@ class ChatDaoTest {
         val renamed = chatDao.get("a")!!
         assertEquals("New", renamed.title)
         assertEquals(5, renamed.updatedAt)
+    }
+
+    @Test
+    fun pinnedChatsComeFirst() = runTest {
+        chatDao.upsert(chat("old", "Old", updatedAt = 1))
+        chatDao.upsert(chat("new", "New", updatedAt = 2))
+        chatDao.setPinned("old", true)
+
+        assertEquals(listOf("old", "new"), chatDao.observeSummaries("", "", "").first().map { it.id })
+    }
+
+    @Test
+    fun deletingAFolderKeepsItsChats() = runTest {
+        val folders = db.folderDao()
+        folders.upsert(FolderEntity("f1", "Work", 1))
+        chatDao.upsert(chat("c1", "Plan", updatedAt = 1))
+        chatDao.setFolder("c1", "f1")
+
+        folders.deleteFolder("f1")
+
+        assertEquals(emptyList<FolderEntity>(), folders.observeAll().first())
+        assertEquals(null, chatDao.get("c1")?.folderId)
+    }
+
+    @Test
+    fun fullTextSearchFollowsInsertsAndDeletes() = runTest {
+        chatDao.upsert(chat("c1", "Untitled", updatedAt = 1))
+        messageDao.upsert(MessageEntity("m1", "c1", "USER", "Propeller balancing", 1, "COMPLETE", null, null))
+        assertEquals(listOf("c1"), chatDao.observeSummaries("prop", "prop", "\"prop*\"").first().map { it.id })
+
+        messageDao.delete("m1")
+        assertEquals(emptyList<String>(), chatDao.observeSummaries("prop", "prop", "\"prop*\"").first().map { it.id })
     }
 }

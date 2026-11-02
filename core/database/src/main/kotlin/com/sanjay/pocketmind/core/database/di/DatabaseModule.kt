@@ -2,10 +2,12 @@ package com.sanjay.pocketmind.core.database.di
 
 import android.content.Context
 import androidx.room.Room
+import com.sanjay.pocketmind.core.database.Migrations
 import com.sanjay.pocketmind.core.database.PocketMindDatabase
 import com.sanjay.pocketmind.core.database.dao.BenchmarkDao
 import com.sanjay.pocketmind.core.database.dao.ChatDao
 import com.sanjay.pocketmind.core.database.dao.DocumentDao
+import com.sanjay.pocketmind.core.database.dao.FolderDao
 import com.sanjay.pocketmind.core.database.dao.MessageDao
 import dagger.Module
 import dagger.Provides
@@ -22,6 +24,7 @@ object DatabaseModule {
     @Singleton
     fun providesDatabase(@ApplicationContext context: Context): PocketMindDatabase =
         Room.databaseBuilder(context, PocketMindDatabase::class.java, PocketMindDatabase.NAME)
+            .apply { Migrations.ALL.forEach { addMigrations(it) } }
             .build()
 
     @Provides
@@ -35,4 +38,7 @@ object DatabaseModule {
 
     @Provides
     fun providesDocumentDao(db: PocketMindDatabase): DocumentDao = db.documentDao()
+
+    @Provides
+    fun providesFolderDao(db: PocketMindDatabase): FolderDao = db.folderDao()
 }

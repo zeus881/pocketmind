@@ -17,7 +17,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 8 Design system v2 | DONE | 80 % (measured 80.5 %, 217 tests) | tokens everywhere (92 raw dp replaced), checkDesignTokens in lint, dynamic-colour switch |
 | 9 Adaptive layouts, edge-to-edge, predictive back | DONE | 80 % (measured 80.6 %, 218 tests) | rail on wide windows, History list-detail at 840 dp+; build memory capped (workers 6) after 2 stalls |
 | 10 Screen redesign + Roborazzi screenshot tests | DONE | 81 % (measured 81.1 %, 234 tests) | 64 goldens (16 states x phone light/dark, tablet, font 200 %); CI verifies |
-| 11 Database v5: pin, folders, branches, FTS | NEXT | | |
+| 11 Database v5: pin, folders, branches, FTS | DONE | 81 % (measured 81.7 %, 245 tests) | manual migration 4->5 tested from v1-v4; to verify on device: upgrade with a copy of real chats |
+| 12 Edit/resend, versions, branches, pin, folders, search | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 

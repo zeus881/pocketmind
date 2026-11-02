@@ -85,6 +85,30 @@ class OfflineChatRepositoryTest {
     }
 
     @Test
+    fun messagesFormAChainAndTheChatPointsAtTheNewest() = runTest {
+        val chatId = repository.createChat()
+        sendAndFinish(chatId, "one")
+        sendAndFinish(chatId, "two")
+
+        val messages = repository.observeMessages(chatId).first()
+        assertEquals(listOf(null) + messages.dropLast(1).map { it.id }, messages.map { it.parentId })
+        assertEquals(messages.last().id, repository.observeChat(chatId).first()?.currentLeafId)
+    }
+
+    @Test
+    fun searchUsesTheFullTextIndexAndTreatsWildcardsLiterally() = runTest {
+        val a = repository.createChat()
+        sendAndFinish(a, "Battery life")
+        sendAndFinish(a, "How long do quadcopters fly?") // only in a message, not in the title
+        val b = repository.createChat()
+        sendAndFinish(b, "Prices went up 50%")
+
+        assertEquals(listOf(a), repository.observeChats("quadcop").first().map { it.chat.id })
+        // "%" is a literal percent sign, not "anything": only the "50%" chat matches.
+        assertEquals(listOf(b), repository.observeChats("%").first().map { it.chat.id })
+    }
+
+    @Test
     fun noModelSelectedReturnsNoModelFailure() = runTest {
         settings = null
         val chatId = repository.createChat()

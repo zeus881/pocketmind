@@ -1,4 +1,5 @@
 import com.sanjay.pocketmind.buildlogic.AppVersion
+import com.sanjay.pocketmind.buildlogic.GitTagValueSource
 
 plugins {
     alias(libs.plugins.pocketmind.android.application)
@@ -33,12 +34,7 @@ val hasReleaseKeystore = listOf(keystorePath, keystorePassword, signingKeyAlias,
  * tag the build is "0.0.0-dev" (versionCode 1). Nobody edits version numbers by hand.
  */
 val versionTag: String? = providers.environmentVariable("POCKETMIND_VERSION_TAG").orNull
-    ?: runCatching {
-        providers.exec {
-            commandLine("git", "describe", "--tags", "--match", "v*", "--abbrev=0")
-            isIgnoreExitValue = true
-        }.standardOutput.asText.get().trim()
-    }.getOrNull()
+    ?: providers.of(GitTagValueSource::class.java) { }.orNull
 val appVersion = AppVersion.fromTag(versionTag)
 
 android {

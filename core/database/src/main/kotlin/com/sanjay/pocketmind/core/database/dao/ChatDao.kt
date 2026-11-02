@@ -11,12 +11,15 @@ import com.sanjay.pocketmind.core.database.entity.ConversationSummaryEntity
 import com.sanjay.pocketmind.core.database.entity.MessageEntity
 import kotlinx.coroutines.flow.Flow
 
-/** A history-list row: chat columns plus the newest message text (computed by SQL). */
+/** A history-list row: chat columns plus the text of the message shown last (computed by SQL). */
 data class ChatSummaryRow(
     val id: String,
     val title: String,
     val createdAt: Long,
     val updatedAt: Long,
+    val pinned: Boolean,
+    val folderId: String?,
+    val currentLeafId: String?,
     val lastMessage: String?,
 )
 
@@ -30,22 +33,38 @@ data class ChatSummaryRow(
 @Dao
 interface ChatDao {
     /**
-     * Chats whose title OR any message contains [query] (empty query = all chats), newest first.
-     * `||` is SQL string concatenation; LIKE is case-insensitive for ASCII in SQLite.
+     * History list, pinned chats first, then newest first. With a non-empty [query] only chats
+     * whose title contains [likePattern] (an escaped LIKE pattern) or whose messages match the
+     * full-text expression [ftsQuery] are returned. Build both with `SearchQuery` (data:chat).
+     * The last-message preview follows the chat's CURRENT branch ([ChatEntity.currentLeafId]).
      */
     @Query(
         """
-        SELECT c.id, c.title, c.createdAt, c.updatedAt,
-               (SELECT m.text FROM messages m WHERE m.chatId = c.id
-                ORDER BY m.createdAt DESC LIMIT 1) AS lastMessage
+        SELECT c.id, c.title, c.createdAt, c.updatedAt, c.pinned, c.folderId, c.currentLeafId,
+               COALESCE(
+                   (SELECT m.text FROM messages m WHERE m.id = c.currentLeafId),
+                   (SELECT m.text FROM messages m WHERE m.chatId = c.id ORDER BY m.createdAt DESC, m.id DESC LIMIT 1)
+               ) AS lastMessage
         FROM chats c
         WHERE :query = ''
-           OR c.title LIKE '%' || :query || '%'
-           OR EXISTS (SELECT 1 FROM messages m2 WHERE m2.chatId = c.id AND m2.text LIKE '%' || :query || '%')
-        ORDER BY c.updatedAt DESC
+           OR c.title LIKE '%' || :likePattern || '%' ESCAPE '\'
+           OR (:ftsQuery != '' AND c.id IN (
+                SELECT m2.chatId FROM messages m2
+                JOIN messages_fts ON m2.rowid = messages_fts.rowid
+                WHERE messages_fts MATCH :ftsQuery))
+        ORDER BY c.pinned DESC, c.updatedAt DESC
         """,
     )
-    fun observeSummaries(query: String): Flow<List<ChatSummaryRow>>
+    fun observeSummaries(query: String, likePattern: String, ftsQuery: String): Flow<List<ChatSummaryRow>>
+
+    @Query("UPDATE chats SET pinned = :pinned WHERE id = :id")
+    suspend fun setPinned(id: String, pinned: Boolean)
+
+    @Query("UPDATE chats SET folderId = :folderId WHERE id = :id")
+    suspend fun setFolder(id: String, folderId: String?)
+
+    @Query("UPDATE chats SET currentLeafId = :leafId WHERE id = :id")
+    suspend fun setCurrentLeaf(id: String, leafId: String?)
 
     @Query("SELECT * FROM chats WHERE id = :id")
     fun observe(id: String): Flow<ChatEntity?>

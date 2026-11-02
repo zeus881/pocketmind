@@ -80,10 +80,24 @@ internal class OfflineChatRepository @Inject constructor(
 
     override val engineState: StateFlow<EngineState> = engine.state
 
-    override fun observeChats(query: String): Flow<List<ChatSummary>> =
-        chatDao.observeSummaries(query.trim()).map { rows ->
-            rows.map { ChatSummary(Chat(it.id, it.title, it.createdAt, it.updatedAt), it.lastMessage) }
+    override fun observeChats(query: String): Flow<List<ChatSummary>> = SearchQuery.from(query).let { search ->
+        chatDao.observeSummaries(search.raw, search.likePattern, search.ftsQuery).map { rows ->
+            rows.map { row ->
+                ChatSummary(
+                    Chat(
+                        row.id,
+                        row.title,
+                        row.createdAt,
+                        row.updatedAt,
+                        row.pinned,
+                        row.folderId,
+                        row.currentLeafId,
+                    ),
+                    row.lastMessage,
+                )
+            }
         }
+    }
 
     override fun observeChat(chatId: String): Flow<Chat?> = chatDao.observe(chatId).map { it?.asModel() }
 
@@ -124,7 +138,17 @@ internal class OfflineChatRepository @Inject constructor(
             prepareSessionLocked(chatId, settings, history, prompt = text)
 
             val now = nextTimestamp()
-            messageDao.upsert(Message(UUID.randomUUID().toString(), chatId, TurnRole.USER, text, now).asEntity())
+            val question = Message(
+                id = UUID.randomUUID().toString(),
+                chatId = chatId,
+                role = TurnRole.USER,
+                text = text,
+                createdAt = now,
+                // v5 tree: the question follows the newest message of the chat's branch.
+                parentId = chatDao.get(chatId)?.currentLeafId ?: history.lastOrNull()?.id,
+            )
+            messageDao.upsert(question.asEntity())
+            chatDao.setCurrentLeaf(chatId, question.id)
             if (history.none { it.role == TurnRole.USER }) {
                 chatDao.rename(chatId, ChatTitles.fromFirstMessage(text), now) // auto-title
             } else {
@@ -147,6 +171,7 @@ internal class OfflineChatRepository @Inject constructor(
             if (lastUserIndex < 0) return null
             // Remove the old answer(s) after the last question.
             messages.drop(lastUserIndex + 1).forEach { messageDao.delete(it.id) }
+            chatDao.setCurrentLeaf(chatId, messages[lastUserIndex].id)
             sessionInSync = false // the model still remembers the old answer
             prepareSessionLocked(chatId, settings, messages.take(lastUserIndex), messages[lastUserIndex].text)
             messages[lastUserIndex].text to ownedSessionId
@@ -171,8 +196,10 @@ internal class OfflineChatRepository @Inject constructor(
                 status = status,
                 tokensPerSecond = stats?.decodeTokensPerSecond,
                 backend = stats?.backend?.label,
+                parentId = chatDao.get(chatId)?.currentLeafId, // the question it answers
             )
             messageDao.upsert(message.asEntity())
+            chatDao.setCurrentLeaf(chatId, message.id)
             chatDao.touch(chatId, now)
             sessionInSync = status == MessageStatus.COMPLETE
             if (sessionInSync) sessionTokens += pendingPromptTokens + TokenEstimator.estimate(text)

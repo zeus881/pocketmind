@@ -7,13 +7,16 @@ import androidx.room.TypeConverters
 import com.sanjay.pocketmind.core.database.dao.BenchmarkDao
 import com.sanjay.pocketmind.core.database.dao.ChatDao
 import com.sanjay.pocketmind.core.database.dao.DocumentDao
+import com.sanjay.pocketmind.core.database.dao.FolderDao
 import com.sanjay.pocketmind.core.database.dao.MessageDao
 import com.sanjay.pocketmind.core.database.entity.BenchmarkRunEntity
 import com.sanjay.pocketmind.core.database.entity.ChatEntity
 import com.sanjay.pocketmind.core.database.entity.ChunkEntity
 import com.sanjay.pocketmind.core.database.entity.ConversationSummaryEntity
 import com.sanjay.pocketmind.core.database.entity.DocumentEntity
+import com.sanjay.pocketmind.core.database.entity.FolderEntity
 import com.sanjay.pocketmind.core.database.entity.MessageEntity
+import com.sanjay.pocketmind.core.database.entity.MessageFtsEntity
 
 /**
  * The app's SQLite database, described for Room.
@@ -23,6 +26,9 @@ import com.sanjay.pocketmind.core.database.entity.MessageEntity
  * - 2 (phase 5): + benchmark_runs
  * - 3 (phase 7): + documents, chunks (RAG index)
  * - 4 (v2 phase 7): + conversation_summaries (cached summaries of long chats)
+ * - 5 (v2 phase 11): chats.pinned/folderId/currentLeafId, messages.parentId, folders, messages_fts.
+ *   A MANUAL migration ([Migrations.MIGRATION_4_5]): existing linear chats get their parent links
+ *   and current branch filled in, and the search index is built — things Room can't infer.
  * Additive changes use AutoMigrations: Room diffs the committed schema JSONs at compile time
  * and generates the SQL. Existing users keep all their data; [MigrationTest] proves it.
  *
@@ -36,8 +42,10 @@ import com.sanjay.pocketmind.core.database.entity.MessageEntity
         DocumentEntity::class,
         ChunkEntity::class,
         ConversationSummaryEntity::class,
+        FolderEntity::class,
+        MessageFtsEntity::class,
     ],
-    version = 4,
+    version = 5,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -54,6 +62,8 @@ abstract class PocketMindDatabase : RoomDatabase() {
     abstract fun benchmarkDao(): BenchmarkDao
 
     abstract fun documentDao(): DocumentDao
+
+    abstract fun folderDao(): FolderDao
 
     companion object {
         const val NAME = "pocketmind.db"

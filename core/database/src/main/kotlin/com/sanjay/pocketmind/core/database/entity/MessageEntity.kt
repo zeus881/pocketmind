@@ -2,6 +2,8 @@ package com.sanjay.pocketmind.core.database.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Fts4
+import androidx.room.FtsOptions
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.sanjay.pocketmind.core.model.Message
@@ -31,7 +33,7 @@ import com.sanjay.pocketmind.core.model.TurnRole
             onDelete = ForeignKey.CASCADE,
         ),
     ],
-    indices = [Index("chatId")],
+    indices = [Index("chatId"), Index("parentId")],
 )
 data class MessageEntity(
     @PrimaryKey val id: String,
@@ -42,7 +44,20 @@ data class MessageEntity(
     val status: String,
     val tokensPerSecond: Double?,
     val backend: String?,
+    /** v5: the previous message on this branch (null for the first). Edits and regenerations add siblings. */
+    val parentId: String? = null,
 )
+
+/**
+ * Full-text search index over message text (SQLite FTS4), kept in sync with `messages` by
+ * triggers that Room creates. `content = messages` means the index stores no second copy of the
+ * text, only the search structure. Matching uses whole words and prefixes ("drone*"), and is
+ * far faster than `LIKE '%…%'`, which must scan every message (AUDIT M-8).
+ */
+// unicode61: Unicode-aware word splitting and case folding, so Hindi and accented words are found too.
+@Fts4(contentEntity = MessageEntity::class, tokenizer = FtsOptions.TOKENIZER_UNICODE61)
+@Entity(tableName = "messages_fts")
+data class MessageFtsEntity(val text: String)
 
 fun MessageEntity.asModel() = Message(
     id = id,
@@ -53,6 +68,7 @@ fun MessageEntity.asModel() = Message(
     status = MessageStatus.valueOf(status),
     tokensPerSecond = tokensPerSecond,
     backend = backend,
+    parentId = parentId,
 )
 
 fun Message.asEntity() = MessageEntity(
@@ -64,4 +80,5 @@ fun Message.asEntity() = MessageEntity(
     status = status.name,
     tokensPerSecond = tokensPerSecond,
     backend = backend,
+    parentId = parentId,
 )
