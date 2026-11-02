@@ -36,6 +36,10 @@ class OfflineChatRepositoryTest {
     private var settings: InferenceSettings? = InferenceSettings("/model.litertlm", true, "SYS", SamplingParams())
     private var now = 1_000L
 
+    /** Records summary requests and answers with a predictable text. */
+    private val summaryCalls = mutableListOf<Pair<String?, Int>>()
+    private var summaryResult: String? = "S"
+
     @Before
     fun setUp() {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -49,6 +53,10 @@ class OfflineChatRepositoryTest {
                 override suspend fun current() = settings
             },
             clock = { now },
+            summarizer = { previous, turns ->
+                summaryCalls += previous to turns.size
+                summaryResult?.let { "$it${summaryCalls.size}" }
+            },
         )
     }
 
@@ -132,8 +140,46 @@ class OfflineChatRepositoryTest {
 
         val last = engine.sessions.last()
         assertTrue(last.systemPrompt.startsWith("SYS"))
-        assertTrue(last.systemPrompt.contains("Earlier in this conversation:"))
+        assertTrue(last.systemPrompt.contains("Summary of the earlier part of this conversation:\nS"))
         assertTrue(last.history.size < 4)
+        assertNotNull(db.chatDao().summary(chatId)) // cached for the next messages
+    }
+
+    @Test
+    fun aCachedSummaryIsReusedAndOnlyExtendedWithNewlyDroppedTurns() = runTest {
+        engine.contextWindowTokens = 1712
+        engine.responsePieces = listOf("A long answer. " + "z".repeat(600))
+        val chatId = repository.createChat()
+        repeat(5) { sendAndFinish(chatId, "Question number $it?") }
+
+        // First summary from scratch; later ones continue the previous summary.
+        assertNull(summaryCalls.first().first)
+        assertTrue(summaryCalls.drop(1).all { it.first != null })
+        val cached = db.chatDao().summary(chatId)!!
+        assertEquals("S${summaryCalls.size}", cached.summary)
+    }
+
+    @Test
+    fun withoutASummaryTheExtractiveNoteIsUsed() = runTest {
+        summaryResult = null // e.g. generation failed
+        engine.contextWindowTokens = 1712
+        engine.responsePieces = listOf("A long answer. " + "z".repeat(600))
+        val chatId = repository.createChat()
+        repeat(3) { sendAndFinish(chatId, "Question number $it?") }
+
+        assertTrue(engine.sessions.last().systemPrompt.contains("Earlier in this conversation:"))
+        assertNull(db.chatDao().summary(chatId))
+    }
+
+    @Test
+    fun aLongChatDoesNotRebuildTheSessionOnEveryMessage() = runTest {
+        engine.contextWindowTokens = 3000 // ~1270 tokens of history budget
+        engine.responsePieces = listOf("x".repeat(800)) // ~200 tokens per answer
+        val chatId = repository.createChat()
+        repeat(12) { sendAndFinish(chatId, "Question $it") }
+
+        // v1 rebuilt on every message once the chat overflowed; with headroom it is far fewer.
+        assertTrue("sessions: ${engine.sessions.size}", engine.sessions.size <= 5)
     }
 
     @Test

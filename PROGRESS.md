@@ -13,7 +13,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 4 Tests for engine, worker, model repository | DONE | 78 % (measured 78.0 %, 201 tests) | engine device test written; run manually (see manual steps) |
 | 5 Versioning + quick wins | DONE | 78 % (measured 78.3 %, 203 tests) | release APK 31.2 → 27.27 MB; version from git tag |
 | 6 StrictMode, LeakCanary, perf budget, Baseline Profile | DONE | 79 % (measured 79.6 %, 204 tests) | 2 main-thread disk reads fixed; benchmarks + Baseline Profile need the phone |
-| 7 Smarter context (summaries, context size) | NEXT | | |
+| 7 Smarter context (summaries, context size) | DONE | 80 % (measured 80.1 %, 213 tests) | Room v4; 8k context deferred until memory is measured on a phone |
+| 8 Design system v2 | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -135,6 +136,8 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   `app/src/release/generated/baselineProfiles/`), then `./gradlew :benchmark:connectedBenchmarkReleaseAndroidTest`;
   copy the medians into `docs/performance-budget.md`. Use the debug app once and read `adb logcat -s StrictMode` and
   LeakCanary notifications; report anything found.
+- **Context size (phase 7):** to consider an 8k context on 8 GB+ phones, measure peak memory with 8192 tokens first
+  (Benchmark screen after temporarily changing `CONTEXT_WINDOW_TOKENS`). Until then it stays 4096.
 
 ### v1
 

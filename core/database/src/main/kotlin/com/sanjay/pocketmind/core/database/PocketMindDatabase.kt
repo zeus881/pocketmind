@@ -11,6 +11,7 @@ import com.sanjay.pocketmind.core.database.dao.MessageDao
 import com.sanjay.pocketmind.core.database.entity.BenchmarkRunEntity
 import com.sanjay.pocketmind.core.database.entity.ChatEntity
 import com.sanjay.pocketmind.core.database.entity.ChunkEntity
+import com.sanjay.pocketmind.core.database.entity.ConversationSummaryEntity
 import com.sanjay.pocketmind.core.database.entity.DocumentEntity
 import com.sanjay.pocketmind.core.database.entity.MessageEntity
 
@@ -21,6 +22,7 @@ import com.sanjay.pocketmind.core.database.entity.MessageEntity
  * - 1 (phase 3): chats, messages
  * - 2 (phase 5): + benchmark_runs
  * - 3 (phase 7): + documents, chunks (RAG index)
+ * - 4 (v2 phase 7): + conversation_summaries (cached summaries of long chats)
  * Additive changes use AutoMigrations: Room diffs the committed schema JSONs at compile time
  * and generates the SQL. Existing users keep all their data; [MigrationTest] proves it.
  *
@@ -33,12 +35,14 @@ import com.sanjay.pocketmind.core.database.entity.MessageEntity
         BenchmarkRunEntity::class,
         DocumentEntity::class,
         ChunkEntity::class,
+        ConversationSummaryEntity::class,
     ],
-    version = 3,
+    version = 4,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
         AutoMigration(from = 2, to = 3),
+        AutoMigration(from = 3, to = 4),
     ],
 )
 @TypeConverters(Converters::class)

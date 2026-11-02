@@ -4,6 +4,7 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import com.sanjay.pocketmind.core.database.entity.ConversationSummaryEntity
 import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -13,6 +14,7 @@ import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,7 +22,7 @@ import org.robolectric.RobolectricTestRunner
 
 /**
  * Proves that existing users' databases survive app updates, from EVERY older version to the
- * current one (a user may skip updates and jump from v1 straight to v3).
+ * current one (a user may skip updates and jump from v1 straight to the newest version).
  *
  * 1. Build a REAL old database from the committed `schemas/.../<version>.json` — the exact SQL
  *    Room generated back then, including Room's identity hash.
@@ -42,6 +44,9 @@ class MigrationTest {
     @Test
     fun migrateFrom2KeepsChats() = runTest { migrateAndCheck(fromVersion = 2) }
 
+    @Test
+    fun migrateFrom3KeepsChats() = runTest { migrateAndCheck(fromVersion = 3) }
+
     private suspend fun migrateAndCheck(fromVersion: Int) {
         val name = "migration-from-$fromVersion.db"
         createOldDatabase(name, fromVersion)
@@ -54,6 +59,10 @@ class MigrationTest {
         assertEquals("hello", chats.single().lastMessage)
         assertTrue(db.benchmarkDao().observeAll().first().isEmpty())
         assertTrue(db.documentDao().observeAll().first().isEmpty())
+        // v4 table exists and works on a migrated database.
+        assertNull(db.chatDao().summary("c1"))
+        db.chatDao().upsertSummary(ConversationSummaryEntity("c1", "Earlier: greetings.", 2, 5))
+        assertEquals("Earlier: greetings.", db.chatDao().summary("c1")?.summary)
         db.close()
     }
 

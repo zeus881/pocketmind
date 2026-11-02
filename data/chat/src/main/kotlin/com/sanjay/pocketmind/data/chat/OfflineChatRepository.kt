@@ -5,6 +5,7 @@ import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.common.time.Clock
 import com.sanjay.pocketmind.core.database.dao.ChatDao
 import com.sanjay.pocketmind.core.database.dao.MessageDao
+import com.sanjay.pocketmind.core.database.entity.ConversationSummaryEntity
 import com.sanjay.pocketmind.core.database.entity.asEntity
 import com.sanjay.pocketmind.core.database.entity.asModel
 import com.sanjay.pocketmind.core.llm.EngineState
@@ -50,6 +51,7 @@ internal class OfflineChatRepository @Inject constructor(
     private val engine: LlmEngine,
     private val settingsSource: InferenceSettingsSource,
     private val clock: Clock,
+    private val summarizer: ConversationSummarizer,
 ) : ChatRepository {
 
     /** What the engine's current conversation was built for. */
@@ -63,6 +65,17 @@ internal class OfflineChatRepository @Inject constructor(
 
     /** The engine's [LlmEngine.sessionId] right after WE built the session (-1 = never). */
     private var ownedSessionId = -1L
+
+    /**
+     * Estimated tokens the live conversation already holds (history + summary note). It grows by
+     * each completed question and answer; when the next request would overflow, the session is
+     * rebuilt with a trimmed history. Before v2 the rebuild happened on EVERY message once a chat
+     * was long, re-reading ~2000 tokens each time.
+     */
+    private var sessionTokens = 0
+
+    /** Tokens of the question being answered right now (added to [sessionTokens] on success). */
+    private var pendingPromptTokens = 0
     private var lastTimestamp = 0L
 
     override val engineState: StateFlow<EngineState> = engine.state
@@ -162,6 +175,8 @@ internal class OfflineChatRepository @Inject constructor(
             messageDao.upsert(message.asEntity())
             chatDao.touch(chatId, now)
             sessionInSync = status == MessageStatus.COMPLETE
+            if (sessionInSync) sessionTokens += pendingPromptTokens + TokenEstimator.estimate(text)
+            pendingPromptTokens = 0
         }
     }
 
@@ -196,6 +211,10 @@ internal class OfflineChatRepository @Inject constructor(
      * Makes the engine's conversation match [history] for [chatId], rebuilding it only when
      * needed (rebuilding re-reads the whole history: "prefill" costs time on a phone).
      * Must be called while holding [sessionLock].
+     *
+     * When the chat no longer fits, the newest turns that fill [HEADROOM_PERCENT] of the budget
+     * are kept and everything older is replaced by a summary. The headroom means the next
+     * several messages fit without another rebuild.
      */
     private suspend fun prepareSessionLocked(
         chatId: String,
@@ -206,25 +225,61 @@ internal class OfflineChatRepository @Inject constructor(
         val turns = history
             .filter { it.status != MessageStatus.FAILED && it.text.isNotBlank() }
             .map { ChatTurn(it.role, it.text) }
+        val promptTokens = TokenEstimator.estimate(prompt)
         val budget = engine.contextWindowTokens - RESPONSE_RESERVE_TOKENS -
-            TokenEstimator.estimate(settings.systemPrompt) - TokenEstimator.estimate(prompt)
-        val historyTokens = turns.sumOf { TokenEstimator.estimate(it.text) }
+            TokenEstimator.estimate(settings.systemPrompt) - promptTokens
+        pendingPromptTokens = promptTokens
 
         val key = SessionKey(chatId, settings)
         val upToDate = session == key &&
             sessionInSync &&
             // Someone else (benchmark, translate, a reload…) may have replaced the conversation.
             ownedSessionId == engine.sessionId &&
-            historyTokens <= budget
+            sessionTokens <= budget
         if (upToDate) return
 
-        val trimmed = HistoryTrimmer.trim(turns, budget)
-        val systemPrompt = listOfNotNull(settings.systemPrompt, trimmed.summaryNote).joinToString("\n\n")
+        val historyTokens = turns.sumOf { TokenEstimator.estimate(it.text) }
+        val keptTurns: List<ChatTurn>
+        val note: String?
+        if (historyTokens <= budget) {
+            keptTurns = turns
+            note = null
+        } else {
+            val trimmed = HistoryTrimmer.trim(turns, budget * HEADROOM_PERCENT / PERCENT)
+            keptTurns = trimmed.turns
+            note = earlierContextNote(chatId, turns.take(turns.size - keptTurns.size), trimmed.summaryNote)
+        }
+        val systemPrompt = listOfNotNull(settings.systemPrompt, note).joinToString("\n\n")
         // Use the id RETURNED by newSession (reading engine.sessionId afterwards could already
-        // see another feature's newer session).
-        ownedSessionId = engine.newSession(systemPrompt, trimmed.turns, settings.sampling)
+        // see another feature's newer session — or our own summarizer's).
+        ownedSessionId = engine.newSession(systemPrompt, keptTurns, settings.sampling)
         session = key
         sessionInSync = true
+        sessionTokens = keptTurns.sumOf { TokenEstimator.estimate(it.text) } + TokenEstimator.estimate(note.orEmpty())
+    }
+
+    /**
+     * A note about the [dropped] (oldest) turns for the system prompt: the cached model-written
+     * summary, extended when more turns fell out of the window; or [fallback] (the extractive
+     * first-sentence note) when no summary can be written.
+     */
+    private suspend fun earlierContextNote(chatId: String, dropped: List<ChatTurn>, fallback: String?): String? {
+        if (dropped.isEmpty()) return fallback
+        val cached = chatDao.summary(chatId)
+        val summary = if (cached != null && cached.coveredTurns == dropped.size) {
+            cached.summary
+        } else {
+            // Extend the cached summary with only the newly dropped turns; if the chat got shorter
+            // (an answer was regenerated), start again from all dropped turns.
+            val extendFrom = cached?.takeIf { it.coveredTurns < dropped.size }
+            summarizer.summarize(
+                previousSummary = extendFrom?.summary,
+                turns = dropped.drop(extendFrom?.coveredTurns ?: 0),
+            )?.also { written ->
+                chatDao.upsertSummary(ConversationSummaryEntity(chatId, written, dropped.size, nextTimestamp()))
+            }
+        }
+        return summary?.let { "$SUMMARY_HEADER\n$it" } ?: fallback
     }
 
     /** Strictly increasing timestamps, so two messages saved in the same millisecond keep their order. */
@@ -239,5 +294,11 @@ internal class OfflineChatRepository @Inject constructor(
          * explanation fits; with less, long code answers were cut off near the end of a chat.
          */
         const val RESPONSE_RESERVE_TOKENS = 1536
+
+        /** After a rebuild the kept history fills at most this share of the budget. */
+        const val HEADROOM_PERCENT = 60
+        const val PERCENT = 100
+
+        const val SUMMARY_HEADER = "Summary of the earlier part of this conversation:"
     }
 }

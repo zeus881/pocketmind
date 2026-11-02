@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import com.sanjay.pocketmind.core.database.entity.ChatEntity
+import com.sanjay.pocketmind.core.database.entity.ConversationSummaryEntity
 import com.sanjay.pocketmind.core.database.entity.MessageEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -77,4 +78,11 @@ interface ChatDao {
         upsert(chat)
         insertMessages(messages)
     }
+
+    /** The cached summary of the older part of [chatId], or null if none was written yet. */
+    @Query("SELECT * FROM conversation_summaries WHERE chatId = :chatId")
+    suspend fun summary(chatId: String): ConversationSummaryEntity?
+
+    @Upsert
+    suspend fun upsertSummary(summary: ConversationSummaryEntity)
 }
