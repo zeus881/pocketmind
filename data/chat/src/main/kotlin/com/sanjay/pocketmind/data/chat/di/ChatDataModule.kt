@@ -1,5 +1,7 @@
 package com.sanjay.pocketmind.data.chat.di
 
+import com.sanjay.pocketmind.data.chat.AndroidChatExporter
+import com.sanjay.pocketmind.data.chat.ChatExporter
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import com.sanjay.pocketmind.data.chat.ConversationSummarizer
 import com.sanjay.pocketmind.data.chat.FolderRepository
@@ -22,4 +24,7 @@ internal abstract class ChatDataModule {
 
     @Binds
     abstract fun bindsFolderRepository(repository: RoomFolderRepository): FolderRepository
+
+    @Binds
+    abstract fun bindsChatExporter(exporter: AndroidChatExporter): ChatExporter
 }

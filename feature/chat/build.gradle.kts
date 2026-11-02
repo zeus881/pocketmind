@@ -9,6 +9,7 @@ android {
 dependencies {
     implementation(projects.data.chat)
     implementation(projects.core.llm)
+    implementation(libs.androidx.activity.compose) // "Save as" launcher for chat export
 
     testImplementation(projects.core.testing)
     testImplementation(libs.androidx.test.core)

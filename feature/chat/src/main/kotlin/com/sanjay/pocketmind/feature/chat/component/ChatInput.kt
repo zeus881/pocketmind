@@ -40,8 +40,10 @@ internal fun ChatInput(
     onSend: (String) -> Unit,
     onStop: () -> Unit,
     modifier: Modifier = Modifier,
+    /** Pre-filled text (shared from another app); the user still decides to send it. */
+    initialText: String = "",
 ) {
-    var text by rememberSaveable { mutableStateOf("") }
+    var text by rememberSaveable { mutableStateOf(initialText) }
     val haptics = rememberPmHaptics()
     Row(
         modifier = modifier

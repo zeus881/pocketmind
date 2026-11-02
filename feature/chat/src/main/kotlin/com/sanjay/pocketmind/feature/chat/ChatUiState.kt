@@ -22,7 +22,15 @@ data class ChatUiState(
     val streamingText: String? = null,
     val isGenerating: Boolean = false,
     val model: ModelUi = ModelUi.Loading,
+    /** Text shared from another app ("Share → PocketMind"): pre-filled in the input, not sent automatically. */
+    val draft: String = "",
 )
+
+/** File formats a chat can be exported to. */
+enum class ExportFormat(val mimeType: String, val extension: String) {
+    MARKDOWN("text/markdown", "md"),
+    PDF("application/pdf", "pdf"),
+}
 
 /** Model status as the chat screen needs it. */
 sealed interface ModelUi {
@@ -43,4 +51,7 @@ sealed interface ModelUi {
 /** One-off events (shown once, e.g. a snackbar), separate from state that is redrawn. */
 sealed interface ChatEvent {
     data class Error(val kind: ErrorKind) : ChatEvent
+
+    /** The chat was saved to the file the user picked. */
+    data object Exported : ChatEvent
 }

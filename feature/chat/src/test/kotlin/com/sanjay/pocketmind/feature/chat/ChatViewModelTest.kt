@@ -1,12 +1,17 @@
 package com.sanjay.pocketmind.feature.chat
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
+import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.model.BranchInfo
+import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
 import com.sanjay.pocketmind.core.testing.MainDispatcherRule
+import com.sanjay.pocketmind.data.chat.ChatExporter
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -27,8 +32,65 @@ class ChatViewModelTest {
 
     private val repository = FakeChatRepository()
 
-    private fun viewModel(chatId: String? = null) =
-        ChatViewModel(repository, SavedStateHandle(mapOf(ChatViewModel.CHAT_ID_KEY to chatId)))
+    private val exporter = FakeExporter()
+
+    /** android.net.Uri has no real implementation in JVM tests; the fake exporter never reads it. */
+    private val anyUri: Uri = mockk()
+
+    private fun viewModel(chatId: String? = null, draft: String? = null) = ChatViewModel(
+        repository,
+        exporter,
+        SavedStateHandle(mapOf(ChatViewModel.CHAT_ID_KEY to chatId, ChatViewModel.DRAFT_KEY to draft)),
+    )
+
+    private class FakeExporter : ChatExporter {
+        val written = mutableListOf<Pair<String, Int>>()
+        var result: AppResult<Unit> = AppResult.Success(Unit)
+
+        override suspend fun writeMarkdown(uri: Uri, title: String, messages: List<Message>): AppResult<Unit> {
+            written += "md:$title" to messages.size
+            return result
+        }
+
+        override suspend fun writePdf(uri: Uri, title: String, messages: List<Message>): AppResult<Unit> {
+            written += "pdf:$title" to messages.size
+            return result
+        }
+    }
+
+    @Test
+    fun `shared text arrives as a draft, not as a sent message`() = runTest(mainRule.testDispatcher) {
+        val vm = viewModel(draft = "Summarize this: …")
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+
+        assertEquals("Summarize this: …", vm.uiState.value.draft)
+        assertEquals(emptyList<Any>(), repository.messages.value)
+    }
+
+    @Test
+    fun `export writes the visible conversation and reports the result`() = runTest(mainRule.testDispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        vm.send("Hello")
+        advanceUntilIdle()
+
+        vm.export(anyUri, ExportFormat.PDF)
+        advanceUntilIdle()
+        assertEquals(listOf("pdf:Hello" to 2), exporter.written)
+        assertEquals(ChatEvent.Exported, vm.events.first())
+
+        exporter.result = AppResult.Failure(ErrorKind.FILE_UNREADABLE)
+        vm.export(anyUri, ExportFormat.MARKDOWN)
+        advanceUntilIdle()
+        assertEquals(ChatEvent.Error(ErrorKind.FILE_UNREADABLE), vm.events.first())
+    }
+
+    @Test
+    fun `export file names drop characters file systems dislike`() {
+        assertEquals("Add two numbers in C.md", exportFileName("Add two numbers in C?", ExportFormat.MARKDOWN))
+        assertEquals("PocketMind chat.pdf", exportFileName("  ///  ", ExportFormat.PDF))
+    }
 
     @Test
     fun `opening the screen lazily loads the model`() = runTest(mainRule.testDispatcher) {

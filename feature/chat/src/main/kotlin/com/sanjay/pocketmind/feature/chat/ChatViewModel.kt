@@ -1,5 +1,6 @@
 package com.sanjay.pocketmind.feature.chat
 
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -11,6 +12,7 @@ import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
+import com.sanjay.pocketmind.data.chat.ChatExporter
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -50,11 +52,17 @@ import timber.log.Timber
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 @HiltViewModel
-class ChatViewModel @Inject constructor(private val repository: ChatRepository, savedStateHandle: SavedStateHandle) :
-    ViewModel() {
+class ChatViewModel @Inject constructor(
+    private val repository: ChatRepository,
+    private val exporter: ChatExporter,
+    savedStateHandle: SavedStateHandle,
+) : ViewModel() {
 
     /** Which chat is shown. Null = a new chat that is created on the first message. */
     private val chatId = MutableStateFlow(savedStateHandle.get<String>(CHAT_ID_KEY))
+
+    /** Text shared from another app; shown once in the input (see ChatRoute.draft). */
+    private val draft: String = savedStateHandle.get<String>(DRAFT_KEY).orEmpty()
     private val streaming = MutableStateFlow<String?>(null)
     private val noModel = MutableStateFlow(false)
     private val loadingModel = MutableStateFlow(false)
@@ -107,11 +115,16 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
             title = title,
             messages = list,
             branches = versions,
+            draft = draft,
             streamingText = live,
             isGenerating = live != null,
             model = model,
         )
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS), ChatUiState(chatId = chatId.value))
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS),
+        ChatUiState(chatId = chatId.value, draft = draft),
+    )
 
     init {
         // Lazy loading: the model is loaded when the chat screen opens, not at app start,
@@ -228,6 +241,22 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
         viewModelScope.launch { guarded { repository.showVersion(id, messageId, offset) } }
     }
 
+    /** Writes the visible conversation to [uri] (picked with the system "Save as" screen). */
+    fun export(uri: Uri, format: ExportFormat) {
+        val state = uiState.value
+        if (state.messages.isEmpty()) return
+        viewModelScope.launch {
+            val title = state.title.orEmpty()
+            val result = when (format) {
+                ExportFormat.MARKDOWN -> exporter.writeMarkdown(uri, title, state.messages)
+                ExportFormat.PDF -> exporter.writePdf(uri, title, state.messages)
+            }
+            _events.send(
+                if (result is AppResult.Success) ChatEvent.Exported else ChatEvent.Error(ErrorKind.FILE_UNREADABLE),
+            )
+        }
+    }
+
     /** The Stop button. Cancellation travels down to the engine, which stops native generation. */
     fun stop() {
         generationJob?.cancel()
@@ -285,6 +314,9 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
     companion object {
         /** Must equal the property name in ChatRoute: Navigation stores route args under it. */
         const val CHAT_ID_KEY = "chatId"
+
+        /** Must equal the property name in ChatRoute. */
+        const val DRAFT_KEY = "draft"
         private const val UI_THROTTLE_MS = 50L
         private const val STOP_TIMEOUT_MS = 5_000L
     }

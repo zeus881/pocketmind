@@ -1,5 +1,7 @@
 package com.sanjay.pocketmind.feature.chat
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,6 +16,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.AddComment
 import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -72,18 +77,34 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
     val haptics = rememberPmHaptics()
 
     // LaunchedEffect(Unit) starts once when the screen appears and is cancelled when it leaves.
+    // The system "Save as" screen: the user picks where; we only get permission for that one file.
+    val saveMarkdown = rememberLauncherForActivityResult(CreateDocument(ExportFormat.MARKDOWN.mimeType)) { uri ->
+        uri?.let { viewModel.export(it, ExportFormat.MARKDOWN) }
+    }
+    val savePdf = rememberLauncherForActivityResult(CreateDocument(ExportFormat.PDF.mimeType)) { uri ->
+        uri?.let { viewModel.export(it, ExportFormat.PDF) }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
+                ChatEvent.Exported -> snackbarHostState.showSnackbar(
+                    resources.getString(R.string.feature_chat_exported),
+                )
+
                 is ChatEvent.Error -> {
                     haptics.reject()
-                    // The action must be able to fix the problem: retrying can't create a missing model.
+                    // The action must be able to fix the problem: retrying can't create a missing
+                    // model, and "Retry" (regenerate) makes no sense for a file that couldn't be saved.
                     val noModel = event.kind == ErrorKind.NO_MODEL
+                    val fileError = event.kind == ErrorKind.FILE_UNREADABLE
                     val result = snackbarHostState.showSnackbar(
                         message = resources.getString(event.kind.messageRes()),
-                        actionLabel = resources.getString(
-                            if (noModel) R.string.feature_chat_get_model else R.string.feature_chat_retry,
-                        ),
+                        actionLabel = when {
+                            fileError -> null
+                            noModel -> resources.getString(R.string.feature_chat_get_model)
+                            else -> resources.getString(R.string.feature_chat_retry)
+                        },
                     )
                     if (result == SnackbarResult.ActionPerformed) {
                         if (noModel) onOpenModels() else viewModel.retry()
@@ -104,6 +125,10 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
         onOpenModels = onOpenModels,
         onEdit = viewModel::edit,
         onShowVersion = viewModel::showVersion,
+        onExport = { format ->
+            val name = exportFileName(state.title, format)
+            if (format == ExportFormat.MARKDOWN) saveMarkdown.launch(name) else savePdf.launch(name)
+        },
     )
 }
 
@@ -121,6 +146,7 @@ fun ChatContent(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onEdit: (messageId: String, newText: String) -> Unit = { _, _ -> },
     onShowVersion: (messageId: String, offset: Int) -> Unit = { _, _ -> },
+    onExport: (ExportFormat) -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -141,6 +167,7 @@ fun ChatContent(
                             contentDescription = stringResource(R.string.feature_chat_new_chat),
                         )
                     }
+                    if (state.messages.isNotEmpty()) ExportMenu(onExport)
                 },
             )
         },
@@ -204,6 +231,7 @@ fun ChatContent(
                     ChatInput(
                         isGenerating = state.isGenerating,
                         onSend = onSend,
+                        initialText = state.draft,
                         onStop = onStop,
                         modifier = Modifier.readableWidth(),
                     )
@@ -217,6 +245,7 @@ fun ChatContent(
 internal fun ErrorKind.messageRes(): Int = when (this) {
     ErrorKind.NO_MODEL -> R.string.feature_chat_no_model_title
     ErrorKind.MODEL_LOAD_FAILED -> R.string.feature_chat_model_failed
+    ErrorKind.FILE_UNREADABLE -> R.string.feature_chat_export_failed
     else -> R.string.feature_chat_generation_failed
 }
 
@@ -310,3 +339,41 @@ private fun ChatWelcome(onSuggestion: (String) -> Unit) {
         }
     }
 }
+
+@Composable
+private fun ExportMenu(onExport: (ExportFormat) -> Unit) {
+    var open by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { open = true }) {
+            Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.feature_chat_more_options))
+        }
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.feature_chat_export_markdown)) },
+                onClick = {
+                    open = false
+                    onExport(ExportFormat.MARKDOWN)
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.feature_chat_export_pdf)) },
+                onClick = {
+                    open = false
+                    onExport(ExportFormat.PDF)
+                },
+            )
+        }
+    }
+}
+
+/** "Add two numbers in C.md": the chat title without characters file systems dislike. */
+internal fun exportFileName(title: String?, format: ExportFormat): String {
+    val base = title.orEmpty()
+        .replace(Regex("[^\\p{L}\\p{M}\\p{N} _-]"), "")
+        .trim()
+        .take(MAX_FILE_NAME)
+        .ifBlank { "PocketMind chat" }
+    return "$base.${format.extension}"
+}
+
+private const val MAX_FILE_NAME = 60

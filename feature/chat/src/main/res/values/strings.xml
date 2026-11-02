@@ -38,4 +38,10 @@
     <string name="feature_chat_version_description">Version %1$d of %2$d</string>
     <string name="feature_chat_previous_version">Previous version</string>
     <string name="feature_chat_next_version">Next version</string>
+    <string name="feature_chat_more_options">More options</string>
+    <string name="feature_chat_export_markdown">Save as Markdown</string>
+    <string name="feature_chat_export_pdf">Save as PDF</string>
+    <string name="feature_chat_exported">Chat saved</string>
+    <string name="feature_chat_export_failed">The chat could not be saved to that file.</string>
+
 </resources>
