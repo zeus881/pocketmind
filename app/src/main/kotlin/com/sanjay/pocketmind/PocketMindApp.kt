@@ -41,7 +41,11 @@ class PocketMindApp :
         super.onCreate()
         // Logs only in debug builds. Release builds log nothing, so no chat text can ever
         // leak into the phone's system log (privacy promise).
-        if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+            // Report main-thread disk/network work and leaked resources in logcat (debug only).
+            StrictModePolicies.enable()
+        }
         // Unload the model some minutes after the user leaves the app (see ModelKeepAlive).
         ProcessLifecycleOwner.get().lifecycle.addObserver(modelKeepAlive)
     }

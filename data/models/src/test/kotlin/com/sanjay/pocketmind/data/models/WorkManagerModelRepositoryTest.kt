@@ -21,9 +21,9 @@ import com.sanjay.pocketmind.core.testing.InMemoryPreferencesDataStore
 import com.sanjay.pocketmind.data.models.work.ModelDownloadWorker
 import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -97,8 +97,9 @@ class WorkManagerModelRepositoryTest {
             deviceInfo = deviceInfo,
             settings = settings,
             engine = engine,
-            verifier = ModelVerifier(catalog, files, guard, UnconfinedTestDispatcher()),
-            loadGuard = guard,
+            verifier = ModelVerifier(catalog, files, guard, Dispatchers.Unconfined),
+            // Not a TestDispatcher: the repository is built here, outside runTest's scheduler.
+            io = Dispatchers.Unconfined,
         )
     }
 

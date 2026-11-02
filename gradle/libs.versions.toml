@@ -53,6 +53,7 @@ okhttp = "5.5.1"
 timber = "5.0.1"
 pdfbox-android = "2.0.27.0"
 markdown-renderer = "0.46.0"
+leakcanary = "2.14"
 
 # Testing
 junit = "4.13.2"
@@ -117,6 +118,7 @@ timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfbox-android" }
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3-android", version.ref = "markdown-renderer" }
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
+leakcanary-android = { module = "com.squareup.leakcanary:leakcanary-android", version.ref = "leakcanary" }
 
 # Testing
 junit = { module = "junit:junit", version.ref = "junit" }

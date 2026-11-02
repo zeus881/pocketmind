@@ -9,21 +9,24 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
+import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.llm.EngineState
 import com.sanjay.pocketmind.core.llm.LlmEngine
-import com.sanjay.pocketmind.core.llm.LoadGuard
 import com.sanjay.pocketmind.core.llm.ModelFiles
 import com.sanjay.pocketmind.core.model.ModelKind
 import com.sanjay.pocketmind.data.models.work.ModelDownloadWorker
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
 
 /**
  * [ModelRepository] built on WorkManager (jobs), [ModelFiles] (what's on disk) and settings.
@@ -41,7 +44,7 @@ internal class WorkManagerModelRepository @Inject constructor(
     private val settings: SettingsDataSource,
     private val engine: LlmEngine,
     private val verifier: ModelVerifier,
-    private val loadGuard: LoadGuard,
+    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
 ) : ModelRepository {
 
     /** File changes (delete/cancel) aren't observable, so we poke this to re-evaluate. */
@@ -71,6 +74,8 @@ internal class WorkManagerModelRepository @Inject constructor(
             )
         }
     }
+        // File checks and the first catalog read touch the disk: never on the main thread.
+        .flowOn(io)
 
     override fun deviceRamGb(): Int = deviceInfo.totalRamGb()
 
@@ -125,7 +130,7 @@ internal class WorkManagerModelRepository @Inject constructor(
         val loaded = engine.state.value
         if (loaded is EngineState.Ready && loaded.modelPath == files.finalFile(modelId).path) engine.unload()
         // A crash record belongs to THIS file; a future download is a different file.
-        loadGuard.clear(files.finalFile(modelId).path)
+        verifier.forgetCrashes(modelId)
         files.delete(modelId)
         if (settings.current().selectedModelId == modelId) {
             // Fall back to another downloaded chat model, if there is one.

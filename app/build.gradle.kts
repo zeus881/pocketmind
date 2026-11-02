@@ -123,7 +123,12 @@ dependencies {
     implementation(libs.androidx.profileinstaller)
     baselineProfile(projects.benchmark)
 
+    // Debug builds only: watches destroyed Activities/ViewModels/Fragments and reports memory leaks
+    // with the reference chain that keeps them alive. Never part of a release APK.
+    debugImplementation(libs.leakcanary.android)
+
     testImplementation(projects.core.testing)
     testImplementation(libs.turbine)
     testImplementation(libs.androidx.datastore.preferences)
+    testImplementation(libs.robolectric)
 }

@@ -24,7 +24,7 @@ plugins {
 // core:testing (test helpers) and :benchmark (device-only tests) are not app code.
 
 /** Minimum line coverage in percent. Raised phase by phase towards 80 (V2_PLAN.md). Never lowered. */
-val koverMinLineCoverage = 78 // v2 phase 4: 78.0 % measured
+val koverMinLineCoverage = 79 // v2 phase 6: 79.6 % measured
 
 val coveredModules = listOf(
     ":app",

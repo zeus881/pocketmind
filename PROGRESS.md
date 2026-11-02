@@ -12,7 +12,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 3 Memory policy + download robustness | DONE | 67 % (measured 67.7 %, 177 tests) | to verify on device: no reload after a 30 s app switch |
 | 4 Tests for engine, worker, model repository | DONE | 78 % (measured 78.0 %, 201 tests) | engine device test written; run manually (see manual steps) |
 | 5 Versioning + quick wins | DONE | 78 % (measured 78.3 %, 203 tests) | release APK 31.2 → 27.27 MB; version from git tag |
-| 6 StrictMode, LeakCanary, perf budget, Baseline Profile | NEXT | | |
+| 6 StrictMode, LeakCanary, perf budget, Baseline Profile | DONE | 79 % (measured 79.6 %, 204 tests) | 2 main-thread disk reads fixed; benchmarks + Baseline Profile need the phone |
+| 7 Smarter context (summaries, context size) | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -130,6 +131,10 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
 ### v2 (added during the v2 build)
 - **Engine test on the phone (phase 4):** `adb push gemma-4-E2B-it.litertlm /data/local/tmp/llm/model.litertlm`, then
   `./gradlew :core:llm:connectedDebugAndroidTest` (3 tests: load/stream/cancel/unload, damaged size, CPU-only).
+- **Baseline Profile + benchmarks (phase 6):** `./gradlew :app:generateBaselineProfile` (commit the generated
+  `app/src/release/generated/baselineProfiles/`), then `./gradlew :benchmark:connectedBenchmarkReleaseAndroidTest`;
+  copy the medians into `docs/performance-budget.md`. Use the debug app once and read `adb logcat -s StrictMode` and
+  LeakCanary notifications; report anything found.
 
 ### v1
 

@@ -29,3 +29,19 @@ fun MacrobenchmarkScope.visitAllTabs() {
         device.waitForIdle()
     }
 }
+
+/** Longest time an answer may take in a benchmark run (model load + generation). */
+private const val ANSWER_TIMEOUT_MS = 120_000L
+
+/**
+ * Opens a new chat, sends [prompt] and waits until the chat says "Answer ready".
+ * Needs a downloaded, selected model on the phone (the benchmark build shares the app's data).
+ */
+fun MacrobenchmarkScope.sendPromptAndWaitForAnswer(prompt: String) {
+    device.wait(Until.findObject(By.text("Chat")), TIMEOUT_MS)?.click()
+    device.wait(Until.findObject(By.desc("New chat")), TIMEOUT_MS)?.click()
+    val input = device.wait(Until.findObject(By.clazz("android.widget.EditText")), TIMEOUT_MS) ?: return
+    input.text = prompt
+    device.wait(Until.findObject(By.desc("Send message")), TIMEOUT_MS)?.click()
+    device.wait(Until.hasObject(By.text("Answer ready")), ANSWER_TIMEOUT_MS)
+}

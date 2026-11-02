@@ -28,6 +28,9 @@ class ModelVerifier @Inject constructor(
     private val loadGuard: LoadGuard,
     @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
 ) {
+    /** The model's file is being deleted or replaced: crash records for it no longer apply. */
+    fun forgetCrashes(modelId: String) = loadGuard.clear(files.finalFile(modelId).path)
+
     /** Success = the file matches; CHECKSUM_MISMATCH = damaged; NO_MODEL = not downloaded. */
     suspend fun verify(modelId: String): AppResult<Unit> = withContext(io) {
         val model = catalog.find(modelId) ?: return@withContext AppResult.Failure(ErrorKind.UNKNOWN)

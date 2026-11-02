@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 /**
  * Measures cold startup (app process killed before every iteration) with and without the
  * Baseline Profile, so the README can show the real difference on a real phone.
- * Goal from the build guide: cold start under 800 ms (the model is NOT loaded at startup).
+ * Budget (docs/performance-budget.md): cold start under 500 ms (the model is NOT loaded at startup).
  *
  * Run on a connected phone: `./gradlew :benchmark:connectedBenchmarkReleaseAndroidTest`
  */

@@ -15,7 +15,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -23,6 +24,9 @@ import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.ui.compose.m3.LibrariesContainer
 import com.sanjay.pocketmind.R
+import com.sanjay.pocketmind.core.designsystem.component.LoadingState
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Open-source licences. The library list is generated at BUILD time by the AboutLibraries Gradle
@@ -34,9 +38,13 @@ import com.sanjay.pocketmind.R
 @Composable
 fun LicensesScreen(onBack: () -> Unit) {
     val resources = LocalResources.current
-    val libs = remember {
-        val json = resources.openRawResource(R.raw.aboutlibraries).bufferedReader().use { it.readText() }
-        Libs.Builder().withJson(json).build()
+    // Reading and parsing the licence JSON is disk + CPU work: off the main thread (v2 phase 6,
+    // found by the StrictMode audit). The screen shows a spinner for the few milliseconds it takes.
+    val libs by produceState<Libs?>(initialValue = null) {
+        value = withContext(Dispatchers.IO) {
+            val json = resources.openRawResource(R.raw.aboutlibraries).bufferedReader().use { it.readText() }
+            Libs.Builder().withJson(json).build()
+        }
     }
     Scaffold(
         topBar = {
@@ -66,7 +74,8 @@ fun LicensesScreen(onBack: () -> Unit) {
                     modifier = Modifier.padding(16.dp),
                 )
             }
-            LibrariesContainer(libs, Modifier.fillMaxSize())
+            val loaded = libs
+            if (loaded == null) LoadingState() else LibrariesContainer(loaded, Modifier.fillMaxSize())
         }
     }
 }
