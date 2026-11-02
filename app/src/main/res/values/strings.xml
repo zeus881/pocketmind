@@ -15,4 +15,12 @@
     <string name="licenses_title">Open-source licences</string>
     <string name="licenses_back">Back</string>
     <string name="licenses_models">Models: Gemma 4 E2B and EmbeddingGemma 2 by Google, Apache License 2.0. Qwen3 and Qwen3.5 by the Qwen team (Alibaba Cloud), Apache License 2.0. Model files from huggingface.co/litert-community. On-device runtime: LiteRT-LM by Google, Apache License 2.0.</string>
+    <string name="share_label">Ask PocketMind</string>
+    <string name="share_label_pdf">Summarize with PocketMind</string>
+    <string name="widget_description">Start a private chat or open a recent one</string>
+    <string name="widget_new_chat">New chat</string>
+    <string name="widget_no_chats">No chats yet.</string>
+    <string name="widget_untitled">Untitled chat</string>
+    <string name="widget_locked">App lock is on: open PocketMind to see your chats.</string>
+    <string name="tile_label">PocketMind</string>
 </resources>

@@ -8,6 +8,7 @@ android {
 
 dependencies {
     implementation(projects.data.documents)
+    implementation(libs.androidx.core.ktx) // String.toUri() for shared PDFs
     implementation(libs.androidx.activity.compose) // system file picker launcher
 
     testImplementation(projects.core.testing)

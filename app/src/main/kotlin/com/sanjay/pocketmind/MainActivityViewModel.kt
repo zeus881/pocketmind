@@ -62,6 +62,20 @@ class MainActivityViewModel @Inject constructor(settings: SettingsDataSource) : 
         }
     }
 
+    private val _pendingLaunch = MutableStateFlow<LaunchRequest?>(null)
+
+    /** A request from the widget, the tile or a share, waiting for the app frame to navigate. */
+    val pendingLaunch: StateFlow<LaunchRequest?> = _pendingLaunch
+
+    fun onLaunchRequest(request: LaunchRequest?) {
+        if (request != null) _pendingLaunch.value = request
+    }
+
+    /** The app frame navigated for the request: don't do it again (e.g. after rotation). */
+    fun onLaunchHandled() {
+        _pendingLaunch.value = null
+    }
+
     fun unlock() {
         locked.value = false
     }

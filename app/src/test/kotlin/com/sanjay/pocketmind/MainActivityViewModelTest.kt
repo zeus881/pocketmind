@@ -83,4 +83,16 @@ class MainActivityViewModelTest {
 
         assertFalse((vm.uiState.value as MainUiState.Ready).locked)
     }
+
+    @Test
+    fun `a launch request waits until handled and nulls are ignored`() = runTest {
+        val vm = MainActivityViewModel(settings)
+
+        vm.onLaunchRequest(LaunchRequest.ShareText("hi"))
+        vm.onLaunchRequest(null) // a normal launcher start must not clear a pending share
+        assertTrue(vm.pendingLaunch.value == LaunchRequest.ShareText("hi"))
+
+        vm.onLaunchHandled()
+        assertTrue(vm.pendingLaunch.value == null)
+    }
 }

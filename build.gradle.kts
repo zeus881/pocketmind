@@ -53,6 +53,10 @@ kover {
                     "dagger.*", "hilt_aggregated_deps.*", "*_GeneratedInjector",
                     "*_Impl", "*_Impl$*", "*_AutoMigration_*",
                     "*ComposableSingletons*", "*.BuildConfig", "*\$\$serializer",
+                    // System entry points bound by the launcher / System UI, verified on a device
+                    // (their Intents are unit-tested in WidgetIntentsTest).
+                    "*.widget.PocketMindWidget", "*.widget.PocketMindWidget\$*", "*.widget.PocketMindWidgetReceiver",
+                    "*.widget.NewChatTileService",
                 )
                 // Wiring only: DI modules and navigation graph builders. Design tokens (colors,
                 // type scale) are constants without logic, checked by screenshot tests instead.

@@ -123,6 +123,9 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.hilt.work)
     implementation(libs.aboutlibraries.compose.m3)
+    // Home-screen widget (Jetpack Glance: widgets written like Compose).
+    implementation(libs.glance.appwidget)
+    implementation(libs.glance.material3)
     // Applies the Baseline Profile at install time even on phones without the Play Store.
     implementation(libs.androidx.profileinstaller)
     baselineProfile(projects.benchmark)

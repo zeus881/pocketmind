@@ -1,6 +1,7 @@
 package com.sanjay.pocketmind
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.SystemClock
@@ -23,14 +24,19 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.core.content.ContextCompat
+import androidx.core.content.IntentCompat
 import androidx.fragment.app.FragmentActivity
+import androidx.glance.appwidget.updateAll
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.sanjay.pocketmind.core.designsystem.theme.PocketMindTheme
 import com.sanjay.pocketmind.feature.chat.navigation.ChatRoute
 import com.sanjay.pocketmind.feature.onboarding.navigation.OnboardingRoute
 import com.sanjay.pocketmind.ui.LockScreen
 import com.sanjay.pocketmind.ui.PocketMindAppUi
+import com.sanjay.pocketmind.widget.PocketMindWidget
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 /**
  * The only Activity. With Compose + Navigation we use a "single-activity" app: screens are
@@ -52,6 +58,9 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         // Draw behind the status and navigation bars; Scaffold adds the right insets.
         enableEdgeToEdge()
+        // Widget, tile or "Share → PocketMind". Only on a fresh start: after a rotation the
+        // request was already handled (and the Intent is still the same).
+        if (savedInstanceState == null) viewModel.onLaunchRequest(intent.toLaunchRequest())
         setContent {
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             when (val current = state) {
@@ -70,12 +79,24 @@ class MainActivity : FragmentActivity() {
                     // The start screen is decided ONCE; later settings changes must not reset navigation.
                     val start = remember { if (current.settings.onboardingDone) ChatRoute() else OnboardingRoute }
                     HideRecentsPreview(current.settings.appLockEnabled)
+                    val launch by viewModel.pendingLaunch.collectAsStateWithLifecycle()
                     LockedAppFrame(locked = current.locked) {
-                        PocketMindAppUi(startDestination = start)
+                        PocketMindAppUi(
+                            startDestination = start,
+                            launchRequest = launch,
+                            onLaunchHandled = viewModel::onLaunchHandled,
+                        )
                     }
                 }
             }
         }
+    }
+
+    /** The app was already open and the widget/tile/share sent a new request. */
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        viewModel.onLaunchRequest(intent.toLaunchRequest())
     }
 
     override fun onStart() {
@@ -86,8 +107,21 @@ class MainActivity : FragmentActivity() {
     override fun onStop() {
         super.onStop()
         // A rotation recreates the activity; it isn't "leaving the app".
-        if (!isChangingConfigurations) viewModel.onAppBackground(SystemClock.elapsedRealtime())
+        if (!isChangingConfigurations) {
+            viewModel.onAppBackground(SystemClock.elapsedRealtime())
+            // The widget shows recent chats: refresh it when the user leaves the app.
+            lifecycleScope.launch { PocketMindWidget().updateAll(applicationContext) }
+        }
     }
+
+    private fun Intent.toLaunchRequest(): LaunchRequest? = LaunchRequests.parse(
+        action = action,
+        mimeType = type,
+        text = getStringExtra(Intent.EXTRA_TEXT),
+        subject = getStringExtra(Intent.EXTRA_SUBJECT),
+        streamUri = IntentCompat.getParcelableExtra(this, Intent.EXTRA_STREAM, Uri::class.java)?.toString(),
+        chatId = getStringExtra(LaunchRequests.EXTRA_CHAT_ID),
+    )
 
     /**
      * Every `rememberLauncherForActivityResult(...).launch()` in the app (PDF picker, photo picker)

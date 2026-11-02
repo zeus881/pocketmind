@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navOptions
+import com.sanjay.pocketmind.LaunchRequest
 import com.sanjay.pocketmind.feature.benchmark.navigation.benchmarkScreen
 import com.sanjay.pocketmind.feature.benchmark.navigation.navigateToBenchmark
 import com.sanjay.pocketmind.feature.chat.ChatScreen
@@ -26,6 +27,7 @@ import com.sanjay.pocketmind.feature.chat.ChatViewModel
 import com.sanjay.pocketmind.feature.chat.navigation.ChatRoute
 import com.sanjay.pocketmind.feature.chat.navigation.chatScreen
 import com.sanjay.pocketmind.feature.chat.navigation.navigateToChat
+import com.sanjay.pocketmind.feature.documents.navigation.DocumentsShareRoute
 import com.sanjay.pocketmind.feature.documents.navigation.documentsScreen
 import com.sanjay.pocketmind.feature.history.navigation.historyScreen
 import com.sanjay.pocketmind.feature.models.navigation.modelsScreen
@@ -51,7 +53,12 @@ import com.sanjay.pocketmind.navigation.licensesScreen
  * them.
  */
 @Composable
-fun PocketMindAppUi(startDestination: Any, navController: NavHostController = rememberNavController()) {
+fun PocketMindAppUi(
+    startDestination: Any,
+    navController: NavHostController = rememberNavController(),
+    launchRequest: LaunchRequest? = null,
+    onLaunchHandled: () -> Unit = {},
+) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
     // The navigation belongs to the five tabs only, not to onboarding or the model manager.
@@ -62,6 +69,26 @@ fun PocketMindAppUi(startDestination: Any, navController: NavHostController = re
         NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfoV2())
     } else {
         NavigationSuiteType.None
+    }
+
+    // Widget, tile and share requests become navigation. Before onboarding is finished they
+    // are dropped: the user first needs a model.
+    LaunchedEffect(launchRequest) {
+        val request = launchRequest ?: return@LaunchedEffect
+        val inOnboarding = navController.currentDestination?.hasRoute(OnboardingRoute::class) == true
+        if (!inOnboarding) {
+            when (request) {
+                // A NEW back-stack entry, so the chat screen gets a fresh ViewModel (a new chat).
+                LaunchRequest.NewChat -> navController.navigate(ChatRoute())
+
+                is LaunchRequest.OpenChat -> navController.navigateToChat(request.chatId)
+
+                is LaunchRequest.ShareText -> navController.navigate(ChatRoute(draft = request.text))
+
+                is LaunchRequest.SharePdf -> navController.navigate(DocumentsShareRoute(request.uri))
+            }
+        }
+        onLaunchHandled()
     }
 
     NavigationSuiteScaffold(

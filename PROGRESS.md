@@ -19,7 +19,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 10 Screen redesign + Roborazzi screenshot tests | DONE | 81 % (measured 81.1 %, 234 tests) | 64 goldens (16 states x phone light/dark, tablet, font 200 %); CI verifies |
 | 11 Database v5: pin, folders, branches, FTS | DONE | 81 % (measured 81.7 %, 245 tests) | manual migration 4->5 tested from v1-v4; to verify on device: upgrade with a copy of real chats |
 | 12 Edit/resend, versions, branches, pin, folders, search | DONE | 81 % (measured 81.5 %, 265 tests) | regenerate keeps old answers as versions; screenshots updated |
-| 13 Export, share-in, widget, quick-settings tile | NEXT | | |
+| 13 Export, share-in, widget, quick-settings tile | DONE | 81 % (measured 81.3 %, 285 tests) | to verify on device: share text/PDF, widget (no titles when locked), tile, PDF export |
+| 14 Personas + prompt library | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 

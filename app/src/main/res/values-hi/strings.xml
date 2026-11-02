@@ -14,4 +14,12 @@
     <string name="licenses_title">ओपन-सोर्स लाइसेंस</string>
     <string name="licenses_back">वापस</string>
     <string name="licenses_models">मॉडल: Gemma 4 E2B और EmbeddingGemma 2 — Google, Apache License 2.0। Qwen3 और Qwen3.5 — Qwen टीम (Alibaba Cloud), Apache License 2.0। मॉडल फ़ाइलें huggingface.co/litert-community से। ऑन-डिवाइस रनटाइम: LiteRT-LM — Google, Apache License 2.0।</string>
+    <string name="share_label">PocketMind से पूछें</string>
+    <string name="share_label_pdf">PocketMind से सारांश बनाएँ</string>
+    <string name="widget_description">निजी चैट शुरू करें या हाल की चैट खोलें</string>
+    <string name="widget_new_chat">नई चैट</string>
+    <string name="widget_no_chats">अभी कोई चैट नहीं।</string>
+    <string name="widget_untitled">बिना शीर्षक की चैट</string>
+    <string name="widget_locked">ऐप लॉक चालू है: अपनी चैट देखने के लिए PocketMind खोलें।</string>
+    <string name="tile_label">PocketMind</string>
 </resources>

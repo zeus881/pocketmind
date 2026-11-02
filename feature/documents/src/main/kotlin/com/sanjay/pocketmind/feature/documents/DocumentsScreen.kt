@@ -13,12 +13,15 @@ import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -35,12 +38,23 @@ import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 @Composable
 fun DocumentsScreen(
     onOpenModels: () -> Unit,
+    /** A PDF shared from another app: summarized once when the screen opens. */
+    sharedPdfUri: String? = null,
     summarizeViewModel: SummarizeViewModel = hiltViewModel(),
     askViewModel: AskViewModel = hiltViewModel(),
 ) {
     val summarizeState by summarizeViewModel.uiState.collectAsStateWithLifecycle()
     val askState by askViewModel.uiState.collectAsStateWithLifecycle()
     var tab by rememberSaveable { mutableIntStateOf(0) }
+
+    // Saveable: a rotation must not summarize the shared PDF a second time.
+    var sharedHandled by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(sharedPdfUri) {
+        if (sharedPdfUri != null && !sharedHandled) {
+            sharedHandled = true
+            summarizeViewModel.onPdfPicked(sharedPdfUri.toUri())
+        }
+    }
 
     // Coming back from the model screen: the embedding model may now be downloaded.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { askViewModel.refreshModelState() }
