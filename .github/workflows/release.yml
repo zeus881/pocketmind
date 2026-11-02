@@ -48,6 +48,8 @@ jobs:
           POCKETMIND_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           POCKETMIND_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           POCKETMIND_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          # versionName/versionCode come from this tag (AppVersion in build-logic).
+          POCKETMIND_VERSION_TAG: ${{ github.ref_name }}
         run: ./gradlew bundleRelease assembleRelease
 
       - name: Rename artifacts with the version

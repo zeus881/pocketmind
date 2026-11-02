@@ -15,7 +15,7 @@ Reference phone: **iQOO Neo 10R** (Snapdragon 8s Gen 3, 8 GB RAM, Android 16), m
 | Decode speed, GPU | ≥ 20 tok/s | 26.3 tok/s | Benchmark screen, greedy sampling, 3 fixed prompts | 2026-11-02 |
 | Peak memory during generation | < 1.5 GB PSS | 960 MB | Benchmark screen (`Debug.getPss`; PSS undercounts GPU memory) | 2026-11-02 |
 | Frames over 16 ms while streaming an answer | < 1 % | Not measured yet | Macrobenchmark `FrameTimingMetric` on a streaming journey | — |
-| Release APK size (arm64) | < 30 MB | 31.2 MB (over budget: see AUDIT M-1) | `app-release-unsigned.apk` file size | 2026-11-02 |
+| Release APK size (arm64) | < 30 MB | 27.27 MB (was 31.2 MB before removing unused Bouncy Castle PQC data, v2 phase 5) | `app-release-unsigned.apk` file size | 2026-11-02 |
 | Model reload after a short app switch (< 5 min) | 0 s (no reload) | Not measured yet | logcat, switch apps for 30 s and return | — |
 
 ## Rules

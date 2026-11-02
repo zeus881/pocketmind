@@ -24,7 +24,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
@@ -41,6 +43,7 @@ import com.sanjay.pocketmind.core.designsystem.component.ErrorState
 import com.sanjay.pocketmind.core.llm.FailureReason
 import com.sanjay.pocketmind.feature.chat.component.ChatInput
 import com.sanjay.pocketmind.feature.chat.component.MessageList
+import kotlinx.coroutines.delay
 
 /**
  * Stateful wrapper: gets the ViewModel from Hilt, collects its state and events, and passes
@@ -62,11 +65,17 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
         viewModel.events.collect { event ->
             when (event) {
                 is ChatEvent.Error -> {
+                    // The action must be able to fix the problem: retrying can't create a missing model.
+                    val noModel = event.kind == ErrorKind.NO_MODEL
                     val result = snackbarHostState.showSnackbar(
                         message = resources.getString(event.kind.messageRes()),
-                        actionLabel = resources.getString(R.string.feature_chat_retry),
+                        actionLabel = resources.getString(
+                            if (noModel) R.string.feature_chat_get_model else R.string.feature_chat_retry,
+                        ),
                     )
-                    if (result == SnackbarResult.ActionPerformed) viewModel.retry()
+                    if (result == SnackbarResult.ActionPerformed) {
+                        if (noModel) onOpenModels() else viewModel.retry()
+                    }
                 }
             }
         }
@@ -176,9 +185,9 @@ fun ChatContent(
                             )
                         }
                     }
+                    GenerationStatus(isGenerating = state.isGenerating)
                     ChatInput(
                         isGenerating = state.isGenerating,
-                        enabled = state.model != ModelUi.Loading,
                         onSend = onSend,
                         onStop = onStop,
                     )
@@ -201,3 +210,42 @@ private fun FailureReason.messageRes(): Int = when (this) {
     FailureReason.INIT_FAILED -> R.string.feature_chat_model_failed
     FailureReason.CRASHED_LAST_TIME -> R.string.feature_chat_model_crashed
 }
+
+/**
+ * One short status line for screen-reader users (and a quiet hint for everyone):
+ * "PocketMind is writing…" while an answer streams, then "Answer ready" for a few seconds.
+ *
+ * WHY: v1 made the streaming bubble itself a live region. It changed every 50 ms, so TalkBack
+ * kept interrupting itself (AUDIT M-3). Now TalkBack announces exactly two things: the start
+ * and the end. The answer itself is read when the user moves to it.
+ */
+@Composable
+private fun GenerationStatus(isGenerating: Boolean) {
+    var showReady by remember { mutableStateOf(false) }
+    var wasGenerating by remember { mutableStateOf(isGenerating) }
+    LaunchedEffect(isGenerating) {
+        if (wasGenerating && !isGenerating) {
+            showReady = true
+            delay(READY_VISIBLE_MS)
+            showReady = false
+        }
+        wasGenerating = isGenerating
+    }
+    val text = when {
+        isGenerating -> stringResource(R.string.feature_chat_status_writing)
+        showReady -> stringResource(R.string.feature_chat_status_ready)
+        else -> null
+    }
+    if (text != null) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .semantics { liveRegion = LiveRegionMode.Polite },
+        )
+    }
+}
+
+private const val READY_VISIBLE_MS = 3_000L

@@ -1,3 +1,5 @@
+import com.sanjay.pocketmind.buildlogic.AppVersion
+
 plugins {
     alias(libs.plugins.pocketmind.android.application)
     alias(libs.plugins.pocketmind.android.compose)
@@ -23,13 +25,35 @@ val hasReleaseKeystore = listOf(keystorePath, keystorePassword, signingKeyAlias,
     .all { !it.isNullOrBlank() } &&
     file(keystorePath!!).exists()
 
+/*
+ * Version from the release tag (see AppVersion in build-logic): CI passes the tag it builds in
+ * POCKETMIND_VERSION_TAG; locally the newest "v*" tag reachable from HEAD is used; without any
+ * tag the build is "0.0.0-dev" (versionCode 1). Nobody edits version numbers by hand.
+ */
+val versionTag: String? = providers.environmentVariable("POCKETMIND_VERSION_TAG").orNull
+    ?: runCatching {
+        providers.exec {
+            commandLine("git", "describe", "--tags", "--match", "v*", "--abbrev=0")
+            isIgnoreExitValue = true
+        }.standardOutput.asText.get().trim()
+    }.getOrNull()
+val appVersion = AppVersion.fromTag(versionTag)
+
 android {
     namespace = "com.sanjay.pocketmind"
 
     defaultConfig {
         applicationId = "com.sanjay.pocketmind"
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = appVersion.code
+        versionName = appVersion.name
+    }
+
+    packaging {
+        resources {
+            // Post-quantum crypto tables from Bouncy Castle (pulled in by PdfBox for encrypted
+            // PDFs). PdfBox never uses these algorithms; they were 4.0 MB of the APK (AUDIT M-1).
+            excludes += "org/bouncycastle/pqc/**"
+        }
     }
 
     buildFeatures {

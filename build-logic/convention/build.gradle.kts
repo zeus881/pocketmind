@@ -26,6 +26,8 @@ dependencies {
     compileOnly(libs.compose.gradle.plugin)
     compileOnly(libs.room.gradle.plugin)
     compileOnly(libs.kover.gradle.plugin)
+
+    testImplementation(libs.junit)
 }
 
 gradlePlugin {

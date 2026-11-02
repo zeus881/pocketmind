@@ -26,11 +26,14 @@ import com.sanjay.pocketmind.feature.chat.R
 /**
  * Text field + one button that is "Send" when idle and "Stop" while an answer streams.
  * The typed text is `rememberSaveable`, so it survives screen rotation.
+ *
+ * Always usable, even while the model is still loading: a message sent then simply waits
+ * for the load to finish (the "thinking" bubble shows at once), instead of a dead input box
+ * for 5–13 seconds (AUDIT M-4).
  */
 @Composable
 internal fun ChatInput(
     isGenerating: Boolean,
-    enabled: Boolean,
     onSend: (String) -> Unit,
     onStop: () -> Unit,
     modifier: Modifier = Modifier,
@@ -62,7 +65,7 @@ internal fun ChatInput(
                     onSend(text)
                     text = ""
                 },
-                enabled = enabled && text.isNotBlank(),
+                enabled = text.isNotBlank(),
             ) {
                 Icon(Icons.AutoMirrored.Filled.Send, contentDescription = stringResource(R.string.feature_chat_send))
             }

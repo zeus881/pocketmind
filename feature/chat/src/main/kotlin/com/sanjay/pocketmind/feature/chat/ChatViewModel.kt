@@ -136,12 +136,18 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
         val prompt = text.trim()
         if (prompt.isEmpty() || generationJob?.isActive == true) return
         generationJob = viewModelScope.launch {
+            val isNewChat = chatId.value == null
             val id = chatId.value ?: repository.createChat().also { chatId.value = it }
             streaming.value = "" // shows the "thinking" bubble immediately
             when (val result = guarded { repository.sendMessage(id, prompt) }) {
                 is AppResult.Success -> collectAnswer(id, result.value)
-                is AppResult.Failure -> fail(result.kind)
-                null -> Unit // already reported by guarded()
+
+                is AppResult.Failure -> {
+                    discardIfEmpty(id, isNewChat)
+                    fail(result.kind)
+                }
+
+                null -> discardIfEmpty(id, isNewChat) // the error was already reported by guarded()
             }
         }
     }
@@ -174,6 +180,16 @@ class ChatViewModel @Inject constructor(private val repository: ChatRepository, 
         Timber.e(e, "Chat request failed")
         fail(ErrorKind.GENERATION_FAILED)
         null
+    }
+
+    /**
+     * A brand-new chat whose first message could not even be sent (no model, load failure) would
+     * stay in History as an empty, untitled entry (AUDIT L-1). Remove it and start fresh.
+     */
+    private suspend fun discardIfEmpty(id: String, isNewChat: Boolean) {
+        if (!isNewChat) return
+        repository.deleteChat(id)
+        if (chatId.value == id) chatId.value = null
     }
 
     /** The Stop button. Cancellation travels down to the engine, which stops native generation. */

@@ -11,7 +11,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 2 App lock overlay + grace period | DONE | 67 % (measured 67.9 %, 172 tests) | KSP incremental off (lost Hilt outputs); to verify on device: lock + PDF picker, Recents thumbnail |
 | 3 Memory policy + download robustness | DONE | 67 % (measured 67.7 %, 177 tests) | to verify on device: no reload after a 30 s app switch |
 | 4 Tests for engine, worker, model repository | DONE | 78 % (measured 78.0 %, 201 tests) | engine device test written; run manually (see manual steps) |
-| 5 Versioning + quick wins | NEXT | | |
+| 5 Versioning + quick wins | DONE | 78 % (measured 78.3 %, 203 tests) | release APK 31.2 → 27.27 MB; version from git tag |
+| 6 StrictMode, LeakCanary, perf budget, Baseline Profile | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -118,7 +119,11 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
 
 ## BLOCKERS
 
-- None.
+- **Intermittent KSP2 errors in parallel builds** (seen 5 times, phases 0–5): `InjectProcessingStep was unable to
+  process X because Y could not be resolved`, and once a module's KSP output was empty (→ `MissingBinding`). Task
+  order was verified correct; the same task succeeds alone. Mitigations applied (phase 2: `ksp.incremental=false`;
+  phase 5: `ksp.classloader.cache.processors=false`). If it recurs: re-run the build (it is not a code error); the
+  long-term fix is a KSP release that addresses it — watch Dependabot PRs for KSP.
 
 ## MANUAL STEPS FOR SANJAY
 

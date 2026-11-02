@@ -27,9 +27,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.LiveRegionMode
-import androidx.compose.ui.semantics.liveRegion
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.model.markdownAnimations
@@ -153,10 +150,10 @@ private fun StreamingBubble(text: String) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceVariant,
         shape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp),
-        // Polite live region: TalkBack reads the answer as it grows, without interrupting.
         // Full width from the first token, so the bubble grows only downwards and never
-        // jumps sideways while the first line is being written.
-        modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
+        // jumps sideways while the first line is being written. No live region here: the
+        // chat screen's status line announces start and end once (AUDIT M-3).
+        modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(12.dp)) {
             if (text.isEmpty()) {

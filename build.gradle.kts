@@ -123,6 +123,15 @@ configurations.matching { it.name == "detekt" }.configureEach {
     }
 }
 
+// ---------- Build-logic tests ----------
+// build-logic is an included build, so its unit tests (e.g. AppVersionTest) don't run with the
+// app's. This root task has the same name as the modules' test tasks, so the usual
+// `./gradlew testDebugUnitTest` runs them too.
+tasks.register("testDebugUnitTest") {
+    description = "Runs the build-logic unit tests together with the modules' debug unit tests."
+    dependsOn(gradle.includedBuild("build-logic").task(":convention:test"))
+}
+
 // ---------- Architecture guard ----------
 // Fails the build if a module breaks the dependency rules from CLAUDE.md:
 //   feature -> data, core   (never feature -> feature)

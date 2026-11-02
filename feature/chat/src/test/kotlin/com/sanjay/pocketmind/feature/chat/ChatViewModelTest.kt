@@ -104,6 +104,33 @@ class ChatViewModelTest {
     }
 
     @Test
+    fun `a first message that can't be sent leaves no empty chat behind`() = runTest(mainRule.testDispatcher) {
+        repository.modelAvailable = false
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+
+        vm.send("Hello")
+        advanceUntilIdle()
+
+        assertEquals(emptyMap<String, Any>(), repository.chats.value)
+        assertNull(vm.uiState.value.chatId)
+    }
+
+    @Test
+    fun `a failed send in an existing chat keeps the chat`() = runTest(mainRule.testDispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        vm.send("first")
+        advanceUntilIdle()
+
+        repository.modelAvailable = false
+        vm.send("second")
+        advanceUntilIdle()
+
+        assertEquals(setOf("chat0"), repository.chats.value.keys)
+    }
+
+    @Test
     fun `blank input is ignored`() = runTest(mainRule.testDispatcher) {
         val vm = viewModel()
         vm.send("   ")
