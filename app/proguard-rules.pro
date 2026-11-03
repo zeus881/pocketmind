@@ -16,3 +16,8 @@
 # PdfBox loads fonts/encodings and some filters by reflection.
 -keep class com.tom_roush.pdfbox.** { *; }
 -keep class com.tom_roush.fontbox.** { *; }
+
+# v2 final (Play Billing 9.1 / Play Core): their classes reference this build-time annotation of
+# Google Play services, which is not shipped (it only guides Google's own compiler). An annotation
+# that is never read at runtime is safe to ignore.
+-dontwarn com.google.android.gms.common.annotation.NoNullnessRewrite

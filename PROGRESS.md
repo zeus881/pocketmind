@@ -29,7 +29,7 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 20 PocketMind Pro (Play Billing) + local diagnostics | DONE | 82 % (measured 82.6 %, 388 tests) | Billing 9.1.0 in new core:billing; gates: Pro models, PDFs > 50 pages (my choice, one constant), new custom personas; extra themes not built (none exist); crash log + share report; builds now serial (BLOCKERS) |
 | 21 Punjabi, Hindi review, per-app language, accessibility | DONE | 82 % (measured 82.5 %, 388 tests) | values-pa in all 12 modules (keys checked against en and hi); localeConfig + LocaleManager picker (Android 13+); accessibility audited in code; native review and TalkBack walk to do on device |
 | 22 End-to-end Compose UI tests + CI gates | DONE | 84 % (measured 84.2 %, 392 tests) | 3 E2E tests on the real app (Robolectric + Hilt test modules) found and fixed the "No model yet after first download" bug; KSP serialized (KspLock), parallel builds back on; PR coverage comment |
-| Final: release build, AUDIT_AFTER.md, README, report | NEXT | | |
+| Final: release build, AUDIT_AFTER.md, README, report | DONE | 84 % (measured 84.2 %, 392 tests) | assembleRelease + bundleRelease green (unsigned: APK 30.59 MB, AAB 23.40 MB; one R8 -dontwarn for a Play annotation); AUDIT_AFTER.md scores 62 → 79; README rewritten |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
