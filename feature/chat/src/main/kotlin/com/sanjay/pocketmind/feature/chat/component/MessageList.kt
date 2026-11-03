@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
@@ -45,6 +46,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,12 +56,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.sanjay.pocketmind.core.designsystem.component.MarkdownText
 import com.sanjay.pocketmind.core.designsystem.component.StreamingMarkdownText
@@ -82,20 +86,21 @@ import kotlinx.coroutines.launch
 private const val STREAMING_KEY = "streaming"
 
 /**
- * The scrolling conversation, oldest message at the top.
+ * The scrolling conversation, oldest message at the top, scrolled like current AI assistant apps
+ * (see [ChatScrollEffect]): a new question moves to the top of the screen and its answer is written
+ * downwards below it; nothing scrolls on its own after that.
  *
- * Scrolling follows the newest text only while the user is at the end (see [FollowLatestState]).
- * Until the 2026-11-03 phone test this list used `reverseLayout = true`, which anchors it to the
- * BOTTOM of the newest item: every new line of an answer then pushed all the text above it up,
- * even after the user had scrolled up to read it. Laid out top-down, an answer grows BELOW what is
- * on screen, so a reader is left alone; a short conversation still sits at the bottom
- * (`Alignment.Bottom`), like every chat app.
+ * To make that possible even for a short answer, the newest answer is at least one screen tall minus
+ * its question ([newestAnswerMinHeight]); the empty space sits below the answer, where the next
+ * question will go. History (from the 2026-11-03 phone tests): the old `reverseLayout = true` list
+ * was anchored to the bottom of the newest item, so every new line pushed the text up and the
+ * answer appeared at the bottom of the screen.
  *
  * v2 design: user messages are bubbles on the end side; answers are plain, full-width text
  * (like current AI assistants), which gives code blocks and tables room. On wide windows the
  * conversation is centred at a readable width, but the WHOLE area still scrolls (the side
  * margins are list padding, not a narrower list). Messages fade in as they arrive
- * (`animateItem`), and a "jump to latest" button appears after scrolling up (AUDIT L-7).
+ * (`animateItem`), and a "jump to latest" button appears while there is more below (AUDIT L-7).
  *
  * Stable `key`s let Compose keep each item's state when the list changes, instead of
  * re-creating every message on every new one. Items fade in and out but have NO placement
@@ -119,25 +124,46 @@ internal fun MessageList(
     val canChange = canRetry
     val lastAssistantId = messages.lastOrNull()?.takeIf { it.role == TurnRole.ASSISTANT }?.id
     val lastIndex = messages.size - if (streamingText == null) 1 else 0
-    // Opens at the newest message; FollowLatestEffect then scrolls to the end of it.
+    val questionIndex = messages.indexOfLast { it.role == TurnRole.USER }
+    val questionId = messages.getOrNull(questionIndex)?.id
+    // The answer to the newest question: the one being written, or the saved one right after it.
+    val newestAnswerId = when {
+        streamingText != null -> STREAMING_KEY
+        questionIndex >= 0 && questionIndex == messages.size - 2 -> lastAssistantId
+        else -> null
+    }
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = lastIndex.coerceAtLeast(0))
-    val follow = rememberFollowLatestState()
-    FollowLatestEffect(listState, follow)
+    ChatScrollEffect(listState, questionIndex, questionId)
     val scope = rememberCoroutineScope()
+    val showJump by remember { derivedStateOf { listState.canScrollForward } }
+    // The newest question's height, measured; until then 0, which only makes the answer's space bigger.
+    var questionHeight by remember { mutableStateOf<Pair<String, Int>?>(null) }
+    val density = LocalDensity.current
 
     BoxWithConstraints(modifier.fillMaxSize()) {
         val sideMargin = maxOf(PmSpacing.l, (maxWidth - PmSize.readableContentWidth) / 2)
+        val measuredQuestion = questionHeight?.takeIf { it.first == questionId }?.second ?: 0
+        val answerMinHeight = newestAnswerMinHeight(maxHeight, with(density) { measuredQuestion.toDp() })
         LazyColumn(
             state = listState,
-            modifier = Modifier
-                .fillMaxSize()
-                .nestedScroll(follow.connection),
+            modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(horizontal = sideMargin, vertical = PmSpacing.m),
-            verticalArrangement = Arrangement.spacedBy(PmSpacing.l, Alignment.Bottom),
+            verticalArrangement = Arrangement.spacedBy(PmSpacing.l),
         ) {
             items(messages, key = { it.id }) { message ->
                 val versions = branches[message.id]
-                Column(Modifier.animateItem(placementSpec = null)) {
+                Column(
+                    Modifier
+                        .animateItem(placementSpec = null)
+                        .then(if (message.id == newestAnswerId) Modifier.heightIn(min = answerMinHeight) else Modifier)
+                        .then(
+                            if (message.id == questionId) {
+                                Modifier.onSizeChanged { questionHeight = message.id to it.height }
+                            } else {
+                                Modifier
+                            },
+                        ),
+                ) {
                     if (message.role == TurnRole.USER) {
                         message.imagePath?.let { path ->
                             PhotoThumbnail(
@@ -173,11 +199,18 @@ internal fun MessageList(
                 }
             }
             if (streamingText != null) {
-                item(key = STREAMING_KEY) { StreamingAnswer(streamingText, Modifier.animateItem(placementSpec = null)) }
+                item(key = STREAMING_KEY) {
+                    StreamingAnswer(
+                        streamingText,
+                        Modifier
+                            .animateItem(placementSpec = null)
+                            .heightIn(min = answerMinHeight),
+                    )
+                }
             }
         }
         AnimatedVisibility(
-            visible = !follow.following,
+            visible = showJump,
             enter = fadeIn(tween(PmMotion.SHORT_MS)) + scaleIn(tween(PmMotion.SHORT_MS, easing = PmMotion.standard)),
             exit = fadeOut(tween(PmMotion.SHORT_MS)) + scaleOut(tween(PmMotion.SHORT_MS, easing = PmMotion.standard)),
             modifier = Modifier
@@ -188,7 +221,7 @@ internal fun MessageList(
                 onClick = {
                     scope.launch {
                         listState.animateScrollToItem(lastIndex.coerceAtLeast(0))
-                        follow.follow()
+                        listState.scrollToEnd()
                     }
                 },
             ) {
@@ -200,6 +233,13 @@ internal fun MessageList(
         }
     }
 }
+
+/**
+ * The newest answer fills the screen below its question, so the question can be scrolled to the top:
+ * the list height minus the list padding, the gap between items and the question itself.
+ */
+private fun newestAnswerMinHeight(listHeight: Dp, questionHeight: Dp): Dp =
+    (listHeight - PmSpacing.m * 2 - PmSpacing.l - questionHeight).coerceAtLeast(Dp.Hairline) // never negative
 
 /**
  * A question. Long-press (or TalkBack's "actions" menu) offers Edit and Copy. Editing sends a

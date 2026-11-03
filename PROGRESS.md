@@ -187,7 +187,11 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   Now the list is laid out top-down and follows the newest text only while the user is at the end
   (`FollowLatestState`: a drag towards older messages stops following; reaching the end or "Jump to latest"
   resumes it). The finished answer replaces the live one in a single frame (ViewModel waits for Room's copy).
-  3 Robolectric tests (`MessageListFollowTest`). Commit `221d652`.
+  Commit `221d652`; owner confirmed: the text stays steady. Owner's follow-up wish: the answer should start at the
+  TOP, not the bottom. Now (like current AI assistant apps) a new question moves to the top of the screen and its
+  answer is written downwards below it; nothing scrolls on its own; the newest answer is at least one screen tall
+  so this works for short answers too; "Jump to latest" shows while there is more below (`ChatScrollEffect`,
+  3 Robolectric tests in `MessageListScrollTest`). To verify on device.
 - **Voice input: works** ("What is the capital of France", microphone permission granted, answer correct).
   **Read aloud: works** (the owner heard the answer; the icon turned into Stop and back).
 - **Export all my data: works.** ZIP with 17 chats (Markdown), JSON with 116 messages, 1 note, 2 photos
