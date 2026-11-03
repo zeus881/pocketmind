@@ -11,10 +11,10 @@ import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-internal abstract class BillingModule {
+abstract class BillingModule {
     @Binds
-    abstract fun bindsBillingGateway(gateway: PlayBillingGateway): BillingGateway
+    internal abstract fun bindsBillingGateway(gateway: PlayBillingGateway): BillingGateway
 
     @Binds
-    abstract fun bindsProStatus(status: PlayProStatus): ProStatus
+    internal abstract fun bindsProStatus(status: PlayProStatus): ProStatus
 }

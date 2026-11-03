@@ -32,6 +32,35 @@ import timber.log.Timber
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
     @Provides
+    fun providesChatDao(db: PocketMindDatabase): ChatDao = db.chatDao()
+
+    @Provides
+    fun providesMessageDao(db: PocketMindDatabase): MessageDao = db.messageDao()
+
+    @Provides
+    fun providesBenchmarkDao(db: PocketMindDatabase): BenchmarkDao = db.benchmarkDao()
+
+    @Provides
+    fun providesDocumentDao(db: PocketMindDatabase): DocumentDao = db.documentDao()
+
+    @Provides
+    fun providesFolderDao(db: PocketMindDatabase): FolderDao = db.folderDao()
+
+    @Provides
+    fun providesPersonaDao(db: PocketMindDatabase): PersonaDao = db.personaDao()
+
+    @Provides
+    fun providesNoteDao(db: PocketMindDatabase): NoteDao = db.noteDao()
+}
+
+/**
+ * The database FILE (encrypted, on the phone). Separate from the DAO bindings so end-to-end tests can swap in
+ * an in-memory database and keep everything else real.
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+object DatabaseFileModule {
+    @Provides
     @Singleton
     fun providesDatabase(@ApplicationContext context: Context): PocketMindDatabase =
         Room.databaseBuilder(context, PocketMindDatabase::class.java, PocketMindDatabase.NAME)
@@ -56,25 +85,4 @@ object DatabaseModule {
 
     /** The wrapped database key; in noBackupFilesDir so no backup or transfer ever carries it. */
     private const val KEY_FILE = "database.key"
-
-    @Provides
-    fun providesChatDao(db: PocketMindDatabase): ChatDao = db.chatDao()
-
-    @Provides
-    fun providesMessageDao(db: PocketMindDatabase): MessageDao = db.messageDao()
-
-    @Provides
-    fun providesBenchmarkDao(db: PocketMindDatabase): BenchmarkDao = db.benchmarkDao()
-
-    @Provides
-    fun providesDocumentDao(db: PocketMindDatabase): DocumentDao = db.documentDao()
-
-    @Provides
-    fun providesFolderDao(db: PocketMindDatabase): FolderDao = db.folderDao()
-
-    @Provides
-    fun providesPersonaDao(db: PocketMindDatabase): PersonaDao = db.personaDao()
-
-    @Provides
-    fun providesNoteDao(db: PocketMindDatabase): NoteDao = db.noteDao()
 }

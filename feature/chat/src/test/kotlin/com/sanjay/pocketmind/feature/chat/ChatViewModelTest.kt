@@ -210,6 +210,24 @@ class ChatViewModelTest {
     }
 
     @Test
+    fun `coming back after the first download finds the new model`() = runTest(mainRule.testDispatcher) {
+        repository.modelAvailable = false
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+        assertEquals(ModelUi.NoModel, vm.uiState.value.model)
+
+        repository.modelAvailable = true // downloaded in the model manager meanwhile
+        vm.onScreenResumed()
+        advanceUntilIdle()
+
+        assertEquals(ModelUi.Ready("GPU"), vm.uiState.value.model)
+        vm.onScreenResumed() // with a model, coming back doesn't load again
+        advanceUntilIdle()
+        assertEquals(2, repository.loadAttempts)
+    }
+
+    @Test
     fun `voice is unavailable without an on-device recognizer`() = runTest(mainRule.testDispatcher) {
         speechIn.available = false
         val vm = viewModel()

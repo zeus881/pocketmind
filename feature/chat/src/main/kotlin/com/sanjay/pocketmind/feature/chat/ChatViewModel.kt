@@ -193,6 +193,14 @@ class ChatViewModel @Inject constructor(
         loadModel()
     }
 
+    /**
+     * The chat is visible again (e.g. back from the model manager). Without a model it looks again: after
+     * the first download in onboarding, the chat behind the model manager still said "No model yet".
+     */
+    fun onScreenResumed() {
+        if (noModel.value) loadModel()
+    }
+
     fun loadModel() {
         viewModelScope.launch {
             loadingModel.value = true

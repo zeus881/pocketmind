@@ -147,6 +147,13 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.androidx.datastore.preferences)
     testImplementation(libs.robolectric)
+    // End-to-end tests (EndToEndTest): the real app with Hilt test modules and FakeLlmEngine, on Robolectric.
+    testImplementation(libs.hilt.android.testing)
+    kspTest(libs.hilt.compiler)
+    testImplementation(libs.compose.ui.test.junit4)
+    testImplementation(projects.core.database)
+    testImplementation(libs.androidx.room.runtime)
+    testImplementation(libs.pdfbox.android)
 }
 
 /*

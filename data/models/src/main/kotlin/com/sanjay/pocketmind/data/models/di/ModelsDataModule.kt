@@ -25,13 +25,7 @@ import okhttp3.OkHttpClient
 @InstallIn(SingletonComponent::class)
 internal abstract class ModelsDataModule {
     @Binds
-    abstract fun bindsModelRepository(repository: WorkManagerModelRepository): ModelRepository
-
-    @Binds
     abstract fun bindsDeviceInfo(info: AndroidDeviceInfo): DeviceInfo
-
-    @Binds
-    abstract fun bindsInferenceSettingsSource(source: SettingsInferenceSource): InferenceSettingsSource
 
     @Binds
     abstract fun bindsEmbeddingModelSource(source: CatalogEmbeddingModelSource): EmbeddingModelSource
@@ -52,4 +46,18 @@ internal abstract class ModelsDataModule {
         private const val CONNECT_TIMEOUT_S = 30L
         private const val READ_TIMEOUT_S = 60L
     }
+}
+
+/**
+ * Which models exist and which one answers. Public and separate so end-to-end tests can replace exactly
+ * this (with an instant "download") while the rest of the app's wiring stays real.
+ */
+@Module
+@InstallIn(SingletonComponent::class)
+abstract class ModelSelectionModule {
+    @Binds
+    internal abstract fun bindsModelRepository(repository: WorkManagerModelRepository): ModelRepository
+
+    @Binds
+    internal abstract fun bindsInferenceSettingsSource(source: SettingsInferenceSource): InferenceSettingsSource
 }

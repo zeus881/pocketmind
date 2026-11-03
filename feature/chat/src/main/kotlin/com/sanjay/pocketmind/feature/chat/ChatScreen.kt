@@ -57,6 +57,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
@@ -111,6 +112,11 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
 
             else -> micPermission.launch(Manifest.permission.RECORD_AUDIO)
         }
+    }
+
+    LifecycleResumeEffect(Unit) {
+        viewModel.onScreenResumed()
+        onPauseOrDispose { }
     }
 
     // LaunchedEffect(Unit) starts once when the screen appears and is cancelled when it leaves.

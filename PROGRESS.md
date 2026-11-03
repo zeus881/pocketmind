@@ -28,7 +28,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 19 Release notes, In-App Updates/Review, Play publishing | DONE | 82 % (measured 82.0 %, 373 tests) | Play app-update 2.1.0, review 2.0.2, Play Publisher 4.1.1; play.yml → internal track; needs the service-account secret |
 | 20 PocketMind Pro (Play Billing) + local diagnostics | DONE | 82 % (measured 82.6 %, 388 tests) | Billing 9.1.0 in new core:billing; gates: Pro models, PDFs > 50 pages (my choice, one constant), new custom personas; extra themes not built (none exist); crash log + share report; builds now serial (BLOCKERS) |
 | 21 Punjabi, Hindi review, per-app language, accessibility | DONE | 82 % (measured 82.5 %, 388 tests) | values-pa in all 12 modules (keys checked against en and hi); localeConfig + LocaleManager picker (Android 13+); accessibility audited in code; native review and TalkBack walk to do on device |
-| 22 End-to-end Compose UI tests + CI gates | NEXT | | |
+| 22 End-to-end Compose UI tests + CI gates | DONE | 84 % (measured 84.2 %, 392 tests) | 3 E2E tests on the real app (Robolectric + Hilt test modules) found and fixed the "No model yet after first download" bug; KSP serialized (KspLock), parallel builds back on; PR coverage comment |
+| Final: release build, AUDIT_AFTER.md, README, report | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -156,6 +157,12 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   that one was the phase 5 setting `ksp.classloader.cache.processors=false` (a fresh processor classloader per KSP
   task fills the daemon's 1 GB metaspace over ~25 modules). With serial builds the cache is safe again, so it is
   back ON and the metaspace limit is 1.5 GB.
+  **Phase 22, root cause and fix:** KSP runs as Gradle *worker actions*, which overlap even in a serial build, so
+  two KSP tasks still ran at the same time (seen as two simultaneous failures). A build service with one allowed
+  user (`KspLock` in `HiltConventionPlugin`) now runs KSP tasks strictly one at a time; parallel builds are back
+  ON. Since then every full check passed without a KSP error. Also found: a `kspDebugKotlin` output folder deleted
+  in an earlier clean-up was never regenerated (the debug app lacked ChatViewModel's Hilt registration until
+  `kspDebugKotlin --rerun`). Status: **resolved**, keep watching.
 
 ## MANUAL STEPS FOR SANJAY
 
@@ -206,6 +213,8 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   mark. Walk through `docs/accessibility-checklist.md` with TalkBack and at the largest font size. Then re-record
   the screenshot goldens (Record screenshots workflow): phases 16–21 changed Settings, the chat input and the answer
   footer, so `verifyRoborazziDebug` reports differences until then.
+- **CI gate (phase 22):** on GitHub, Settings → Branches → add a branch protection rule for `main` (and `v2`) with
+  "Require status checks to pass" → select the CI job `build`. Then a red CI really blocks a merge.
 
 ### v1
 

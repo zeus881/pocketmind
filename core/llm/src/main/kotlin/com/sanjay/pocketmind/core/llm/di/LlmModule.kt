@@ -18,13 +18,13 @@ import dagger.hilt.components.SingletonComponent
  */
 @Module
 @InstallIn(SingletonComponent::class)
-internal abstract class LlmModule {
+abstract class LlmModule {
     @Binds
-    abstract fun bindsLlmEngine(engine: LiteRtLmEngine): LlmEngine
+    internal abstract fun bindsLlmEngine(engine: LiteRtLmEngine): LlmEngine
 
     @Binds
-    abstract fun bindsTextEmbedder(embedder: LiteRtLmEmbedder): TextEmbedder
+    internal abstract fun bindsTextEmbedder(embedder: LiteRtLmEmbedder): TextEmbedder
 
     @Binds
-    abstract fun bindsExitReasonSource(source: AndroidExitReasonSource): ExitReasonSource
+    internal abstract fun bindsExitReasonSource(source: AndroidExitReasonSource): ExitReasonSource
 }

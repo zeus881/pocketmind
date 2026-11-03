@@ -12,6 +12,11 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+# pull-requests: write lets the coverage step comment on a pull request; nothing else is written.
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -36,7 +41,9 @@ jobs:
       - name: Android Lint
         run: ./gradlew lint
 
-      - name: Unit tests and coverage gate
+      # Includes the end-to-end tests (app: EndToEndTest): the real app on Robolectric with Hilt test modules,
+      # so no emulator is needed and they run on every push.
+      - name: Unit, end-to-end tests and coverage gate
         run: ./gradlew testDebugUnitTest koverVerifyApp koverXmlReportApp koverHtmlReportApp
 
       # Coverage summary on the run page (no third-party action: parses Kover's JaCoCo-format XML).
@@ -51,8 +58,32 @@ jobs:
           root = ET.parse(path).getroot()
           line = next(c for c in root.findall("counter") if c.get("type") == "LINE")
           missed, covered = int(line.get("missed")), int(line.get("covered"))
-          print(f"### Line coverage: {100 * covered / (missed + covered):.1f} % ({covered}/{missed + covered} lines)")
+          text = f"### Line coverage: {100 * covered / (missed + covered):.1f} % ({covered}/{missed + covered} lines)"
+          print(text)
+          open("coverage-summary.md", "w").write(text + "\n\nGate: koverVerifyApp (data, domain and ViewModel classes).\n")
           EOF
+
+      # The same summary as a pull-request comment, updated in place on every push (first-party action).
+      - name: Coverage comment on the pull request
+        if: always() && github.event_name == 'pull_request' && hashFiles('coverage-summary.md') != '
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require("fs");
+            const body = "<!-- pocketmind-coverage -->\n" + fs.readFileSync("coverage-summary.md", "utf8");
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+            const comments = await github.paginate(github.rest.issues.listComments, { owner, repo, issue_number });
+            const old = comments.find(c => c.body && c.body.startsWith("<!-- pocketmind-coverage -->"));
+            if (old) await github.rest.issues.updateComment({ owner, repo, comment_id: old.id, body });
+            else await github.rest.issues.createComment({ owner, repo, issue_number, body });
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-results
+          path: "**/build/test-results/"
+          retention-days: 7
 
       - uses: actions/upload-artifact@v7
         if: always()
