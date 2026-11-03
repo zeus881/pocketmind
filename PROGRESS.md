@@ -180,7 +180,20 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   Two causes: the whole Markdown text was re-parsed and re-composed on every 50 ms update, and `animateItem()`
   sprang every message above into place each time the answer grew. Now `StreamingMarkdownText` uses the
   renderer's append-only `StreamingMarkdownState` (0.46.0, checked with javap; finished blocks stay put), and list
-  items keep their fade but have no placement animation. Commit `b77222b`.
+  items keep their fade but have no placement animation. Commit `b77222b`. Owner confirmed on the phone: no
+  flicker any more.
+- **Reading while an answer is written (owner's report): fixed, to verify on device.** The text kept moving up,
+  even after scrolling up to read. Cause: `reverseLayout` anchors the list to the bottom of the newest item.
+  Now the list is laid out top-down and follows the newest text only while the user is at the end
+  (`FollowLatestState`: a drag towards older messages stops following; reaching the end or "Jump to latest"
+  resumes it). The finished answer replaces the live one in a single frame (ViewModel waits for Room's copy).
+  3 Robolectric tests (`MessageListFollowTest`). Commit `221d652`.
+- **Voice input: works** ("What is the capital of France", microphone permission granted, answer correct).
+  **Read aloud:** a speech audio stream was seen; the owner still has to confirm hearing it.
+- **Export all my data: works.** ZIP with 17 chats (Markdown), JSON with 116 messages, 1 note, 2 photos
+  (same as on the phone), settings, README.
+- **Seen:** unneeded tool calls (Notes for a photo question, Date and time for "capital of France"); the
+  temperature setting on the phone was 1.5, which may make this more likely.
 - **App logs:** this phone shows no app log lines in logcat (vivo/iQOO suppresses them unless enabled in developer
   options), so on-device checks read files instead.
 
