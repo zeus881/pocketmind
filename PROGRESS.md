@@ -174,6 +174,13 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   - Note: a scripted test run left the app by mistake (Back closed PocketMind) and tapped the home screen. Rule
     for future device scripts: take a screenshot and check the foreground app before every tap. Also seen: the model sometimes writes
     LaTeX (`$… \times …$`), which the Markdown view shows raw.
+- **Photo question (vision): works.** A photo of a restaurant menu was read correctly: sections, items, prices and
+  the shop's address (28.7 tok/s · GPU). Oddity: the model also called the Notes tool, which it didn't need.
+- **Streaming flicker (owner's report): fixed, to verify on device.** The answer flickered while it was written.
+  Two causes: the whole Markdown text was re-parsed and re-composed on every 50 ms update, and `animateItem()`
+  sprang every message above into place each time the answer grew. Now `StreamingMarkdownText` uses the
+  renderer's append-only `StreamingMarkdownState` (0.46.0, checked with javap; finished blocks stay put), and list
+  items keep their fade but have no placement animation. Commit `b77222b`.
 - **App logs:** this phone shows no app log lines in logcat (vivo/iQOO suppresses them unless enabled in developer
   options), so on-device checks read files instead.
 
