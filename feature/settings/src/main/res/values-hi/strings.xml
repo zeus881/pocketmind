@@ -78,4 +78,6 @@
     <string name="feature_settings_diagnostics">डायग्नोस्टिक रिपोर्ट शेयर करें</string>
     <string name="feature_settings_diagnostics_hint">ऐप और Android का संस्करण, फ़ोन का मॉडल और दर्ज क्रैश, समस्या ठीक करने के लिए। कोई चैट नहीं। कहाँ भेजना है, आप चुनें।</string>
     <string name="feature_settings_diagnostics_subject">PocketMind डायग्नोस्टिक रिपोर्ट</string>
+    <string name="feature_settings_language">ऐप की भाषा</string>
+    <string name="feature_settings_language_system">फ़ोन जैसी</string>
 </resources>

@@ -1,10 +1,13 @@
 package com.sanjay.pocketmind.feature.settings
 
+import android.app.LocaleManager
 import android.content.Intent
 import android.os.Build
+import android.os.LocaleList
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -156,6 +159,8 @@ internal fun SettingsContent(
 
             Section(R.string.feature_settings_section_appearance)
             ThemeChooser(s.themeMode, vm::setThemeMode)
+            // Per-app language exists from Android 13; older phones follow the phone's language.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) LanguageChooser()
             // Wallpaper colours exist only on Android 12+; older phones always use the brand colours.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 SwitchRow(
@@ -499,6 +504,45 @@ private fun ThemeChooser(current: ThemeMode, onChange: (ThemeMode) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .selectable(selected = current == mode, role = Role.RadioButton) { onChange(mode) },
+            )
+        }
+    }
+}
+
+/** The app's languages (same list as res/xml/locales_config.xml); "" = follow the phone. */
+private val APP_LANGUAGES = listOf(
+    "" to R.string.feature_settings_language_system,
+    "en" to R.string.feature_settings_language_en,
+    "hi" to R.string.feature_settings_language_hi,
+    "pa" to R.string.feature_settings_language_pa,
+)
+
+/**
+ * Android's own per-app language setting (LocaleManager, Android 13+). Android stores the choice
+ * and recreates the screen in the new language; the same setting appears under
+ * Settings > Apps > PocketMind > Language.
+ */
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@Composable
+private fun LanguageChooser() {
+    val context = LocalContext.current
+    val manager = remember { context.getSystemService(LocaleManager::class.java) }
+    val current = remember { manager?.applicationLocales?.get(0)?.language.orEmpty() }
+    Text(
+        text = stringResource(R.string.feature_settings_language),
+        style = MaterialTheme.typography.titleSmall,
+        modifier = Modifier.padding(start = PmSpacing.l, top = PmSpacing.m),
+    )
+    Column(Modifier.selectableGroup()) {
+        APP_LANGUAGES.forEach { (tag, label) ->
+            ListItem(
+                headlineContent = { Text(stringResource(label)) },
+                leadingContent = { RadioButton(selected = current == tag, onClick = null) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .selectable(selected = current == tag, role = Role.RadioButton) {
+                        manager?.applicationLocales = LocaleList.forLanguageTags(tag)
+                    },
             )
         }
     }

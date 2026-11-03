@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Punjabi (Gurmukhi). Written by the developer's assistant; a native speaker review is a manual step. -->
+<resources>
+    <string name="nav_chat">ਚੈਟ</string>
+    <string name="nav_history">ਇਤਿਹਾਸ</string>
+    <string name="nav_documents">ਦਸਤਾਵੇਜ਼</string>
+    <string name="nav_translate">ਅਨੁਵਾਦ</string>
+    <string name="nav_settings">ਸੈਟਿੰਗਾਂ</string>
+    <string name="lock_title">PocketMind ਲਾਕ ਹੈ</string>
+    <string name="lock_unlock">ਖੋਲ੍ਹੋ</string>
+    <string name="lock_prompt_title">PocketMind ਖੋਲ੍ਹੋ</string>
+    <string name="lock_prompt_subtitle">ਤੁਹਾਡੀਆਂ ਚੈਟਾਂ ਸੁਰੱਖਿਅਤ ਹਨ</string>
+    <string name="licenses_title">ਓਪਨ-ਸੋਰਸ ਲਾਇਸੈਂਸ</string>
+    <string name="licenses_back">ਪਿੱਛੇ</string>
+    <string name="licenses_models">ਮਾਡਲ: Google ਦੇ Gemma 4 E2B ਅਤੇ EmbeddingGemma 2, Apache License 2.0। Qwen ਟੀਮ (Alibaba Cloud) ਦੇ Qwen3 ਅਤੇ Qwen3.5, Apache License 2.0। ਮਾਡਲ ਫ਼ਾਈਲਾਂ huggingface.co/litert-community ਤੋਂ। ਫ਼ੋਨ ਉੱਤੇ ਚੱਲਣ ਵਾਲਾ ਰਨਟਾਈਮ: Google ਦਾ LiteRT-LM, Apache License 2.0।</string>
+    <string name="share_label">PocketMind ਨੂੰ ਪੁੱਛੋ</string>
+    <string name="share_label_pdf">PocketMind ਨਾਲ ਸਾਰ ਬਣਾਓ</string>
+    <string name="widget_description">ਨਵੀਂ ਨਿੱਜੀ ਚੈਟ ਸ਼ੁਰੂ ਕਰੋ ਜਾਂ ਹਾਲ ਦੀ ਕੋਈ ਚੈਟ ਖੋਲ੍ਹੋ</string>
+    <string name="widget_new_chat">ਨਵੀਂ ਚੈਟ</string>
+    <string name="widget_no_chats">ਹਾਲੇ ਕੋਈ ਚੈਟ ਨਹੀਂ।</string>
+    <string name="widget_untitled">ਬਿਨਾਂ ਨਾਂ ਦੀ ਚੈਟ</string>
+    <string name="widget_locked">ਐਪ ਲਾਕ ਚਾਲੂ ਹੈ: ਆਪਣੀਆਂ ਚੈਟਾਂ ਦੇਖਣ ਲਈ PocketMind ਖੋਲ੍ਹੋ।</string>
+    <string name="tile_label">PocketMind</string>
+    <string name="update_ready">PocketMind ਦਾ ਨਵਾਂ ਸੰਸਕਰਣ ਤਿਆਰ ਹੈ।</string>
+    <string name="update_restart">ਮੁੜ ਸ਼ੁਰੂ ਕਰੋ</string>
+    <string name="update_later">ਬਾਅਦ ਵਿੱਚ</string>
+</resources>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_settings_title">ਸੈਟਿੰਗਾਂ</string>
+    <string name="feature_settings_section_model">ਮਾਡਲ</string>
+    <string name="feature_settings_section_answers">ਜਵਾਬ</string>
+    <string name="feature_settings_section_appearance">ਦਿੱਖ</string>
+    <string name="feature_settings_section_downloads">ਡਾਊਨਲੋਡ</string>
+    <string name="feature_settings_section_tools">ਟੂਲ</string>
+    <string name="feature_settings_model">ਮਾਡਲ</string>
+    <string name="feature_settings_no_model">ਕੋਈ ਮਾਡਲ ਨਹੀਂ ਚੁਣਿਆ — ਚੁਣਨ ਲਈ ਛੂਹੋ</string>
+    <string name="feature_settings_gpu">GPU ਵਰਤੋ</string>
+    <string name="feature_settings_gpu_hint">ਆਮ ਤੌਰ ਉੱਤੇ ਤੇਜ਼। ਜੇ GPU ਸਹਾਇਕ ਨਾ ਹੋਵੇ ਤਾਂ ਆਪਣੇ ਆਪ CPU ਉੱਤੇ ਚੱਲਦਾ ਹੈ।</string>
+    <string name="feature_settings_gpu_active">ਹੁਣ ਇਸ ਉੱਤੇ ਚੱਲ ਰਿਹਾ ਹੈ: %1$s</string>
+    <string name="feature_settings_temperature">ਰਚਨਾਤਮਕਤਾ (temperature): %1$s</string>
+    <string name="feature_settings_temperature_hint">ਘੱਟ = ਟਿਕਿਆ ਅਤੇ ਅਨੁਮਾਨਯੋਗ। ਵੱਧ = ਵਧੇਰੇ ਵੰਨ-ਸੁਵੰਨਾ, ਵਧੇਰੇ ਗ਼ਲਤੀਆਂ।</string>
+    <string name="feature_settings_top_k">Top-K: %1$d</string>
+    <string name="feature_settings_top_k_hint">ਮਾਡਲ ਅਗਲਾ ਸ਼ਬਦ ਕਿੰਨੇ ਸੰਭਾਵੀ ਸ਼ਬਦਾਂ ਵਿੱਚੋਂ ਚੁਣਦਾ ਹੈ।</string>
+    <string name="feature_settings_system_prompt">ਸਿਸਟਮ ਪ੍ਰੋਂਪਟ</string>
+    <string name="feature_settings_save">ਸੰਭਾਲੋ</string>
+    <string name="feature_settings_reset">ਮੂਲ ਉੱਤੇ ਵਾਪਸ ਕਰੋ</string>
+    <string name="feature_settings_cancel">ਰੱਦ ਕਰੋ</string>
+    <string name="feature_settings_theme_system">ਫ਼ੋਨ ਵਾਂਗ</string>
+    <string name="feature_settings_theme_light">ਹਲਕਾ</string>
+    <string name="feature_settings_theme_dark">ਗੂੜ੍ਹਾ</string>
+    <string name="feature_settings_mobile_data">ਮੋਬਾਈਲ ਡਾਟਾ ਉੱਤੇ ਡਾਊਨਲੋਡ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ</string>
+    <string name="feature_settings_mobile_data_hint">ਮਾਡਲ ਵੱਡੇ ਹਨ। ਬੰਦ = ਸਿਰਫ਼ Wi-Fi।</string>
+    <string name="feature_settings_benchmark">ਬੈਂਚਮਾਰਕ</string>
+    <string name="feature_settings_benchmark_hint">ਇਸ ਫ਼ੋਨ ਉੱਤੇ ਗਤੀ ਅਤੇ ਮੈਮੋਰੀ ਮਾਪੋ</string>
+    <string name="feature_settings_section_privacy">ਨਿੱਜਤਾ</string>
+    <string name="feature_settings_app_lock">ਐਪ ਲਾਕ</string>
+    <string name="feature_settings_app_lock_hint">PocketMind ਖੋਲ੍ਹਣ ਵੇਲੇ ਉਂਗਲ ਦਾ ਨਿਸ਼ਾਨ, ਚਿਹਰਾ ਜਾਂ ਸਕ੍ਰੀਨ ਲਾਕ ਮੰਗੋ</string>
+    <string name="feature_settings_app_lock_unavailable">ਇਸਨੂੰ ਵਰਤਣ ਲਈ ਆਪਣੇ ਫ਼ੋਨ ਉੱਤੇ ਸਕ੍ਰੀਨ ਲਾਕ ਜਾਂ ਉਂਗਲ ਦਾ ਨਿਸ਼ਾਨ ਲਗਾਓ।</string>
+    <string name="feature_settings_privacy_statement">PocketMind ਵਿੱਚ ਨਾ ਖਾਤਾ ਹੈ, ਨਾ ਵਿਸ਼ਲੇਸ਼ਣ, ਨਾ ਇਸ਼ਤਿਹਾਰ। ਚੈਟਾਂ, ਦਸਤਾਵੇਜ਼ ਅਤੇ ਸੈਟਿੰਗਾਂ ਇਸੇ ਫ਼ੋਨ ਉੱਤੇ ਰਹਿੰਦੀਆਂ ਹਨ ਅਤੇ ਬੈਕਅੱਪ ਵਿੱਚ ਨਹੀਂ ਜਾਂਦੀਆਂ। ਇੰਟਰਨੈੱਟ ਸਿਰਫ਼ Hugging Face ਤੋਂ HTTPS ਰਾਹੀਂ ਮਾਡਲ ਡਾਊਨਲੋਡ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="feature_settings_licenses">ਓਪਨ-ਸੋਰਸ ਲਾਇਸੈਂਸ</string>
+    <string name="feature_settings_licenses_hint">PocketMind ਵਿੱਚ ਵਰਤੀਆਂ ਲਾਇਬ੍ਰੇਰੀਆਂ ਅਤੇ ਮਾਡਲ</string>
+    <string name="feature_settings_lock_after">ਐਪ ਛੱਡਣ ਤੋਂ ਬਾਅਦ ਦੁਬਾਰਾ ਲਾਕ ਕਰੋ</string>
+    <string name="feature_settings_lock_immediately">ਤੁਰੰਤ</string>
+    <plurals name="feature_settings_lock_seconds">
+        <item quantity="one">%d ਸਕਿੰਟ ਬਾਅਦ</item>
+        <item quantity="other">%d ਸਕਿੰਟ ਬਾਅਦ</item>
+    </plurals>
+    <plurals name="feature_settings_lock_minutes">
+        <item quantity="one">%d ਮਿੰਟ ਬਾਅਦ</item>
+        <item quantity="other">%d ਮਿੰਟ ਬਾਅਦ</item>
+    </plurals>
+    <string name="feature_settings_keep_model">ਐਪ ਛੱਡਣ ਤੋਂ ਬਾਅਦ ਮਾਡਲ ਲੋਡ ਰੱਖੋ</string>
+    <string name="feature_settings_keep_model_hint">ਵੱਧ ਸਮਾਂ ਮਤਲਬ ਵਾਪਸ ਆਉਣ ਉੱਤੇ ਉਡੀਕ ਨਹੀਂ, ਪਰ ਇਸ ਦੌਰਾਨ ਮਾਡਲ ਮੈਮੋਰੀ ਵਰਤਦਾ ਰਹਿੰਦਾ ਹੈ।</string>
+    <string name="feature_settings_keep_model_none">ਤੁਰੰਤ ਹਟਾਓ</string>
+    <plurals name="feature_settings_keep_model_minutes">
+        <item quantity="one">%d ਮਿੰਟ ਲਈ</item>
+        <item quantity="other">%d ਮਿੰਟ ਲਈ</item>
+    </plurals>
+    <string name="feature_settings_dynamic_color">ਤੁਹਾਡੇ ਵਾਲਪੇਪਰ ਦੇ ਰੰਗ</string>
+    <string name="feature_settings_dynamic_color_hint">ਬੰਦ: PocketMind ਦੇ ਰੰਗ ਵਰਤੋ।</string>
+    <string name="feature_settings_personas">ਪਰਸੋਨਾ ਅਤੇ ਪ੍ਰੋਂਪਟ</string>
+    <string name="feature_settings_personas_hint">ਜਵਾਬ ਦੇਣ ਦੇ ਢੰਗ, ਅਤੇ ਅਕਸਰ ਵਰਤੇ ਜਾਣ ਵਾਲੇ ਪ੍ਰੋਂਪਟ</string>
+    <string name="feature_settings_section_data">ਤੁਹਾਡਾ ਡਾਟਾ</string>
+    <string name="feature_settings_export_data">ਮੇਰਾ ਸਾਰਾ ਡਾਟਾ ਐਕਸਪੋਰਟ ਕਰੋ</string>
+    <string name="feature_settings_export_data_hint">ਇੱਕ ZIP ਫ਼ਾਈਲ: ਚੈਟਾਂ (Markdown ਅਤੇ JSON), ਨੋਟਸ, ਪਰਸੋਨਾ, ਪ੍ਰੋਂਪਟ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਸੈਟਿੰਗਾਂ। ਇਨਕ੍ਰਿਪਟ ਨਹੀਂ।</string>
+    <string name="feature_settings_delete_data">ਮੇਰਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਓ</string>
+    <string name="feature_settings_delete_data_hint">ਚੈਟਾਂ, ਨੋਟਸ, ਪਰਸੋਨਾ, ਪ੍ਰੋਂਪਟ, ਫ਼ੋਟੋਆਂ ਅਤੇ ਸੈਟਿੰਗਾਂ। ਡਾਊਨਲੋਡ ਕੀਤੇ ਮਾਡਲ ਰਹਿਣਗੇ।</string>
+    <string name="feature_settings_delete_data_confirm_title">ਕੀ ਤੁਹਾਡਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਉਣਾ ਹੈ?</string>
+    <string name="feature_settings_delete_data_confirm_body">ਸਾਰੀਆਂ ਚੈਟਾਂ, ਨੋਟਸ, ਪਰਸੋਨਾ, ਸੰਭਾਲੇ ਪ੍ਰੋਂਪਟ, ਜੋੜੀਆਂ ਫ਼ੋਟੋਆਂ, PDF ਇੰਡੈਕਸ ਅਤੇ ਤੁਹਾਡੀਆਂ ਸੈਟਿੰਗਾਂ ਇਸ ਫ਼ੋਨ ਤੋਂ ਮਿਟ ਜਾਣਗੀਆਂ। ਇਹ ਵਾਪਸ ਨਹੀਂ ਹੋ ਸਕਦਾ। ਡਾਊਨਲੋਡ ਕੀਤੇ ਮਾਡਲ ਰਹਿਣਗੇ, ਇਸ ਲਈ ਤੁਸੀਂ ਚੈਟ ਕਰਦੇ ਰਹਿ ਸਕਦੇ ਹੋ। ਕਾਪੀ ਚਾਹੀਦੀ ਹੈ ਤਾਂ ਪਹਿਲਾਂ ਡਾਟਾ ਐਕਸਪੋਰਟ ਕਰੋ।</string>
+    <string name="feature_settings_delete_data_confirm">ਸਭ ਕੁਝ ਮਿਟਾਓ</string>
+    <string name="feature_settings_data_exported">ਤੁਹਾਡਾ ਡਾਟਾ ਐਕਸਪੋਰਟ ਹੋ ਗਿਆ।</string>
+    <string name="feature_settings_data_export_failed">ਐਕਸਪੋਰਟ ਸੰਭਾਲਿਆ ਨਹੀਂ ਜਾ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਕੋਈ ਹੋਰ ਥਾਂ ਚੁਣੋ।</string>
+    <string name="feature_settings_data_deleted">ਤੁਹਾਡਾ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾ ਦਿੱਤਾ ਗਿਆ।</string>
+    <string name="feature_settings_section_pro">PocketMind Pro</string>
+    <string name="feature_settings_pro_get">PocketMind Pro ਲਓ: %1$s</string>
+    <string name="feature_settings_pro_price_unknown">ਕੀਮਤ Google Play ਦਿਖਾਉਂਦਾ ਹੈ</string>
+    <string name="feature_settings_pro_benefits">ਇੱਕ ਵਾਰ ਦੀ ਖ਼ਰੀਦ। ਵੱਡੇ ਮਾਡਲ, ਕਿਸੇ ਵੀ ਲੰਬਾਈ ਦੀ PDF ਅਤੇ ਤੁਹਾਡੇ ਆਪਣੇ ਪਰਸੋਨਾ। ਆਵਾਜ਼ ਨਾਲ ਲਿਖਣਾ ਅਤੇ ਪੜ੍ਹ ਕੇ ਸੁਣਾਉਣਾ ਮੁਫ਼ਤ ਰਹਿਣਗੇ।</string>
+    <string name="feature_settings_pro_unlocked">PocketMind Pro ਚਾਲੂ ਹੈ। ਧੰਨਵਾਦ!</string>
+    <string name="feature_settings_pro_restore">ਖ਼ਰੀਦ ਵਾਪਸ ਲਿਆਓ</string>
+    <string name="feature_settings_pro_restore_hint">ਕਿਸੇ ਹੋਰ ਫ਼ੋਨ ਉੱਤੇ ਜਾਂ ਦੁਬਾਰਾ ਇੰਸਟਾਲ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ Pro ਖ਼ਰੀਦਿਆ ਸੀ? Google Play ਤੁਹਾਡਾ ਖਾਤਾ ਜਾਂਚੇਗਾ।</string>
+    <string name="feature_settings_pro_unavailable">ਇਸ ਵੇਲੇ Google Play ਉਪਲਬਧ ਨਹੀਂ ਹੈ। ਦੇਖੋ ਕਿ Play Store ਇੰਸਟਾਲ ਹੈ ਅਤੇ ਤੁਸੀਂ ਸਾਈਨ ਇਨ ਹੋ।</string>
+    <string name="feature_settings_pro_restored">PocketMind Pro ਚਾਲੂ ਹੈ।</string>
+    <string name="feature_settings_pro_not_found">ਇਸ ਖਾਤੇ ਲਈ Google Play ਨੂੰ ਕੋਈ Pro ਖ਼ਰੀਦ ਨਹੀਂ ਮਿਲੀ।</string>
+    <string name="feature_settings_diagnostics">ਡਾਇਗਨੌਸਟਿਕ ਰਿਪੋਰਟ ਸਾਂਝੀ ਕਰੋ</string>
+    <string name="feature_settings_diagnostics_hint">ਐਪ ਅਤੇ Android ਦਾ ਸੰਸਕਰਣ, ਫ਼ੋਨ ਦਾ ਮਾਡਲ ਅਤੇ ਦਰਜ ਕਰੈਸ਼, ਸਮੱਸਿਆ ਠੀਕ ਕਰਨ ਲਈ। ਕੋਈ ਚੈਟ ਨਹੀਂ। ਕਿੱਥੇ ਭੇਜਣਾ ਹੈ, ਤੁਸੀਂ ਚੁਣੋ।</string>
+    <string name="feature_settings_diagnostics_subject">PocketMind ਡਾਇਗਨੌਸਟਿਕ ਰਿਪੋਰਟ</string>
+    <string name="feature_settings_language">ਐਪ ਦੀ ਭਾਸ਼ਾ</string>
+    <string name="feature_settings_language_system">ਫ਼ੋਨ ਵਾਂਗ</string>
+</resources>

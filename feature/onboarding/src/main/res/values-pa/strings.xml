@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_onboarding_what_title">ਤੁਹਾਡੇ ਫ਼ੋਨ ਵਿੱਚ ਰਹਿਣ ਵਾਲਾ AI ਸਹਾਇਕ</string>
+    <string name="feature_onboarding_what_body">ਚੈਟ ਕਰੋ, PDF ਦਾ ਸਾਰ ਬਣਾਓ, ਦਸਤਾਵੇਜ਼ਾਂ ਬਾਰੇ ਸਵਾਲ ਪੁੱਛੋ ਅਤੇ ਅਨੁਵਾਦ ਕਰੋ — ਸਭ ਕੁਝ ਇਸੇ ਫ਼ੋਨ ਉੱਤੇ ਚੱਲਣ ਵਾਲੇ ਭਾਸ਼ਾ ਮਾਡਲ ਨਾਲ।</string>
+    <string name="feature_onboarding_privacy_title">ਸ਼ੁਰੂ ਤੋਂ ਹੀ ਨਿੱਜੀ</string>
+    <string name="feature_onboarding_privacy_body">ਨਾ ਖਾਤਾ। ਨਾ ਕਲਾਊਡ। ਨਾ ਕੋਈ ਵਿਸ਼ਲੇਸ਼ਣ। ਤੁਹਾਡੀਆਂ ਚੈਟਾਂ ਕਦੇ ਇਸ ਫ਼ੋਨ ਤੋਂ ਬਾਹਰ ਨਹੀਂ ਜਾਂਦੀਆਂ। ਇੰਟਰਨੈੱਟ ਸਿਰਫ਼ ਇੱਕ ਵਾਰ ਮਾਡਲ ਡਾਊਨਲੋਡ ਕਰਨ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="feature_onboarding_model_title">ਇੱਕ ਡਾਊਨਲੋਡ, ਫਿਰ ਪੂਰੀ ਤਰ੍ਹਾਂ ਆਫ਼ਲਾਈਨ</string>
+    <string name="feature_onboarding_model_body">ਤੁਹਾਡੇ ਫ਼ੋਨ ਵਿੱਚ %1$d GB RAM ਹੈ। ਅਸੀਂ %2$s (%3$s) ਦੀ ਸਿਫ਼ਾਰਸ਼ ਕਰਦੇ ਹਾਂ। ਅਗਲੇ ਪੜਾਅ ਵਿੱਚ ਤੁਸੀਂ ਇਸਨੂੰ Wi-Fi ਉੱਤੇ ਡਾਊਨਲੋਡ ਕਰ ਸਕਦੇ ਹੋ।</string>
+    <string name="feature_onboarding_model_body_generic">ਅਗਲੇ ਪੜਾਅ ਵਿੱਚ ਤੁਸੀਂ ਇੱਕ ਮਾਡਲ ਚੁਣੋਗੇ। ਮਾਡਲ 0.6 ਤੋਂ 2.6 GB ਦੇ ਹਨ।</string>
+    <string name="feature_onboarding_disclaimer_title">ਜਵਾਬ ਗ਼ਲਤ ਹੋ ਸਕਦੇ ਹਨ</string>
+    <string name="feature_onboarding_disclaimer_body">ਫ਼ੋਨ ਉੱਤੇ ਚੱਲਣ ਵਾਲੇ ਛੋਟੇ ਮਾਡਲ ਗ਼ਲਤੀਆਂ ਕਰਦੇ ਹਨ ਅਤੇ ਗ਼ਲਤ ਹੋਣ ਵੇਲੇ ਵੀ ਪੱਕੇ ਲੱਗ ਸਕਦੇ ਹਨ। ਜ਼ਰੂਰੀ ਗੱਲਾਂ ਦੀ ਜਾਂਚ ਕਰੋ, ਅਤੇ ਡਾਕਟਰੀ, ਕਾਨੂੰਨੀ ਜਾਂ ਪੈਸੇ ਦੇ ਫ਼ੈਸਲਿਆਂ ਲਈ PocketMind ਉੱਤੇ ਭਰੋਸਾ ਨਾ ਕਰੋ।</string>
+    <string name="feature_onboarding_skip">ਛੱਡੋ</string>
+    <string name="feature_onboarding_next">ਅੱਗੇ</string>
+    <string name="feature_onboarding_get_started">ਮੈਂ ਸਮਝ ਗਿਆ — ਸ਼ੁਰੂ ਕਰੋ</string>
+    <string name="feature_onboarding_page_of">ਸਫ਼ਾ %2$d ਵਿੱਚੋਂ %1$d</string>
+</resources>

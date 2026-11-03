@@ -27,7 +27,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 18 Encryption (SQLCipher) and data control | DONE | 82 % (measured 82.1 %, 362 tests) | SQLCipher 4.20.0, key wrapped by Keystore, verified one-time migration; export/delete all data; APK 30.22 MB (SQLCipher 2.01 MB); to verify on device |
 | 19 Release notes, In-App Updates/Review, Play publishing | DONE | 82 % (measured 82.0 %, 373 tests) | Play app-update 2.1.0, review 2.0.2, Play Publisher 4.1.1; play.yml → internal track; needs the service-account secret |
 | 20 PocketMind Pro (Play Billing) + local diagnostics | DONE | 82 % (measured 82.6 %, 388 tests) | Billing 9.1.0 in new core:billing; gates: Pro models, PDFs > 50 pages (my choice, one constant), new custom personas; extra themes not built (none exist); crash log + share report; builds now serial (BLOCKERS) |
-| 21 Punjabi, Hindi review, per-app language, accessibility | NEXT | | |
+| 21 Punjabi, Hindi review, per-app language, accessibility | DONE | 82 % (measured 82.5 %, 388 tests) | values-pa in all 12 modules (keys checked against en and hi); localeConfig + LocaleManager picker (Android 13+); accessibility audited in code; native review and TalkBack walk to do on device |
+| 22 End-to-end Compose UI tests + CI gates | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -200,6 +201,11 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   internal-track build (steps in `docs/billing.md`). Decide whether 50 free PDF pages is right
   (`PdfBoxTextExtractor.FREE_PDF_PAGES`). "Extra themes" from decision 2 don't exist yet: say if you want them
   built (they would be gated with `ProStatus.isPro`).
+- **Languages and accessibility (phase 21):** ask a native Punjabi speaker to read the app in ਪੰਜਾਬੀ and a native
+  Hindi speaker in हिन्दी (Settings → App language on Android 13+), and fix the `values-pa` / `values-hi` files they
+  mark. Walk through `docs/accessibility-checklist.md` with TalkBack and at the largest font size. Then re-record
+  the screenshot goldens (Record screenshots workflow): phases 16–21 changed Settings, the chat input and the answer
+  footer, so `verifyRoborazziDebug` reports differences until then.
 
 ### v1
 

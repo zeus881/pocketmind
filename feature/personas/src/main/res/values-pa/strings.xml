@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_personas_title">ਪਰਸੋਨਾ ਅਤੇ ਪ੍ਰੋਂਪਟ</string>
+    <string name="feature_personas_back">ਪਿੱਛੇ</string>
+    <string name="feature_personas_section_personas">ਪਰਸੋਨਾ</string>
+    <string name="feature_personas_section_prompts">ਸੰਭਾਲੇ ਪ੍ਰੋਂਪਟ</string>
+    <string name="feature_personas_built_in">ਪਹਿਲਾਂ ਤੋਂ ਬਣਿਆ</string>
+    <string name="feature_personas_new_persona">ਨਵਾਂ ਪਰਸੋਨਾ</string>
+    <string name="feature_personas_new_prompt">ਨਵਾਂ ਪ੍ਰੋਂਪਟ</string>
+    <string name="feature_personas_edit">ਬਦਲੋ</string>
+    <string name="feature_personas_delete">%1$s ਮਿਟਾਓ</string>
+    <string name="feature_personas_name">ਨਾਂ</string>
+    <string name="feature_personas_instructions">ਹਦਾਇਤਾਂ (ਇਹ ਕਿਵੇਂ ਜਵਾਬ ਦੇਵੇ?)</string>
+    <string name="feature_personas_own_creativity">ਆਪਣਾ ਰਚਨਾਤਮਕਤਾ ਪੱਧਰ</string>
+    <string name="feature_personas_creativity">ਰਚਨਾਤਮਕਤਾ: %1$s</string>
+    <string name="feature_personas_prompt_title">ਸਿਰਲੇਖ</string>
+    <string name="feature_personas_prompt_text">ਪ੍ਰੋਂਪਟ ਦੀ ਲਿਖਤ</string>
+    <string name="feature_personas_no_prompts">ਹਾਲੇ ਕੋਈ ਪ੍ਰੋਂਪਟ ਸੰਭਾਲਿਆ ਨਹੀਂ ਗਿਆ। ਸੰਭਾਲੇ ਪ੍ਰੋਂਪਟ ਚੈਟ ਵਿੱਚ ਲਿਖਣ ਵਾਲੀ ਥਾਂ ਤੋਂ ਪਾਏ ਜਾ ਸਕਦੇ ਹਨ।</string>
+    <string name="feature_personas_save">ਸੰਭਾਲੋ</string>
+    <string name="feature_personas_cancel">ਰੱਦ ਕਰੋ</string>
+    <string name="feature_personas_needs_pro">ਆਪਣੇ ਪਰਸੋਨਾ ਬਣਾਉਣਾ PocketMind Pro ਦਾ ਹਿੱਸਾ ਹੈ (ਸੈਟਿੰਗਾਂ → PocketMind Pro)। ਪਹਿਲਾਂ ਤੋਂ ਬਣੇ ਪਰਸੋਨਾ ਮੁਫ਼ਤ ਹਨ।</string>
+</resources>

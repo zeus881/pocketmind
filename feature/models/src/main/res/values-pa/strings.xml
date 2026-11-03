@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_models_title">ਮਾਡਲ</string>
+    <string name="feature_models_back">ਪਿੱਛੇ</string>
+    <string name="feature_models_device_ram">ਤੁਹਾਡੇ ਫ਼ੋਨ ਵਿੱਚ %1$d GB RAM ਹੈ</string>
+    <string name="feature_models_recommended_for_you">ਇਸ ਫ਼ੋਨ ਲਈ ਸਿਫ਼ਾਰਸ਼: %1$s</string>
+    <string name="feature_models_offline_note">ਮਾਡਲ ਇੱਕ ਵਾਰ ਡਾਊਨਲੋਡ ਹੁੰਦਾ ਹੈ। ਉਸ ਤੋਂ ਬਾਅਦ ਸਭ ਕੁਝ ਇੰਟਰਨੈੱਟ ਤੋਂ ਬਿਨਾਂ ਚੱਲਦਾ ਹੈ।</string>
+    <string name="feature_models_mobile_data">ਮੋਬਾਈਲ ਡਾਟਾ ਉੱਤੇ ਡਾਊਨਲੋਡ ਦੀ ਇਜਾਜ਼ਤ ਦਿਓ</string>
+    <string name="feature_models_mobile_data_hint">ਪਹਿਲਾਂ ਤੋਂ ਬੰਦ: ਮਾਡਲ ਵੱਡੇ ਹਨ ਅਤੇ ਬਹੁਤ ਡਾਟਾ ਵਰਤਦੇ ਹਨ।</string>
+    <string name="feature_models_chat_section">ਚੈਟ ਮਾਡਲ</string>
+    <string name="feature_models_embedding_section">“ਆਪਣੀ PDF ਨੂੰ ਪੁੱਛੋ” ਲਈ</string>
+    <string name="feature_models_recommended">ਸਿਫ਼ਾਰਸ਼ੀ</string>
+    <string name="feature_models_in_use">ਵਰਤੋਂ ਵਿੱਚ</string>
+    <string name="feature_models_facts">%1$s · %2$d GB RAM ਚਾਹੀਦੀ ਹੈ · %3$s ਲਾਇਸੈਂਸ</string>
+    <string name="feature_models_download">ਡਾਊਨਲੋਡ ਕਰੋ</string>
+    <string name="feature_models_pause">ਰੋਕੋ</string>
+    <string name="feature_models_resume">ਜਾਰੀ ਰੱਖੋ</string>
+    <string name="feature_models_cancel">ਰੱਦ ਕਰੋ</string>
+    <string name="feature_models_retry">ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ</string>
+    <string name="feature_models_use">ਇਹ ਮਾਡਲ ਵਰਤੋ</string>
+    <string name="feature_models_delete">ਮਿਟਾਓ</string>
+    <string name="feature_models_keep">ਰੱਖੋ</string>
+    <string name="feature_models_delete_title">ਕੀ %1$s ਮਿਟਾਉਣਾ ਹੈ?</string>
+    <string name="feature_models_delete_body">ਇਸ ਨਾਲ %1$s ਥਾਂ ਖਾਲੀ ਹੋਵੇਗੀ। ਤੁਸੀਂ ਇਸਨੂੰ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਡਾਊਨਲੋਡ ਕਰ ਸਕਦੇ ਹੋ।</string>
+    <string name="feature_models_needs_ram">ਇਸ ਮਾਡਲ ਲਈ ਫ਼ੋਨ ਵਿੱਚ ਘੱਟੋ-ਘੱਟ %1$d GB RAM ਚਾਹੀਦੀ ਹੈ।</string>
+    <string name="feature_models_waiting_network">Wi-Fi ਦੀ ਉਡੀਕ ਹੋ ਰਹੀ ਹੈ…</string>
+    <string name="feature_models_progress">%2$s ਵਿੱਚੋਂ %1$s (%3$d%%)</string>
+    <string name="feature_models_failed_storage">ਲੋੜੀਂਦੀ ਖਾਲੀ ਥਾਂ ਨਹੀਂ ਹੈ।</string>
+    <string name="feature_models_failed_checksum">ਡਾਊਨਲੋਡ ਦੌਰਾਨ ਫ਼ਾਈਲ ਖ਼ਰਾਬ ਹੋ ਗਈ ਅਤੇ ਮਿਟਾ ਦਿੱਤੀ ਗਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="feature_models_failed_network">ਡਾਊਨਲੋਡ ਰੁਕ ਗਿਆ: ਆਪਣਾ ਕਨੈਕਸ਼ਨ ਜਾਂਚੋ।</string>
+    <string name="feature_models_error_storage">ਥਾਂ ਕਾਫ਼ੀ ਨਹੀਂ। ਘੱਟੋ-ਘੱਟ %1$s ਥਾਂ ਖਾਲੀ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="feature_models_error_generic">ਕੁਝ ਗ਼ਲਤ ਹੋ ਗਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="feature_models_verify">ਫ਼ਾਈਲ ਜਾਂਚੋ</string>
+    <string name="feature_models_verifying">ਫ਼ਾਈਲ ਦੀ ਜਾਂਚ ਹੋ ਰਹੀ ਹੈ… ਇਸ ਵਿੱਚ ਕੁਝ ਸਕਿੰਟ ਲੱਗਦੇ ਹਨ।</string>
+    <string name="feature_models_verify_ok">%1$s ਠੀਕ ਹੈ ਅਤੇ ਵਰਤਣ ਲਈ ਤਿਆਰ ਹੈ।</string>
+    <string name="feature_models_verify_damaged">ਫ਼ਾਈਲ ਖ਼ਰਾਬ ਸੀ ਅਤੇ ਹਟਾ ਦਿੱਤੀ ਗਈ ਹੈ। ਕਿਰਪਾ ਕਰਕੇ ਇਸਨੂੰ ਦੁਬਾਰਾ ਡਾਊਨਲੋਡ ਕਰੋ।</string>
+    <string name="feature_models_needs_pro">ਇਹ ਵੱਡਾ ਮਾਡਲ PocketMind Pro ਦਾ ਹਿੱਸਾ ਹੈ (ਸੈਟਿੰਗਾਂ → PocketMind Pro)।</string>
+</resources>

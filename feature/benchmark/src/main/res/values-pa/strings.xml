@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_benchmark_title">ਬੈਂਚਮਾਰਕ</string>
+    <string name="feature_benchmark_back">ਪਿੱਛੇ</string>
+    <string name="feature_benchmark_intro">ਚੁਣੇ ਗਏ ਮਾਡਲ ਨਾਲ ਇਸ ਫ਼ੋਨ ਨੂੰ ਮਾਪਦਾ ਹੈ: ਮਾਡਲ ਲੋਡ ਹੋਣ ਦਾ ਸਮਾਂ, ਪਹਿਲੇ ਟੋਕਨ ਤੱਕ ਦਾ ਸਮਾਂ, ਲਿਖਣ ਦੀ ਗਤੀ ਅਤੇ ਸਭ ਤੋਂ ਵੱਧ ਮੈਮੋਰੀ, 3 ਪੱਕੇ ਪ੍ਰੋਂਪਟਾਂ ਉੱਤੇ। 1–3 ਮਿੰਟ ਲੱਗਦੇ ਹਨ।</string>
+    <string name="feature_benchmark_run">ਬੈਂਚਮਾਰਕ ਚਲਾਓ</string>
+    <string name="feature_benchmark_cancel">ਰੱਦ ਕਰੋ</string>
+    <string name="feature_benchmark_loading">ਮਾਡਲ ਸ਼ੁਰੂ ਤੋਂ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ…</string>
+    <string name="feature_benchmark_running_prompt">ਪ੍ਰੋਂਪਟ %2$d ਵਿੱਚੋਂ %1$d (%3$s)…</string>
+    <string name="feature_benchmark_empty_title">ਹਾਲੇ ਕੋਈ ਨਤੀਜਾ ਨਹੀਂ</string>
+    <string name="feature_benchmark_empty_body">ਇਸ ਫ਼ੋਨ ਉੱਤੇ ਮਾਡਲ ਕਿੰਨਾ ਤੇਜ਼ ਹੈ, ਇਹ ਦੇਖਣ ਲਈ ਬੈਂਚਮਾਰਕ ਚਲਾਓ।</string>
+    <string name="feature_benchmark_share">ਨਤੀਜੇ ਸਾਂਝੇ ਕਰੋ</string>
+    <string name="feature_benchmark_delete">ਨਤੀਜਾ ਮਿਟਾਓ</string>
+    <string name="feature_benchmark_metric_speed">ਲਿਖਣ ਦੀ ਗਤੀ</string>
+    <string name="feature_benchmark_metric_ttft">ਪਹਿਲੇ ਟੋਕਨ ਤੱਕ ਦਾ ਸਮਾਂ</string>
+    <string name="feature_benchmark_metric_load">ਮਾਡਲ ਲੋਡ ਹੋਣ ਦਾ ਸਮਾਂ</string>
+    <string name="feature_benchmark_metric_memory">ਸਭ ਤੋਂ ਵੱਧ ਮੈਮੋਰੀ</string>
+    <string name="feature_benchmark_error_no_model">ਪਹਿਲਾਂ ਕੋਈ ਮਾਡਲ ਡਾਊਨਲੋਡ ਕਰਕੇ ਚੁਣੋ।</string>
+    <string name="feature_benchmark_error">ਬੈਂਚਮਾਰਕ ਪੂਰਾ ਨਹੀਂ ਹੋ ਸਕਿਆ।</string>
+</resources>

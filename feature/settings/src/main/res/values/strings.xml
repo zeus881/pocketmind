@@ -78,4 +78,10 @@
     <string name="feature_settings_diagnostics">Share diagnostic report</string>
     <string name="feature_settings_diagnostics_hint">App and Android version, phone model and recorded crashes, to help fix a problem. No chats. You choose where it goes.</string>
     <string name="feature_settings_diagnostics_subject">PocketMind diagnostic report</string>
+    <string name="feature_settings_language">App language</string>
+    <string name="feature_settings_language_system">Same as the phone</string>
+    <!-- Each language is named in its own script, so a user can find theirs whatever the current language. -->
+    <string name="feature_settings_language_en" translatable="false">English</string>
+    <string name="feature_settings_language_hi" translatable="false">हिन्दी</string>
+    <string name="feature_settings_language_pa" translatable="false">ਪੰਜਾਬੀ</string>
 </resources>

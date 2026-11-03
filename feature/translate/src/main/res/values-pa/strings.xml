@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_translate_title">ਅਨੁਵਾਦ</string>
+    <string name="feature_translate_from">ਤੋਂ</string>
+    <string name="feature_translate_to">ਵਿੱਚ</string>
+    <string name="feature_translate_swap">ਭਾਸ਼ਾਵਾਂ ਅਦਲਾ-ਬਦਲੀ ਕਰੋ</string>
+    <string name="feature_translate_input">ਅਨੁਵਾਦ ਕਰਨ ਲਈ ਲਿਖਤ</string>
+    <string name="feature_translate_action">ਅਨੁਵਾਦ ਕਰੋ</string>
+    <string name="feature_translate_stop">ਰੋਕੋ</string>
+    <string name="feature_translate_copy">ਅਨੁਵਾਦ ਕਾਪੀ ਕਰੋ</string>
+    <string name="feature_translate_error_no_model">ਪਹਿਲਾਂ ਕੋਈ ਮਾਡਲ ਡਾਊਨਲੋਡ ਕਰਕੇ ਚੁਣੋ (ਸੈਟਿੰਗਾਂ → ਮਾਡਲ)।</string>
+    <string name="feature_translate_error">ਅਨੁਵਾਦ ਨਹੀਂ ਹੋ ਸਕਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+</resources>

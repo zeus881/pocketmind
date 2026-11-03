@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_documents_title">ਦਸਤਾਵੇਜ਼</string>
+    <string name="feature_documents_summarize_empty_title">PDF ਦਾ ਸਾਰ ਬਣਾਓ</string>
+    <string name="feature_documents_summarize_empty_body">ਆਪਣੇ ਫ਼ੋਨ ਵਿੱਚੋਂ ਇੱਕ PDF ਚੁਣੋ। ਇਹ ਇਸੇ ਫ਼ੋਨ ਉੱਤੇ ਪੜ੍ਹੀ ਅਤੇ ਸੰਖੇਪ ਕੀਤੀ ਜਾਂਦੀ ਹੈ — ਫ਼ਾਈਲ ਕਦੇ ਬਾਹਰ ਨਹੀਂ ਜਾਂਦੀ।</string>
+    <string name="feature_documents_choose_pdf">PDF ਚੁਣੋ</string>
+    <string name="feature_documents_choose_another">ਕੋਈ ਹੋਰ PDF ਚੁਣੋ</string>
+    <string name="feature_documents_reading_pdf">PDF ਪੜ੍ਹੀ ਜਾ ਰਹੀ ਹੈ…</string>
+    <string name="feature_documents_preparing">ਤਿਆਰੀ ਹੋ ਰਹੀ ਹੈ…</string>
+    <string name="feature_documents_part_x_of_y">ਹਿੱਸਾ %2$d ਵਿੱਚੋਂ %1$d ਦਾ ਸਾਰ ਬਣ ਰਿਹਾ ਹੈ</string>
+    <string name="feature_documents_combining">ਹਿੱਸਿਆਂ ਨੂੰ ਇੱਕ ਸਾਰ ਵਿੱਚ ਜੋੜਿਆ ਜਾ ਰਿਹਾ ਹੈ…</string>
+    <plurals name="feature_documents_pages">
+        <item quantity="one">ਲਿਖਤ ਵਾਲਾ %1$d ਸਫ਼ਾ</item>
+        <item quantity="other">ਲਿਖਤ ਵਾਲੇ %1$d ਸਫ਼ੇ</item>
+    </plurals>
+    <plurals name="feature_documents_parts">
+        <item quantity="one">%1$d ਹਿੱਸੇ ਵਿੱਚ ਸਾਰ</item>
+        <item quantity="other">%1$d ਹਿੱਸਿਆਂ ਵਿੱਚ ਸਾਰ</item>
+    </plurals>
+    <string name="feature_documents_cancel">ਰੱਦ ਕਰੋ</string>
+    <string name="feature_documents_copy">ਸਾਰ ਕਾਪੀ ਕਰੋ</string>
+    <string name="feature_documents_share">ਸਾਰ ਸਾਂਝਾ ਕਰੋ</string>
+    <string name="feature_documents_check_facts">ਸਾਰ ਫ਼ੋਨ ਉੱਤੇ ਚੱਲਣ ਵਾਲੇ ਇੱਕ ਛੋਟੇ ਮਾਡਲ ਨੇ ਬਣਾਇਆ ਹੈ। ਜ਼ਰੂਰੀ ਗੱਲਾਂ ਅਸਲ ਦਸਤਾਵੇਜ਼ ਵਿੱਚ ਜਾਂਚੋ।</string>
+    <string name="feature_documents_error_no_text">ਕੋਈ ਲਿਖਤ ਨਹੀਂ ਮਿਲੀ। ਇਹ ਸਕੈਨ ਕੀਤੀ PDF (ਸਿਰਫ਼ ਤਸਵੀਰਾਂ) ਲੱਗਦੀ ਹੈ, ਜੋ ਹਾਲੇ ਨਹੀਂ ਪੜ੍ਹੀ ਜਾ ਸਕਦੀ।</string>
+    <string name="feature_documents_error_unreadable">ਇਹ PDF ਖੁੱਲ੍ਹ ਨਹੀਂ ਸਕੀ। ਇਹ ਖ਼ਰਾਬ ਜਾਂ ਪਾਸਵਰਡ ਨਾਲ ਬੰਦ ਹੋ ਸਕਦੀ ਹੈ।</string>
+    <string name="feature_documents_error_no_model">ਪਹਿਲਾਂ ਕੋਈ ਮਾਡਲ ਡਾਊਨਲੋਡ ਕਰਕੇ ਚੁਣੋ (ਸੈਟਿੰਗਾਂ → ਮਾਡਲ)।</string>
+    <string name="feature_documents_error_generic">ਕੁਝ ਗ਼ਲਤ ਹੋ ਗਿਆ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
+    <string name="feature_documents_tab_summarize">ਸਾਰ</string>
+    <string name="feature_documents_tab_ask">ਆਪਣੀ PDF ਨੂੰ ਪੁੱਛੋ</string>
+    <string name="feature_documents_ask_need_model_title">ਇੱਕ ਹੋਰ ਛੋਟਾ ਡਾਊਨਲੋਡ</string>
+    <string name="feature_documents_ask_need_model_body">PDF ਬਾਰੇ ਸਵਾਲ ਪੁੱਛਣ ਲਈ ਖੋਜ ਮਾਡਲ EmbeddingGemma (ਲਗਭਗ 165 MB) ਚਾਹੀਦਾ ਹੈ। ਇਹ ਸਹੀ ਸਫ਼ੇ ਲੱਭਦਾ ਹੈ; ਚੈਟ ਮਾਡਲ ਜਵਾਬ ਲਿਖਦਾ ਹੈ।</string>
+    <string name="feature_documents_ask_get_model">ਖੋਜ ਮਾਡਲ ਲਓ</string>
+    <string name="feature_documents_ask_empty_title">PDF ਬਾਰੇ ਸਵਾਲ ਪੁੱਛੋ</string>
+    <string name="feature_documents_ask_empty_body">ਇੱਕ PDF ਜੋੜੋ। PocketMind ਇਸਨੂੰ ਇਸੇ ਫ਼ੋਨ ਉੱਤੇ ਤਿਆਰ ਕਰਦਾ ਹੈ ਅਤੇ ਵਰਤੇ ਗਏ ਸਫ਼ਿਆਂ ਦੇ ਨੰਬਰਾਂ ਨਾਲ ਜਵਾਬ ਦਿੰਦਾ ਹੈ।</string>
+    <string name="feature_documents_add_pdf">PDF ਜੋੜੋ</string>
+    <string name="feature_documents_indexing">ਹਿੱਸਾ %2$d ਵਿੱਚੋਂ %1$d ਤਿਆਰ ਹੋ ਰਿਹਾ ਹੈ…</string>
+    <string name="feature_documents_ask_question">ਤੁਹਾਡਾ ਸਵਾਲ</string>
+    <string name="feature_documents_ask_action">ਪੁੱਛੋ</string>
+    <string name="feature_documents_searching">ਦਸਤਾਵੇਜ਼ ਵਿੱਚ ਖੋਜ ਹੋ ਰਹੀ ਹੈ…</string>
+    <string name="feature_documents_sources">ਸਰੋਤ (ਪੜ੍ਹਨ ਲਈ ਛੂਹੋ)</string>
+    <string name="feature_documents_close">ਬੰਦ ਕਰੋ</string>
+    <string name="feature_documents_delete">%1$s ਮਿਟਾਓ</string>
+    <string name="feature_documents_error_needs_pro">ਮੁਫ਼ਤ ਸੰਸਕਰਣ 50 ਸਫ਼ਿਆਂ ਤੱਕ ਦੀ PDF ਪੜ੍ਹਦਾ ਹੈ। PocketMind Pro ਕਿਸੇ ਵੀ ਲੰਬਾਈ ਦੀ PDF ਪੜ੍ਹਦਾ ਹੈ: ਸੈਟਿੰਗਾਂ → PocketMind Pro।</string>
+</resources>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="data_models_notification_channel">ਮਾਡਲ ਡਾਊਨਲੋਡ</string>
+    <string name="data_models_notification_title">%1$s ਡਾਊਨਲੋਡ ਹੋ ਰਿਹਾ ਹੈ</string>
+    <string name="data_models_notification_progress">%1$d%% ਪੂਰਾ</string>
+    <string name="data_models_notification_pause">ਰੋਕੋ</string>
+    <string name="data_models_notification_paused_by_system">ਲੰਬੇ ਡਾਊਨਲੋਡ ਤੋਂ ਬਾਅਦ Android ਨੇ ਰੋਕ ਦਿੱਤਾ। ਇਹ ਜਿੱਥੇ ਰੁਕਿਆ ਸੀ, ਉੱਥੋਂ ਆਪਣੇ ਆਪ ਜਾਰੀ ਹੋਵੇਗਾ।</string>
+</resources>

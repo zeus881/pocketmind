@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_history_title">ਇਤਿਹਾਸ</string>
+    <string name="feature_history_search">ਚੈਟਾਂ ਵਿੱਚ ਖੋਜੋ</string>
+    <string name="feature_history_clear_search">ਖੋਜ ਸਾਫ਼ ਕਰੋ</string>
+    <string name="feature_history_empty_title">ਹਾਲੇ ਕੋਈ ਚੈਟ ਨਹੀਂ</string>
+    <string name="feature_history_empty_body">ਤੁਹਾਡੀਆਂ ਗੱਲਾਂਬਾਤਾਂ ਸਿਰਫ਼ ਇਸੇ ਫ਼ੋਨ ਉੱਤੇ ਸੰਭਾਲੀਆਂ ਜਾਂਦੀਆਂ ਹਨ।</string>
+    <string name="feature_history_no_results">“%1$s” ਨਾਲ ਕੋਈ ਚੈਟ ਨਹੀਂ ਮਿਲਦੀ</string>
+    <string name="feature_history_error">ਤੁਹਾਡੀਆਂ ਚੈਟਾਂ ਲੋਡ ਨਹੀਂ ਹੋ ਸਕੀਆਂ।</string>
+    <string name="feature_history_untitled">ਨਵੀਂ ਚੈਟ</string>
+    <string name="feature_history_more">%1$s ਲਈ ਹੋਰ ਵਿਕਲਪ</string>
+    <string name="feature_history_rename">ਨਾਂ ਬਦਲੋ</string>
+    <string name="feature_history_delete">ਮਿਟਾਓ</string>
+    <string name="feature_history_save">ਸੰਭਾਲੋ</string>
+    <string name="feature_history_cancel">ਰੱਦ ਕਰੋ</string>
+    <string name="feature_history_deleted">ਚੈਟ ਮਿਟਾ ਦਿੱਤੀ ਗਈ</string>
+    <string name="feature_history_undo">ਵਾਪਸ ਲਓ</string>
+    <string name="feature_history_all_chats">ਸਾਰੀਆਂ ਚੈਟਾਂ</string>
+    <string name="feature_history_new_folder">ਨਵਾਂ ਫ਼ੋਲਡਰ</string>
+    <string name="feature_history_rename_folder">ਫ਼ੋਲਡਰ ਦਾ ਨਾਂ ਬਦਲੋ</string>
+    <string name="feature_history_delete_folder">ਫ਼ੋਲਡਰ ਮਿਟਾਓ (ਇਸ ਦੀਆਂ ਚੈਟਾਂ ਰਹਿਣਗੀਆਂ)</string>
+    <string name="feature_history_folder_options">ਫ਼ੋਲਡਰ %1$s ਦੇ ਵਿਕਲਪ</string>
+    <string name="feature_history_no_folder">ਕੋਈ ਫ਼ੋਲਡਰ ਨਹੀਂ</string>
+    <string name="feature_history_move_to_folder">ਫ਼ੋਲਡਰ ਵਿੱਚ ਭੇਜੋ</string>
+    <string name="feature_history_pin">ਸਭ ਤੋਂ ਉੱਤੇ ਟਿਕਾਓ</string>
+    <string name="feature_history_unpin">ਟਿਕਾਉਣਾ ਹਟਾਓ</string>
+    <string name="feature_history_pinned">ਟਿਕਾਈਆਂ ਹੋਈਆਂ</string>
+</resources>
