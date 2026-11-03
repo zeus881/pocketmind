@@ -199,6 +199,15 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   (same as on the phone), settings, README.
 - **Seen:** unneeded tool calls (Notes for a photo question, Date and time for "capital of France"); the
   temperature setting on the phone was 1.5, which may make this more likely.
+- **App language: works** (checked on the phone: Hindi applies instantly, back to English, then restored to
+  "Same as the phone" as the owner had it; a Punjabi option is listed too).
+- **Unneeded tool calls: fixed and measured** (commit `c694683`). Tool descriptions and the system rule now say when
+  NOT to use a tool. 5 fresh chats on the phone, temperature 1.5 (the owner's setting; default 0.4):
+  capital of Japan: no tool ✓; why the sky is blue: no tool ✓; 123.4 × 56: Calculator, 6910.4 ✓; photosynthesis
+  with a heading: no tool ✓; weekday today: Date and time, "Tuesday" ✓. 5 of 5 right, a small sample.
+- **Headings: fixed** (same commit). The renderer used Material display styles (`#` = 57 sp); now h1 =
+  headlineSmall … h6 = titleSmall. Checked on the phone: "Photosynthesis" heading at a normal title size.
+- **Still open:** the model sometimes writes LaTeX (`$\text{H}2\text{O}$`), which is shown raw.
 - **App logs:** this phone shows no app log lines in logcat (vivo/iQOO suppresses them unless enabled in developer
   options), so on-device checks read files instead.
 
