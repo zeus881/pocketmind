@@ -209,6 +209,12 @@ class LiteRtLmEngine @Inject constructor(
                     thinkingConfig = ThinkingConfig(enableThinking = false),
                 ),
             )
+            // Names and the declarations the model receives (no chat text): checks tool wiring on a phone.
+            Timber.i(
+                "newSession tools=%s declarations=%s",
+                tools.map { it.name },
+                runCatching { conversation?.toolManager?.getToolsDescription()?.toString() }.getOrNull(),
+            )
             sessionId
         }
     }

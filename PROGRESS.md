@@ -161,6 +161,19 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   database: header no longer "SQLite format 3", History shows all chats.
 - **Telemetry queue after the fix:** `com.google.android.datatransport.events` holds 0 events and no transport
   context; with no backend registered the CCT uploader is never set up.
+- **Tool calling (phase 17 gate) on the phone, Gemma 4 E2B, GPU:**
+  - First new chat: "What is 123.4 * 56?" was answered from memory, **wrong** (6810.4), without a tool. Asked
+    explicitly to use the calculator, the model even claimed it had none.
+  - A debug log (`files/debug.log`, debug builds only, `FileLogTree`) proved the wiring is right. The repository
+    passed all 4 tools, and LiteRT-LM's ToolManager held their declarations in the correct format.
+  - Next new chat: "123.4 multiplied by 56 is 6910.4" with **"Used: Calculator"**, 35.1 tok/s · GPU.
+  - So tool use works end to end, but a 2B model doesn't call tools every time. Measured so far: the calculator
+    was used in **2 of 3** fresh chats (123.4 × 56 twice, 25 + 26 once); each time it was used, the answer was
+    exact. Too few runs for a reliable rate. Possible improvement: a stronger system rule, or lower temperature
+    for arithmetic questions.
+  - Note: a scripted test run left the app by mistake (Back closed PocketMind) and tapped the home screen. Rule
+    for future device scripts: take a screenshot and check the foreground app before every tap. Also seen: the model sometimes writes
+    LaTeX (`$… \times …$`), which the Markdown view shows raw.
 - **App logs:** this phone shows no app log lines in logcat (vivo/iQOO suppresses them unless enabled in developer
   options), so on-device checks read files instead.
 

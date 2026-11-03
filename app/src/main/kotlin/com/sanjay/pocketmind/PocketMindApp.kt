@@ -51,6 +51,7 @@ class PocketMindApp :
         // leak into the phone's system log (privacy promise).
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
+            Timber.plant(FileLogTree(java.io.File(filesDir, "debug.log")))
             // Report main-thread disk/network work and leaked resources in logcat (debug only).
             StrictModePolicies.enable()
         }

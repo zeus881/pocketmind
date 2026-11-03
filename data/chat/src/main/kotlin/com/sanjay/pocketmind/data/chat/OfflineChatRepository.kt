@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import timber.log.Timber
 
 /**
  * [ChatRepository] backed by Room + the on-device [LlmEngine].
@@ -416,8 +417,11 @@ internal class OfflineChatRepository @Inject constructor(
     }
 
     /** Tools for this chat: only when the model was made for tool calls and the chat hasn't switched them off. */
-    private suspend fun toolsFor(chatId: String, settings: InferenceSettings): List<LocalTool> =
-        if (settings.supportsTools && chatDao.get(chatId)?.toolsEnabled != false) tools.all else emptyList()
+    private suspend fun toolsFor(chatId: String, settings: InferenceSettings): List<LocalTool> {
+        val chatAllows = chatDao.get(chatId)?.toolsEnabled != false
+        Timber.i("tools: model supports=%s, chat allows=%s", settings.supportsTools, chatAllows)
+        return if (settings.supportsTools && chatAllows) tools.all else emptyList()
+    }
 
     /**
      * A note about the [dropped] (oldest) turns for the system prompt: the cached model-written
