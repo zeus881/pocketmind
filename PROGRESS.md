@@ -191,7 +191,8 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   TOP, not the bottom. Now (like current AI assistant apps) a new question moves to the top of the screen and its
   answer is written downwards below it; nothing scrolls on its own; the newest answer is at least one screen tall
   so this works for short answers too; "Jump to latest" shows while there is more below (`ChatScrollEffect`,
-  3 Robolectric tests in `MessageListScrollTest`). To verify on device.
+  3 Robolectric tests in `MessageListScrollTest`). **Verified on the phone** by the owner (long story and a short
+  follow-up question both start at the top; "What is 2 + 2" answered with Calculator, 21.9 tok/s · GPU).
 - **Voice input: works** ("What is the capital of France", microphone permission granted, answer correct).
   **Read aloud: works** (the owner heard the answer; the icon turned into Stop and back).
 - **Export all my data: works.** ZIP with 17 chats (Markdown), JSON with 116 messages, 1 note, 2 photos
