@@ -79,6 +79,7 @@
             android:name="androidx.startup.InitializationProvider"
             android:authorities="${applicationId}.androidx-startup"
             android:exported="false"
+            tools:ignore="MissingClass"
             tools:node="merge">
             <meta-data
                 android:name="androidx.work.WorkManagerInitializer"
@@ -90,11 +91,13 @@
           logging, whose CCT backend uploads device diagnostics (model, build fingerprint, carrier code,
           country, locale, time zone) from THIS app to Google. Removing the backend's registration means the
           uploader finds no backend and deletes queued events on the phone ("Unknown backend ... deleting
-          event batch", checked in transport-runtime 3.1.8). Billing itself is unchanged.
+          event batch", checked in transport-runtime 3.1.8). Billing itself is unchanged. MissingClass is ignored
+          because the class comes in through core:billing, which Lint doesn't see from this module.
         -->
         <service
             android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
             android:exported="false"
+            tools:ignore="MissingClass"
             tools:node="merge">
             <meta-data
                 android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"

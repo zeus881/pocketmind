@@ -51,6 +51,7 @@ class EncryptionMigrator(private val operations: CipherOperations) {
             val original = operations.rowCounts(database, passphrase = null)
             val encrypted = operations.rowCounts(copy, passphrase)
             if (original != encrypted || SqliteHeader.isPlaintext(copy)) {
+                lastError = IllegalStateException("verification failed: rows $original, copy $encrypted")
                 MigrationOutcome.FAILED
             } else {
                 swap(database, copy, backup)

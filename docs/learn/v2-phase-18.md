@@ -136,6 +136,25 @@ return cipher.iv + cipher.doFinal(secret)
    Play defines collection as transmitting data off the device. PocketMind stores data locally and sends none (model
    downloads carry no user data), so nothing is collected or shared, and the form must stay true as the app changes.
 
+## What the real phone taught us (2026-11-03)
+
+The JVM tests used a fake cipher, so they couldn't catch a bug in how SQLCipher itself was called. On the phone the
+first migration attempt returned FAILED. The safety net did its job: the plain file was kept and nothing was lost.
+A diagnostic device test then showed the cause:
+
+- `ATTACH DATABASE '…encrypting' AS encrypted KEY '…'` failed with **"unable to open database (code 14)"**. An
+  attached database is opened with the *main* connection's flags, and the plain file had been opened
+  `OPEN_READWRITE` without `CREATE_IF_NECESSARY`, so SQLite was not allowed to create the new file.
+- SQLCipher's `rawExecSQL` **did not report** that error. The next statements then failed in confusing ways
+  ("unknown database encrypted", or an export that wrote nothing).
+
+Fix: open with `CREATE_IF_NECESSARY`, use `execSQL` for ATTACH/DETACH (errors surface), run the export through
+`rawQuery` and read its row, keep one connection (WAL off), and set the schema version on the encrypted copy itself.
+`EncryptionDeviceTest` then passed on the phone, and the real app encrypted the real chats.
+
+Lesson: **test native libraries on the device.** A fake proves your logic; only the real library proves your use of
+it. And make failures explain themselves: the migrator now records *why* it failed.
+
 ## To verify on device
 
 1. Install over the existing app (chats from before this version present). Open the chat list: all chats are there.

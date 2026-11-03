@@ -51,7 +51,10 @@ class EncryptionDeviceTest {
         val keyFile = File(context.noBackupFilesDir, "test.key")
         val key = WrappedDatabasePassphrase(keyFile, KeystoreKeyWrapper("pocketmind.test")).get()
 
-        assertEquals(MigrationOutcome.MIGRATED, EncryptionMigrator(SqlCipherOperations()).migrate(file, key))
+        val migrator = EncryptionMigrator(SqlCipherOperations())
+        val outcome = migrator.migrate(file, key)
+        val why = migrator.lastError?.stackTraceToString()?.take(ERROR_CHARS)
+        assertEquals("migration error: $why", MigrationOutcome.MIGRATED, outcome)
         assertFalse(SqliteHeader.isPlaintext(file))
 
         val encrypted = Room.databaseBuilder(context, PocketMindDatabase::class.java, name)
@@ -68,5 +71,9 @@ class EncryptionDeviceTest {
         }
         assertTrue(wrongKey.isFailure)
         context.deleteDatabase(name)
+    }
+
+    private companion object {
+        const val ERROR_CHARS = 3000
     }
 }

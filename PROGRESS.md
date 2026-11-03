@@ -146,6 +146,21 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   attempt (0 attempts). `AndroidManifest.xml` now removes the CCT backend registration (the uploader then deletes
   events: "Unknown backend … deleting event batch", checked in transport-runtime 3.1.8); `NoTelemetryBackendTest`
   guards it. To verify on device: Pro buy / restore still works (docs/billing.md).
+- **Room migration 3 → 8 on the real chats: verified.** After installing v2 over v1, the database was schema 8,
+  `PRAGMA integrity_check` = ok, 11 chats and 98 messages (same as the v1 backup). Second backup:
+  `…\pocketmind-backup-2026-11-03\after-v8-upgrade\`.
+- **Encryption migration failed on the first try, safely, and is now fixed.** The first start created
+  `database.key` but kept the plain file (outcome FAILED → plain fallback, retried next start: the safety net
+  worked, no data lost). `EncryptionDeviceTest` reproduced it; a diagnostic run on the phone found the cause:
+  the ATTACH of the new encrypted file failed with "unable to open database (code 14)", because an attached
+  database is opened with the main connection's flags and the plain file was opened without
+  `CREATE_IF_NECESSARY`. SQLCipher's `rawExecSQL` hid that error. Fix in `SqlCipherOperations`: open with
+  `CREATE_IF_NECESSARY`, `execSQL` for ATTACH/DETACH (errors surface), `rawQuery` for the export, single
+  connection (WAL off), and the schema version set on the copy itself. The migrator now also records why a
+  verification failed. **Result on the phone:** `EncryptionDeviceTest` 2/2 passed; the real app migrated the real
+  database: header no longer "SQLite format 3", History shows all chats.
+- **Telemetry queue after the fix:** `com.google.android.datatransport.events` holds 0 events and no transport
+  context; with no backend registered the CCT uploader is never set up.
 - **App logs:** this phone shows no app log lines in logcat (vivo/iQOO suppresses them unless enabled in developer
   options), so on-device checks read files instead.
 
