@@ -14,6 +14,7 @@ import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.Persona
 import com.sanjay.pocketmind.core.model.SavedPrompt
+import com.sanjay.pocketmind.core.model.TurnRole
 import com.sanjay.pocketmind.core.speech.SpeechError
 import com.sanjay.pocketmind.core.speech.SpeechEvent
 import com.sanjay.pocketmind.core.speech.SpeechInput
@@ -35,6 +36,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
@@ -44,6 +46,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
 
 /**
@@ -177,7 +180,8 @@ class ChatViewModel @Inject constructor(
             speakingMessageId = extra.speakingId,
             photo = extra.photo,
             tools = extra.tools,
-            streamingText = live,
+            // Hidden as soon as Room's list holds the saved copy: the swap happens in one frame.
+            streamingText = live?.takeUnless { it.isNotEmpty() && list.endsWithAnswer(it) },
             isGenerating = live != null,
             model = model,
         )
@@ -477,7 +481,13 @@ class ChatViewModel @Inject constructor(
             // but the partial answer must still be saved ("marked stopped", CLAUDE.md).
             withContext(NonCancellable) {
                 val stats = if (status == MessageStatus.COMPLETE) model.lastGenerationStats() else null
-                repository.saveAssistantMessage(chatId, text.toString(), status, stats)
+                val final = text.toString()
+                streaming.value = final // the last throttled update may be a few pieces behind
+                repository.saveAssistantMessage(chatId, final, status, stats)
+                // The live answer stays until Room's list contains the saved one (uiState hides the live
+                // copy then). Clearing it right away could show a frame with neither, which made a
+                // scrolled-up reader's list jump.
+                withTimeoutOrNull(SWAP_TIMEOUT_MS) { uiState.first { it.messages.endsWithAnswer(final) } }
                 streaming.value = null
             }
         }
@@ -496,6 +506,11 @@ class ChatViewModel @Inject constructor(
         /** Must equal the property name in ChatRoute. */
         const val DRAFT_KEY = "draft"
         private const val UI_THROTTLE_MS = 50L
+        private const val SWAP_TIMEOUT_MS = 2_000L
         private const val STOP_TIMEOUT_MS = 5_000L
     }
 }
+
+/** The newest message is the saved answer [text] (the live answer was just written to Room). */
+private fun List<Message>.endsWithAnswer(text: String): Boolean =
+    lastOrNull()?.let { it.role == TurnRole.ASSISTANT && it.text == text } == true

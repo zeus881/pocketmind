@@ -45,7 +45,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,6 +54,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
@@ -82,22 +82,25 @@ import kotlinx.coroutines.launch
 private const val STREAMING_KEY = "streaming"
 
 /**
- * The scrolling conversation.
+ * The scrolling conversation, oldest message at the top.
  *
- * `reverseLayout = true` anchors the list to the BOTTOM, like every chat app: new messages
- * appear at the bottom and the list stays scrolled there without manual scrolling code.
- * Because of that, items are given newest-first, and item 0 is the newest.
+ * Scrolling follows the newest text only while the user is at the end (see [FollowLatestState]).
+ * Until the 2026-11-03 phone test this list used `reverseLayout = true`, which anchors it to the
+ * BOTTOM of the newest item: every new line of an answer then pushed all the text above it up,
+ * even after the user had scrolled up to read it. Laid out top-down, an answer grows BELOW what is
+ * on screen, so a reader is left alone; a short conversation still sits at the bottom
+ * (`Alignment.Bottom`), like every chat app.
  *
  * v2 design: user messages are bubbles on the end side; answers are plain, full-width text
  * (like current AI assistants), which gives code blocks and tables room. On wide windows the
  * conversation is centred at a readable width, but the WHOLE area still scrolls (the side
- * margins are list padding, not a narrower list). Messages fade and slide in as they arrive
+ * margins are list padding, not a narrower list). Messages fade in as they arrive
  * (`animateItem`), and a "jump to latest" button appears after scrolling up (AUDIT L-7).
  *
  * Stable `key`s let Compose keep each item's state when the list changes, instead of
  * re-creating every message on every new one. Items fade in and out but have NO placement
- * animation: the answer being written grows every 50 ms and pushes the messages above it, and a
- * spring on each push made the whole list shimmer while typing (seen on the phone).
+ * animation: the answer being written grows every 50 ms, and a spring on every change made the
+ * list shimmer while typing (seen on the phone).
  */
 @Composable
 internal fun MessageList(
@@ -114,25 +117,25 @@ internal fun MessageList(
 ) {
     // Editing and switching versions are blocked while an answer is being written (same rule as retry).
     val canChange = canRetry
-    val newestFirst = messages.asReversed()
     val lastAssistantId = messages.lastOrNull()?.takeIf { it.role == TurnRole.ASSISTANT }?.id
-    val listState = rememberLazyListState()
+    val lastIndex = messages.size - if (streamingText == null) 1 else 0
+    // Opens at the newest message; FollowLatestEffect then scrolls to the end of it.
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = lastIndex.coerceAtLeast(0))
+    val follow = rememberFollowLatestState()
+    FollowLatestEffect(listState, follow)
     val scope = rememberCoroutineScope()
-    val showJump by remember { derivedStateOf { listState.firstVisibleItemIndex > 0 } }
 
     BoxWithConstraints(modifier.fillMaxSize()) {
         val sideMargin = maxOf(PmSpacing.l, (maxWidth - PmSize.readableContentWidth) / 2)
         LazyColumn(
             state = listState,
-            modifier = Modifier.fillMaxSize(),
-            reverseLayout = true,
+            modifier = Modifier
+                .fillMaxSize()
+                .nestedScroll(follow.connection),
             contentPadding = PaddingValues(horizontal = sideMargin, vertical = PmSpacing.m),
-            verticalArrangement = Arrangement.spacedBy(PmSpacing.l),
+            verticalArrangement = Arrangement.spacedBy(PmSpacing.l, Alignment.Bottom),
         ) {
-            if (streamingText != null) {
-                item(key = STREAMING_KEY) { StreamingAnswer(streamingText, Modifier.animateItem(placementSpec = null)) }
-            }
-            items(newestFirst, key = { it.id }) { message ->
+            items(messages, key = { it.id }) { message ->
                 val versions = branches[message.id]
                 Column(Modifier.animateItem(placementSpec = null)) {
                     if (message.role == TurnRole.USER) {
@@ -169,16 +172,26 @@ internal fun MessageList(
                     }
                 }
             }
+            if (streamingText != null) {
+                item(key = STREAMING_KEY) { StreamingAnswer(streamingText, Modifier.animateItem(placementSpec = null)) }
+            }
         }
         AnimatedVisibility(
-            visible = showJump,
+            visible = !follow.following,
             enter = fadeIn(tween(PmMotion.SHORT_MS)) + scaleIn(tween(PmMotion.SHORT_MS, easing = PmMotion.standard)),
             exit = fadeOut(tween(PmMotion.SHORT_MS)) + scaleOut(tween(PmMotion.SHORT_MS, easing = PmMotion.standard)),
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(PmSpacing.l),
         ) {
-            SmallFloatingActionButton(onClick = { scope.launch { listState.animateScrollToItem(0) } }) {
+            SmallFloatingActionButton(
+                onClick = {
+                    scope.launch {
+                        listState.animateScrollToItem(lastIndex.coerceAtLeast(0))
+                        follow.follow()
+                    }
+                },
+            ) {
                 Icon(
                     Icons.Filled.KeyboardArrowDown,
                     contentDescription = stringResource(R.string.feature_chat_jump_latest),

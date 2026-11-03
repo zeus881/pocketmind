@@ -40,6 +40,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -289,17 +290,20 @@ fun ChatContent(
                                 onSelectPersona = onSelectPersona,
                             )
                         } else {
-                            MessageList(
-                                messages = state.messages,
-                                streamingText = state.streamingText,
-                                canRetry = !state.isGenerating,
-                                onRetry = onRetry,
-                                branches = state.branches,
-                                onEdit = onEdit,
-                                onShowVersion = onShowVersion,
-                                speakingMessageId = state.speakingMessageId,
-                                onToggleSpeak = onToggleSpeak,
-                            )
+                            // One scroll position per chat: another chat (History's detail pane) opens at its end.
+                            key(state.chatId) {
+                                MessageList(
+                                    messages = state.messages,
+                                    streamingText = state.streamingText,
+                                    canRetry = !state.isGenerating,
+                                    onRetry = onRetry,
+                                    branches = state.branches,
+                                    onEdit = onEdit,
+                                    onShowVersion = onShowVersion,
+                                    speakingMessageId = state.speakingMessageId,
+                                    onToggleSpeak = onToggleSpeak,
+                                )
+                            }
                         }
                     }
                     GenerationStatus(isGenerating = state.isGenerating)
