@@ -4,6 +4,7 @@ import com.sanjay.pocketmind.data.chat.AndroidChatExporter
 import com.sanjay.pocketmind.data.chat.AndroidChatImageStore
 import com.sanjay.pocketmind.data.chat.ChatExporter
 import com.sanjay.pocketmind.data.chat.ChatImageStore
+import com.sanjay.pocketmind.data.chat.ChatModel
 import com.sanjay.pocketmind.data.chat.ChatPhotos
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import com.sanjay.pocketmind.data.chat.ConversationSummarizer
@@ -35,6 +36,9 @@ internal abstract class ChatDataModule {
 
     @Binds
     abstract fun bindsPersonaRepository(repository: RoomPersonaRepository): PersonaRepository
+
+    @Binds
+    abstract fun bindsChatModel(repository: OfflineChatRepository): ChatModel
 
     @Binds
     abstract fun bindsChatPhotos(repository: OfflineChatRepository): ChatPhotos

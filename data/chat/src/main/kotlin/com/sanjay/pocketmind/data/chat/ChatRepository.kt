@@ -20,8 +20,6 @@ import kotlinx.coroutines.flow.StateFlow
  * small and lets us change storage or runtime without touching UI code.
  */
 interface ChatRepository {
-    val engineState: StateFlow<EngineState>
-
     /** History list, filtered by [query] (title or message text), newest first. */
     fun observeChats(query: String): Flow<List<ChatSummary>>
 
@@ -33,14 +31,14 @@ interface ChatRepository {
     /** "Version i of n" for the visible messages that have alternatives (edited questions, regenerated answers). */
     fun observeBranches(chatId: String): Flow<Map<String, BranchInfo>>
 
-    /** Lazily loads the selected model. Returns NO_MODEL / MODEL_LOAD_FAILED failures. */
-    suspend fun ensureModelLoaded(): AppResult<Unit>
+    /**
+     * Creates an empty chat (answering as [personaId], or as the default assistant; with tools unless
+     * [toolsEnabled] is false) and returns its id.
+     */
+    suspend fun createChat(personaId: String? = null, toolsEnabled: Boolean = true): String
 
-    /** Lets the next load retry backends that crashed the app before (the user chose "Try again"). */
-    fun resetModelCrashProtection()
-
-    /** Creates an empty chat (answering as [personaId], or as the default assistant) and returns its id. */
-    suspend fun createChat(personaId: String? = null): String
+    /** Lets the model use tools in this chat, or not. Applies from the next message. */
+    suspend fun setToolsEnabled(chatId: String, enabled: Boolean)
 
     /**
      * Saves the user's message and returns the stream of the assistant's answer.
@@ -51,9 +49,6 @@ interface ChatRepository {
      * IMAGES_NOT_SUPPORTED when the selected model can't read images.
      */
     suspend fun sendMessage(chatId: String, text: String, imagePath: String? = null): AppResult<Flow<String>>
-
-    /** True when the selected model can read photos (the chat then offers "Add photo"). */
-    suspend fun imagesSupported(): Boolean
 
     /**
      * Deletes the last assistant answer of the chat and generates it again for the last user
@@ -78,9 +73,6 @@ interface ChatRepository {
     /** Writes the finished (or stopped/failed) answer to Room — once, not per token. */
     suspend fun saveAssistantMessage(chatId: String, text: String, status: MessageStatus, stats: GenerationStats?)
 
-    /** Stats of the answer that just finished, if the engine measured any. */
-    fun lastGenerationStats(): GenerationStats?
-
     suspend fun renameChat(chatId: String, title: String)
 
     /** Deletes the chat (messages cascade) and returns a snapshot for "Undo". */
@@ -103,4 +95,27 @@ interface ChatPhotos {
 
     /** The user removed an attached photo before sending it. */
     suspend fun discardImage(path: String)
+}
+
+/** Abilities of the selected model, from its catalog entry. */
+data class ModelFeatures(val images: Boolean = false, val tools: Boolean = false)
+
+/**
+ * The model as the chat screen sees it: its state, loading it, and what it can do. Separate from
+ * [ChatRepository] because only the chat screen needs it; the same repository object implements it.
+ */
+interface ChatModel {
+    val engineState: StateFlow<EngineState>
+
+    /** Lazily loads the selected model. Returns NO_MODEL / MODEL_LOAD_FAILED failures. */
+    suspend fun ensureModelLoaded(): AppResult<Unit>
+
+    /** Lets the next load retry backends that crashed the app before (the user chose "Try again"). */
+    fun resetModelCrashProtection()
+
+    /** What the selected model can do beyond text (the chat shows "Add photo" and "Tools" accordingly). */
+    suspend fun modelFeatures(): ModelFeatures
+
+    /** Stats of the answer that just finished, if the engine measured any. */
+    fun lastGenerationStats(): GenerationStats?
 }

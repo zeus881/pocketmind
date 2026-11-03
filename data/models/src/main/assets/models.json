@@ -9,7 +9,8 @@
     "sha256": "181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c",
     "minRamGb": 8,
     "license": "Apache-2.0",
-    "supportsImages": true
+    "supportsImages": true,
+    "supportsTools": true
   },
   {
     "id": "qwen3.5-0.8b",
@@ -31,7 +32,8 @@
     "sizeBytes": 613722264,
     "sha256": "c5f39b4191926786c3e6668b62af4d6eb15248dfc7a5348252a9b406f33f2108",
     "minRamGb": 4,
-    "license": "Apache-2.0"
+    "license": "Apache-2.0",
+    "supportsTools": true
   },
   {
     "id": "embeddinggemma-2-270m",

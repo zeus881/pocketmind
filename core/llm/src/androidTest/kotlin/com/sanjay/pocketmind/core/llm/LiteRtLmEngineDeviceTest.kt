@@ -6,6 +6,7 @@ import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.sanjay.pocketmind.core.tools.CalculatorTool
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.take
@@ -105,6 +106,26 @@ class LiteRtLmEngineDeviceTest {
             .joinToString("")
 
         assertTrue("Expected red, got: $answer", answer.contains("red", ignoreCase = true))
+    }
+
+    /**
+     * The phase 17 gate: a model made for tool calls (Gemma 4 E2B) must call the calculator through
+     * LiteRT-LM's automatic tool calling and give its exact result.
+     * Run with `-Pandroid.testInstrumentationRunnerArguments.tools=true`.
+     */
+    @Test
+    fun theModelCallsTheCalculatorAndUsesItsResult() = runBlocking {
+        assumeTrue("Tools test not requested", InstrumentationRegistry.getArguments().getString("tools") == "true")
+        engine.load(modelPath, preferGpu = true)
+        val session = engine.newSession(
+            "You are a test assistant. Use the calculator for every calculation.",
+            tools = listOf(CalculatorTool()),
+        )
+
+        val answer = engine.generate("What is 123.4 * 56?", session).toList().joinToString("")
+
+        assertEquals(listOf(CalculatorTool.NAME), engine.lastStats?.toolsUsed)
+        assertTrue("Expected 6910.4 in: $answer", answer.replace(",", "").contains("6910.4"))
     }
 
     private companion object {

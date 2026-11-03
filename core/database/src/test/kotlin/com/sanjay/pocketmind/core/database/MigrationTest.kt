@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteDatabase
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.sanjay.pocketmind.core.database.entity.ConversationSummaryEntity
+import com.sanjay.pocketmind.core.database.entity.NoteEntity
 import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -56,6 +57,9 @@ class MigrationTest {
     @Test
     fun migrateFrom6KeepsChats() = runTest { migrateAndCheck(fromVersion = 6) }
 
+    @Test
+    fun migrateFrom7KeepsChats() = runTest { migrateAndCheck(fromVersion = 7) }
+
     /** v4 → v5 is a manual migration: check the data it derives, not just that it opens. */
     @Test
     fun migrateFrom4LinksMessagesSetsTheBranchAndIndexesText() = runTest {
@@ -99,6 +103,11 @@ class MigrationTest {
         assertNull(db.messageDao().get("m1")?.imagePath)
         db.messageDao().upsert(checkNotNull(db.messageDao().get("m1")).copy(imagePath = "/photos/a.jpg"))
         assertEquals(listOf("/photos/a.jpg"), db.messageDao().imagePaths())
+        // v8: existing chats may use tools; old answers used none; the notes table works.
+        assertTrue(checkNotNull(db.chatDao().get("c1")).toolsEnabled)
+        assertNull(db.messageDao().get("m1")?.toolsUsed)
+        db.noteDao().insert(NoteEntity("n1", "Locker code 4312", 9))
+        assertEquals(listOf("n1"), db.noteDao().search("locker", 5).map { it.id })
         db.close()
     }
 

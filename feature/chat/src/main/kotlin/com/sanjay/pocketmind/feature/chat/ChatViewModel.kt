@@ -19,6 +19,7 @@ import com.sanjay.pocketmind.core.speech.SpeechEvent
 import com.sanjay.pocketmind.core.speech.SpeechInput
 import com.sanjay.pocketmind.core.speech.SpeechOutput
 import com.sanjay.pocketmind.data.chat.ChatExporter
+import com.sanjay.pocketmind.data.chat.ChatModel
 import com.sanjay.pocketmind.data.chat.ChatPhotos
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import com.sanjay.pocketmind.data.chat.PersonaRepository
@@ -64,6 +65,7 @@ import timber.log.Timber
 class ChatViewModel @Inject constructor(
     private val repository: ChatRepository,
     private val photos: ChatPhotos,
+    private val model: ChatModel,
     private val exporter: ChatExporter,
     personaRepository: PersonaRepository,
     private val speechInput: SpeechInput,
@@ -87,7 +89,7 @@ class ChatViewModel @Inject constructor(
     val events: Flow<ChatEvent> = _events.receiveAsFlow()
 
     private val modelUi: Flow<ModelUi> = combine(
-        repository.engineState,
+        model.engineState,
         noModel,
         loadingModel,
     ) { engine, missing, loading ->
@@ -135,9 +137,24 @@ class ChatViewModel @Inject constructor(
 
     private val photo = MutableStateFlow(PhotoUi())
 
-    private data class Extras(val persona: PersonaUi, val voice: VoiceUi, val speakingId: String?, val photo: PhotoUi)
+    /** Whether the selected model can call tools, and the Tools switch for the NEXT new chat. */
+    private val toolsAvailable = MutableStateFlow(false)
+    private val pickedTools = MutableStateFlow(true)
 
-    private val extras: Flow<Extras> = combine(personaUi, voice, speechOutput.speaking, photo, ::Extras)
+    private val toolsUi: Flow<ToolsUi> =
+        combine(toolsAvailable, pickedTools, chat, chatId) { available, picked, current, id ->
+            ToolsUi(available = available, enabled = if (id == null) picked else current?.toolsEnabled ?: true)
+        }
+
+    private data class Extras(
+        val persona: PersonaUi,
+        val voice: VoiceUi,
+        val speakingId: String?,
+        val photo: PhotoUi,
+        val tools: ToolsUi,
+    )
+
+    private val extras: Flow<Extras> = combine(personaUi, voice, speechOutput.speaking, photo, toolsUi, ::Extras)
 
     val uiState: StateFlow<ChatUiState> = combine(
         combine(chatId, title, ::Pair),
@@ -159,6 +176,7 @@ class ChatViewModel @Inject constructor(
             voice = extra.voice,
             speakingMessageId = extra.speakingId,
             photo = extra.photo,
+            tools = extra.tools,
             streamingText = live,
             isGenerating = live != null,
             model = model,
@@ -178,10 +196,12 @@ class ChatViewModel @Inject constructor(
     fun loadModel() {
         viewModelScope.launch {
             loadingModel.value = true
-            val result = repository.ensureModelLoaded()
+            val result = model.ensureModelLoaded()
             noModel.value = result is AppResult.Failure && result.kind == ErrorKind.NO_MODEL
             loadingModel.value = false
-            val supported = repository.imagesSupported()
+            val features = model.modelFeatures()
+            toolsAvailable.value = features.tools
+            val supported = features.images
             photo.update { it.copy(available = supported) }
             if (!supported) removePhoto() // the user switched to a model without vision
         }
@@ -220,9 +240,9 @@ class ChatViewModel @Inject constructor(
      * crash records are cleared first. For every other reason it is a plain reload.
      */
     fun retryModel() {
-        val model = uiState.value.model
-        if (model is ModelUi.Failed && model.reason == FailureReason.CRASHED_LAST_TIME) {
-            repository.resetModelCrashProtection()
+        val shown = uiState.value.model
+        if (shown is ModelUi.Failed && shown.reason == FailureReason.CRASHED_LAST_TIME) {
+            model.resetModelCrashProtection()
         }
         loadModel()
     }
@@ -232,7 +252,8 @@ class ChatViewModel @Inject constructor(
         if (prompt.isEmpty() || generationJob?.isActive == true) return
         generationJob = viewModelScope.launch {
             val isNewChat = chatId.value == null
-            val id = chatId.value ?: repository.createChat(pickedPersona.value).also { chatId.value = it }
+            val id = chatId.value
+                ?: repository.createChat(pickedPersona.value, pickedTools.value).also { chatId.value = it }
             streaming.value = "" // shows the "thinking" bubble immediately
             val image = photo.value.attached
             when (val result = guarded { repository.sendMessage(id, prompt, image) }) {
@@ -393,6 +414,22 @@ class ChatViewModel @Inject constructor(
         stop()
         chatId.value = null
         pickedPersona.value = null
+        pickedTools.value = true
+    }
+
+    /**
+     * The Tools switch. In a new chat it decides how the chat will be created; in a saved chat it is
+     * stored on the chat and applies from the next message (the conversation is rebuilt with or
+     * without the tool declarations).
+     */
+    fun toggleTools() {
+        val id = chatId.value
+        if (id == null) {
+            pickedTools.update { !it }
+        } else {
+            val enabled = uiState.value.tools.enabled
+            viewModelScope.launch { repository.setToolsEnabled(id, !enabled) }
+        }
     }
 
     /** Picks how the NEXT new chat answers (welcome screen). An existing chat keeps its persona. */
@@ -431,7 +468,7 @@ class ChatViewModel @Inject constructor(
             // NonCancellable: if the user left the screen, this coroutine is already cancelled,
             // but the partial answer must still be saved ("marked stopped", CLAUDE.md).
             withContext(NonCancellable) {
-                val stats = if (status == MessageStatus.COMPLETE) repository.lastGenerationStats() else null
+                val stats = if (status == MessageStatus.COMPLETE) model.lastGenerationStats() else null
                 repository.saveAssistantMessage(chatId, text.toString(), status, stats)
                 streaming.value = null
             }

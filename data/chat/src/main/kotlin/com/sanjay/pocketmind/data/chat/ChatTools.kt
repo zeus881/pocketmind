@@ -1,0 +1,46 @@
+package com.sanjay.pocketmind.data.chat
+
+import com.sanjay.pocketmind.core.common.time.Clock
+import com.sanjay.pocketmind.core.database.dao.NoteDao
+import com.sanjay.pocketmind.core.database.entity.NoteEntity
+import com.sanjay.pocketmind.core.tools.CalculatorTool
+import com.sanjay.pocketmind.core.tools.DateTimeTool
+import com.sanjay.pocketmind.core.tools.LocalTool
+import com.sanjay.pocketmind.core.tools.Note
+import com.sanjay.pocketmind.core.tools.NoteStore
+import com.sanjay.pocketmind.core.tools.NotesTool
+import com.sanjay.pocketmind.core.tools.UnitConverterTool
+import java.time.Instant
+import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/** The tools a chat can offer the model. All of them run on the phone. */
+@Singleton
+class ChatTools @Inject internal constructor(noteDao: NoteDao, clock: Clock) {
+    val all: List<LocalTool> = listOf(
+        CalculatorTool(),
+        DateTimeTool(now = { Instant.ofEpochMilli(clock.nowMillis()) }),
+        UnitConverterTool(),
+        NotesTool(RoomNoteStore(noteDao, clock)),
+    )
+}
+
+/** [NoteStore] in the app's Room database, next to the chats (so exports and "delete all" include them). */
+internal class RoomNoteStore(private val dao: NoteDao, private val clock: Clock) : NoteStore {
+    override fun save(text: String): Note {
+        val note = NoteEntity(UUID.randomUUID().toString(), text, clock.nowMillis())
+        dao.insert(note)
+        return note.asNote()
+    }
+
+    override fun recent(limit: Int) = dao.recent(limit).map { it.asNote() }
+
+    // Same escaping as chat search: "%" and "_" in the query are literal characters, not wildcards.
+    override fun search(query: String, limit: Int) =
+        dao.search(SearchQuery.from(query).likePattern, limit).map { it.asNote() }
+
+    override fun delete(id: String) = dao.delete(id) > 0
+
+    private fun NoteEntity.asNote() = Note(id, text, createdAt)
+}

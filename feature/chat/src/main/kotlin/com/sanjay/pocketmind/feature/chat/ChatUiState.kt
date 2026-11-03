@@ -37,6 +37,7 @@ data class ChatUiState(
     /** Id of the answer being read aloud, or null. */
     val speakingMessageId: String? = null,
     val photo: PhotoUi = PhotoUi(),
+    val tools: ToolsUi = ToolsUi(),
 ) {
     val personaName: String? get() = personas.firstOrNull { it.id == personaId }?.name
 }
@@ -88,6 +89,12 @@ data class PhotoUi(
     /** The picked photo is being copied and scaled down. */
     val preparing: Boolean = false,
 )
+
+/**
+ * The Tools switch: [available] when the selected model can call tools (the switch is hidden
+ * otherwise), [enabled] when this chat lets it.
+ */
+data class ToolsUi(val available: Boolean = false, val enabled: Boolean = true)
 
 /**
  * Voice input state. [transcript] is what the recognizer heard so far; every new transcript gets a

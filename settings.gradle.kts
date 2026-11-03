@@ -47,6 +47,7 @@ include(":core:testing")
 include(":core:database")
 include(":core:datastore")
 include(":core:speech")
+include(":core:tools")
 
 include(":data:chat")
 include(":data:models")

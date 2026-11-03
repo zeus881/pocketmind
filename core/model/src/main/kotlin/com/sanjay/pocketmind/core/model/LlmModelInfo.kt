@@ -26,6 +26,11 @@ data class LlmModelInfo(
      * file's section list (`tf_lite_vision_encoder`), never assumed from the model's name.
      */
     val supportsImages: Boolean = false,
+    /**
+     * The model's chat template has tool calls (`tool_call` / `tool_response`), checked in the file,
+     * so it can use the calculator and the other tools.
+     */
+    val supportsTools: Boolean = false,
 )
 
 /** What a model is used for. */

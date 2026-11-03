@@ -48,6 +48,8 @@ data class MessageEntity(
     val parentId: String? = null,
     /** v7: path of the photo attached to a user question (app-private storage), or null. */
     val imagePath: String? = null,
+    /** v8: names of the tools the answer used, comma-separated ("calculator,unit_converter"), or null. */
+    val toolsUsed: String? = null,
 )
 
 /**
@@ -72,6 +74,7 @@ fun MessageEntity.asModel() = Message(
     backend = backend,
     parentId = parentId,
     imagePath = imagePath,
+    toolsUsed = toolsUsed?.split(",")?.filter { it.isNotBlank() }.orEmpty(),
 )
 
 fun Message.asEntity() = MessageEntity(
@@ -85,4 +88,5 @@ fun Message.asEntity() = MessageEntity(
     backend = backend,
     parentId = parentId,
     imagePath = imagePath,
+    toolsUsed = toolsUsed.takeIf { it.isNotEmpty() }?.joinToString(","),
 )

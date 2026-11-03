@@ -13,8 +13,10 @@ import com.sanjay.pocketmind.core.model.DeletedChat
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
+import com.sanjay.pocketmind.data.chat.ChatModel
 import com.sanjay.pocketmind.data.chat.ChatPhotos
 import com.sanjay.pocketmind.data.chat.ChatRepository
+import com.sanjay.pocketmind.data.chat.ModelFeatures
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +26,8 @@ import kotlinx.coroutines.flow.map
 /** In-memory [ChatRepository] for ViewModel tests. */
 class FakeChatRepository :
     ChatRepository,
-    ChatPhotos {
+    ChatPhotos,
+    ChatModel {
     val chats = MutableStateFlow<Map<String, Chat>>(emptyMap())
     val messages = MutableStateFlow<List<Message>>(emptyList())
     override val engineState = MutableStateFlow<EngineState>(EngineState.Idle)
@@ -93,9 +96,9 @@ class FakeChatRepository :
         if (loadFailure == FailureReason.CRASHED_LAST_TIME) loadFailure = null
     }
 
-    override suspend fun createChat(personaId: String?): String {
+    override suspend fun createChat(personaId: String?, toolsEnabled: Boolean): String {
         val id = "chat${nextId++}"
-        chats.value += id to Chat(id, "", 0, 0, personaId = personaId)
+        chats.value += id to Chat(id, "", 0, 0, personaId = personaId, toolsEnabled = toolsEnabled)
         return id
     }
 
@@ -104,7 +107,13 @@ class FakeChatRepository :
     val sentImages = mutableListOf<String?>()
     val discardedImages = mutableListOf<String>()
 
-    override suspend fun imagesSupported() = imagesSupported
+    var toolsSupported = false
+
+    override suspend fun modelFeatures() = ModelFeatures(images = imagesSupported, tools = toolsSupported)
+
+    override suspend fun setToolsEnabled(chatId: String, enabled: Boolean) {
+        chats.value += chatId to chats.value.getValue(chatId).copy(toolsEnabled = enabled)
+    }
 
     override suspend fun attachImage(uri: String): String? = if (uri.startsWith("content://")) "/images/$uri" else null
 

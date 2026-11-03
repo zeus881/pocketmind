@@ -12,14 +12,21 @@ import com.google.ai.edge.litertlm.EngineConfig
 import com.google.ai.edge.litertlm.ExperimentalApi
 import com.google.ai.edge.litertlm.ExperimentalFlags
 import com.google.ai.edge.litertlm.Message
+import com.google.ai.edge.litertlm.OpenApiTool
 import com.google.ai.edge.litertlm.SamplerConfig
 import com.google.ai.edge.litertlm.ThinkingConfig
+import com.google.ai.edge.litertlm.ToolProvider
+import com.google.ai.edge.litertlm.tool
 import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
 import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.model.ChatTurn
 import com.sanjay.pocketmind.core.model.TurnRole
+import com.sanjay.pocketmind.core.tools.LocalTool
+import com.sanjay.pocketmind.core.tools.ToolRunner
+import com.sanjay.pocketmind.core.tools.ToolSchema
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
+import java.util.Collections
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
@@ -83,6 +90,12 @@ class LiteRtLmEngine @Inject constructor(
     private var loadedPreferGpu: Boolean? = null
     private var loadedBackend: LlmBackend? = null
     private var loadedVision = false
+
+    /**
+     * Tools the model called during the current answer. The runtime calls them on its own thread
+     * in the middle of [generate], hence a synchronized list.
+     */
+    private val toolCalls: MutableList<String> = Collections.synchronizedList(mutableListOf())
 
     init {
         // Lets us read exact time-to-first-token and decode speed from the runtime
@@ -166,32 +179,39 @@ class LiteRtLmEngine @Inject constructor(
         }
     }
 
-    override suspend fun newSession(systemPrompt: String, history: List<ChatTurn>, sampling: SamplingParams): Long =
-        withContext(io) {
-            lock.withLock {
-                val loaded = checkNotNull(engine) { "load() must succeed before newSession()" }
-                conversation?.close()
-                conversation = null
-                sessionId++
-                conversation = loaded.createConversation(
-                    ConversationConfig(
-                        systemInstruction = Contents.of(systemPrompt),
-                        // Restores an old chat: the model "remembers" these turns.
-                        initialMessages = history.map { it.toLiteRt() },
-                        samplerConfig = SamplerConfig(
-                            topK = sampling.topK,
-                            topP = sampling.topP,
-                            temperature = sampling.temperature,
-                            seed = sampling.seed,
-                        ),
-                        // Models like Qwen3 can "think out loud" before answering. That doubles the
-                        // latency on a phone and would show raw reasoning in the chat, so we turn it off.
-                        thinkingConfig = ThinkingConfig(enableThinking = false),
+    override suspend fun newSession(
+        systemPrompt: String,
+        history: List<ChatTurn>,
+        sampling: SamplingParams,
+        tools: List<LocalTool>,
+    ): Long = withContext(io) {
+        lock.withLock {
+            val loaded = checkNotNull(engine) { "load() must succeed before newSession()" }
+            conversation?.close()
+            conversation = null
+            sessionId++
+            conversation = loaded.createConversation(
+                ConversationConfig(
+                    systemInstruction = Contents.of(systemPrompt),
+                    // Restores an old chat: the model "remembers" these turns.
+                    initialMessages = history.map { it.toLiteRt() },
+                    tools = tools.map { it.toLiteRt() },
+                    // The runtime runs a requested tool and gives the model its result itself.
+                    automaticToolCalling = true,
+                    samplerConfig = SamplerConfig(
+                        topK = sampling.topK,
+                        topP = sampling.topP,
+                        temperature = sampling.temperature,
+                        seed = sampling.seed,
                     ),
-                )
-                sessionId
-            }
+                    // Models like Qwen3 can "think out loud" before answering. That doubles the
+                    // latency on a phone and would show raw reasoning in the chat, so we turn it off.
+                    thinkingConfig = ThinkingConfig(enableThinking = false),
+                ),
+            )
+            sessionId
         }
+    }
 
     /**
      * Streams the answer. Built with `flow {}` + `flowOn(io)`:
@@ -211,6 +231,7 @@ class LiteRtLmEngine @Inject constructor(
             val start = SystemClock.elapsedRealtime()
             var firstPieceAt = -1L
             var pieces = 0
+            toolCalls.clear()
             try {
                 val request = if (imagePath == null) {
                     Contents.of(prompt)
@@ -267,6 +288,7 @@ class LiteRtLmEngine @Inject constructor(
                 generatedTokens = info.lastDecodeTokenCount,
                 backend = backend,
                 fromEngine = true,
+                toolsUsed = toolsUsedNow(),
             )
         } else {
             GenerationStats(
@@ -275,6 +297,7 @@ class LiteRtLmEngine @Inject constructor(
                 generatedTokens = pieces,
                 backend = backend,
                 fromEngine = false,
+                toolsUsed = toolsUsedNow(),
             )
         }
     }
@@ -291,6 +314,22 @@ class LiteRtLmEngine @Inject constructor(
         loadedBackend = null
         loadedVision = false
     }
+
+    private fun toolsUsedNow(): List<String> = synchronized(toolCalls) { toolCalls.distinct() }
+
+    /** Our tool as LiteRT-LM's OpenApiTool: a JSON description, and a function from JSON arguments to a JSON result. */
+    private fun LocalTool.toLiteRt(): ToolProvider = tool(
+        object : OpenApiTool {
+            override fun getToolDescriptionJsonString(): String = ToolSchema.describe(this@toLiteRt)
+
+            override fun execute(paramsJsonString: String): String {
+                toolCalls += name
+                return ToolRunner.run(this@toLiteRt, paramsJsonString).also {
+                    Timber.d("Tool %s ran", name) // arguments and results stay out of the log: they are user data
+                }
+            }
+        },
+    )
 
     private fun LlmBackend.toLiteRt(): Backend = when (this) {
         LlmBackend.GPU -> Backend.GPU()

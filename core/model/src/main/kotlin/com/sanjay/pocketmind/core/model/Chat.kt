@@ -18,6 +18,8 @@ data class Chat(
     val currentLeafId: String? = null,
     /** The persona this chat was started with (null = the default assistant). */
     val personaId: String? = null,
+    /** The model may use tools (calculator, date, units, notes) in this chat; the user can switch it off. */
+    val toolsEnabled: Boolean = true,
 )
 
 /** A named group of chats in History. */

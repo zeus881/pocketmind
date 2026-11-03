@@ -17,6 +17,8 @@ data class InferenceSettings(
     val expectedSizeBytes: Long? = null,
     /** The model can read photos (its catalog entry has `supportsImages`). */
     val supportsImages: Boolean = false,
+    /** The model can call tools (its catalog entry has `supportsTools`). */
+    val supportsTools: Boolean = false,
 )
 
 /**

@@ -61,6 +61,7 @@ class OfflineChatRepositoryTest {
             },
             personas = RoomPersonaRepository(db.personaDao()) { now },
             images = images,
+            tools = ChatTools(db.noteDao()) { now },
         )
     }
 
@@ -420,5 +421,67 @@ class OfflineChatRepositoryTest {
         assertEquals(setOf(pending), images.stored)
         repository.discardImage(pending)
         assertTrue(images.stored.isEmpty())
+    }
+
+    private fun toolSettings() =
+        InferenceSettings("/model.litertlm", true, "SYS", SamplingParams(), supportsTools = true)
+
+    @Test
+    fun toolsAreOfferedOnlyToModelsMadeForThem() = runTest {
+        val plain = repository.createChat()
+        sendAndFinish(plain, "Hi")
+        assertTrue(engine.sessions.last().tools.isEmpty())
+
+        settings = toolSettings()
+        val withTools = repository.createChat()
+        sendAndFinish(withTools, "Hi")
+
+        val session = engine.sessions.last()
+        assertEquals(listOf("calculator", "date_time", "unit_converter", "notes"), session.tools.map { it.name })
+        assertTrue(session.systemPrompt.contains("Use the calculator for every calculation"))
+    }
+
+    @Test
+    fun theToolsAnAnswerUsedAreSavedWithIt() = runTest {
+        settings = toolSettings()
+        engine.toolCallsToMake = listOf(
+            "calculator" to """{"expression": "123.4 * 56"}""",
+            "notes" to """{"action": "save", "text": "Locker code is 4312"}""",
+        )
+        val chatId = repository.createChat()
+
+        sendAndFinish(chatId, "What is 123.4 x 56? And remember my locker code is 4312.")
+
+        assertEquals("""{"expression":"123.4 * 56","result":"6910.4"}""", engine.toolResults.first())
+        val answer = repository.observeMessages(chatId).first().last()
+        assertEquals(listOf("calculator", "notes"), answer.toolsUsed)
+        assertEquals(listOf("Locker code is 4312"), db.noteDao().search("locker", 5).map { it.text })
+    }
+
+    @Test
+    fun switchingToolsOffRebuildsTheConversationWithoutThem() = runTest {
+        settings = toolSettings()
+        val chatId = repository.createChat()
+        sendAndFinish(chatId, "Hi")
+        assertEquals(4, engine.sessions.last().tools.size)
+
+        repository.setToolsEnabled(chatId, false)
+        sendAndFinish(chatId, "Write a poem")
+
+        assertEquals(2, engine.sessions.size)
+        assertTrue(engine.sessions.last().tools.isEmpty())
+        assertTrue(!engine.sessions.last().systemPrompt.contains("You have tools"))
+        assertEquals(ModelFeatures(images = false, tools = true), repository.modelFeatures())
+    }
+
+    @Test
+    fun aChatCanStartWithoutTools() = runTest {
+        settings = toolSettings()
+        val chatId = repository.createChat(toolsEnabled = false)
+
+        sendAndFinish(chatId, "Hi")
+
+        assertTrue(engine.sessions.last().tools.isEmpty())
+        assertTrue(!repository.observeChat(chatId).first()!!.toolsEnabled)
     }
 }

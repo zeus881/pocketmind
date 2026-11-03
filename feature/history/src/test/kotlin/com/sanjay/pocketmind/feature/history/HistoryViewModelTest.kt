@@ -2,7 +2,6 @@ package com.sanjay.pocketmind.feature.history
 
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
-import com.sanjay.pocketmind.core.llm.EngineState
 import com.sanjay.pocketmind.core.llm.GenerationStats
 import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Chat
@@ -44,8 +43,6 @@ class HistoryViewModelTest {
         var queries = mutableListOf<String>()
         var failNext = false
 
-        override val engineState = MutableStateFlow<EngineState>(EngineState.Idle)
-
         override fun observeChats(query: String): Flow<List<ChatSummary>> {
             queries += query
             if (failNext) {
@@ -71,13 +68,12 @@ class HistoryViewModelTest {
 
         override fun observeChat(chatId: String): Flow<Chat?> = emptyFlow()
         override fun observeMessages(chatId: String): Flow<List<Message>> = emptyFlow()
-        override suspend fun ensureModelLoaded(): AppResult<Unit> = AppResult.Success(Unit)
-        override fun resetModelCrashProtection() = Unit
-        override suspend fun createChat(personaId: String?) = "new"
+        override suspend fun createChat(personaId: String?, toolsEnabled: Boolean) = "new"
+
+        override suspend fun setToolsEnabled(chatId: String, enabled: Boolean) = Unit
         override suspend fun sendMessage(chatId: String, text: String, imagePath: String?): AppResult<Flow<String>> =
             AppResult.Success(emptyFlow())
 
-        override suspend fun imagesSupported() = false
         override suspend fun regenerateLastAnswer(chatId: String): AppResult<Flow<String>>? = null
         override suspend fun saveAssistantMessage(
             chatId: String,
@@ -85,7 +81,6 @@ class HistoryViewModelTest {
             status: MessageStatus,
             stats: GenerationStats?,
         ) = Unit
-        override fun lastGenerationStats(): GenerationStats? = null
         override fun observeBranches(chatId: String): Flow<Map<String, BranchInfo>> = emptyFlow()
         override suspend fun editAndResend(chatId: String, messageId: String, newText: String) =
             AppResult.Failure(ErrorKind.UNKNOWN)

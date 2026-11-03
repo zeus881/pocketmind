@@ -25,12 +25,12 @@ plugins {
 // core:testing (test helpers) and :benchmark (device-only tests) are not app code.
 
 /** Minimum line coverage in percent. Raised phase by phase towards 80 (V2_PLAN.md). Never lowered. */
-val koverMinLineCoverage = 81 // v2 phase 10: 81.1 % measured (target 80 reached in phase 7; never lower)
+val koverMinLineCoverage = 82 // v2 phase 10: 81.1 % measured (target 80 reached in phase 7; never lower)
 
 val coveredModules = listOf(
     ":app",
     ":core:model", ":core:common", ":core:designsystem", ":core:llm",
-    ":core:database", ":core:datastore", ":core:speech",
+    ":core:database", ":core:datastore", ":core:speech", ":core:tools",
     ":data:chat", ":data:models", ":data:benchmark", ":data:documents",
     ":feature:chat", ":feature:history", ":feature:models", ":feature:settings",
     ":feature:benchmark", ":feature:onboarding", ":feature:documents", ":feature:translate", ":feature:personas",
@@ -136,6 +136,8 @@ configurations.matching { it.name == "detekt" }.configureEach {
 tasks.register("testDebugUnitTest") {
     description = "Runs the build-logic unit tests together with the modules' debug unit tests."
     dependsOn(gradle.includedBuild("build-logic").task(":convention:test"))
+    // Pure Kotlin modules have a plain "test" task (no debug variant).
+    dependsOn(":core:model:test", ":core:tools:test")
 }
 
 // ---------- Design-token guard ----------

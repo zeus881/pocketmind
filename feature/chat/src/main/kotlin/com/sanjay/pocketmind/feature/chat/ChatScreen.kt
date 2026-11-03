@@ -18,6 +18,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Chat
 import androidx.compose.material.icons.outlined.AddComment
+import androidx.compose.material.icons.outlined.Calculate
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.DropdownMenu
@@ -26,6 +27,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconToggleButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -168,6 +170,7 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewMode
         onToggleSpeak = viewModel::toggleSpeak,
         onPhotoPicked = viewModel::attachPhoto,
         onRemovePhoto = viewModel::removePhoto,
+        onToggleTools = viewModel::toggleTools,
         onExport = { format ->
             val name = exportFileName(state.title, format)
             if (format == ExportFormat.MARKDOWN) saveMarkdown.launch(name) else savePdf.launch(name)
@@ -195,6 +198,7 @@ fun ChatContent(
     onToggleSpeak: (messageId: String, text: String) -> Unit = { _, _ -> },
     onPhotoPicked: (String) -> Unit = {},
     onRemovePhoto: () -> Unit = {},
+    onToggleTools: () -> Unit = {},
 ) {
     Scaffold(
         modifier = modifier,
@@ -218,6 +222,7 @@ fun ChatContent(
                     }
                 },
                 actions = {
+                    if (state.tools.available) ToolsSwitch(enabled = state.tools.enabled, onToggle = onToggleTools)
                     IconButton(onClick = onNewChat) {
                         Icon(
                             Icons.Outlined.AddComment,
@@ -308,6 +313,21 @@ fun ChatContent(
                 }
             }
         }
+    }
+}
+
+/**
+ * Tools on/off for this chat. A toggle button (its state is read out by TalkBack as on/off), so the
+ * user can keep tool calls out of a chat, e.g. for creative writing where they only add delay.
+ */
+@Composable
+private fun ToolsSwitch(enabled: Boolean, onToggle: () -> Unit) {
+    IconToggleButton(checked = enabled, onCheckedChange = { onToggle() }) {
+        Icon(
+            Icons.Outlined.Calculate,
+            contentDescription = stringResource(R.string.feature_chat_tools),
+            tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+        )
     }
 }
 

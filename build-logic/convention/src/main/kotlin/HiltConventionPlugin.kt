@@ -19,6 +19,12 @@ class HiltConventionPlugin : Plugin<Project> {
                 add("implementation", libs.lib("hilt-android"))
                 add("ksp", libs.lib("hilt-compiler"))
             }
+            // An intermittent KSP run that produced NO files was stored in the build cache and then
+            // restored in later builds as "FROM-CACHE", giving MissingBinding / "could not be resolved"
+            // errors far from the cause (PROGRESS.md, BLOCKERS). KSP takes seconds: always run it.
+            tasks.matching { it.name.startsWith("ksp") }.configureEach {
+                outputs.doNotCacheIf("KSP output is always regenerated (an empty result was once cached)") { true }
+            }
         }
     }
 }

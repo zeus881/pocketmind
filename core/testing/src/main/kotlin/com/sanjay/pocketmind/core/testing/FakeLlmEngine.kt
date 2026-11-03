@@ -8,6 +8,8 @@ import com.sanjay.pocketmind.core.llm.LlmEngine
 import com.sanjay.pocketmind.core.llm.SamplingParams
 import com.sanjay.pocketmind.core.llm.SessionReplacedException
 import com.sanjay.pocketmind.core.model.ChatTurn
+import com.sanjay.pocketmind.core.tools.LocalTool
+import com.sanjay.pocketmind.core.tools.ToolRunner
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,7 +26,19 @@ import kotlinx.coroutines.flow.flow
 class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", " fake")) : LlmEngine {
 
     /** Records one newSession() call. */
-    data class Session(val systemPrompt: String, val history: List<ChatTurn>, val sampling: SamplingParams)
+    data class Session(
+        val systemPrompt: String,
+        val history: List<ChatTurn>,
+        val sampling: SamplingParams,
+        val tools: List<LocalTool> = emptyList(),
+    )
+
+    /**
+     * Tool calls the "model" makes before answering: (tool name, JSON arguments). Each one is run
+     * with the session's real tool, like the runtime does, and its result is kept in [toolResults].
+     */
+    var toolCallsToMake: List<Pair<String, String>> = emptyList()
+    val toolResults = mutableListOf<String>()
 
     override val state = MutableStateFlow<EngineState>(EngineState.Idle)
     override var lastStats: GenerationStats? = null
@@ -75,9 +89,14 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
         }
     }
 
-    override suspend fun newSession(systemPrompt: String, history: List<ChatTurn>, sampling: SamplingParams): Long {
+    override suspend fun newSession(
+        systemPrompt: String,
+        history: List<ChatTurn>,
+        sampling: SamplingParams,
+        tools: List<LocalTool>,
+    ): Long {
         check(state.value is EngineState.Ready) { "load() must succeed before newSession()" }
-        sessions += Session(systemPrompt, history, sampling)
+        sessions += Session(systemPrompt, history, sampling, tools)
         return ++sessionId
     }
 
@@ -91,6 +110,13 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
         check(imagePath == null || loadedVision) { "load(vision = true) must succeed before sending an image" }
         prompts += prompt
         images += imagePath
+        val available = sessions.lastOrNull()?.tools.orEmpty()
+        val used = toolCallsToMake.mapNotNull { (name, arguments) ->
+            available.firstOrNull { it.name == name }?.let { tool ->
+                toolResults += ToolRunner.run(tool, arguments)
+                name
+            }
+        }
         for (piece in responsePieces) {
             if (pieceDelayMs > 0) delay(pieceDelayMs)
             emit(piece)
@@ -102,6 +128,7 @@ class FakeLlmEngine(var responsePieces: List<String> = listOf("Hello", " from", 
             generatedTokens = responsePieces.size,
             backend = backend,
             fromEngine = true,
+            toolsUsed = used.distinct(),
         )
     }
 

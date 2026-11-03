@@ -19,6 +19,8 @@ data class Message(
     val parentId: String? = null,
     /** v7: a photo the user attached to this question (a JPEG in the app's private storage), or null. */
     val imagePath: String? = null,
+    /** v8: tools the assistant used for this answer (e.g. "calculator"); shown as a chip. */
+    val toolsUsed: List<String> = emptyList(),
 )
 
 /** How an assistant answer ended. User messages are always [COMPLETE]. */

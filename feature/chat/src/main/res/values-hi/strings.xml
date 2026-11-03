@@ -60,4 +60,11 @@
     <string name="feature_chat_attached_photo">जोड़ी गई फ़ोटो</string>
     <string name="feature_chat_photo_unreadable">यह फ़ाइल फ़ोटो के रूप में नहीं खुल सकी।</string>
     <string name="feature_chat_images_not_supported">यह मॉडल फ़ोटो नहीं पढ़ सकता। Models में ऐसा मॉडल चुनें जो पढ़ सके (Gemma 4 E2B)।</string>
+    <string name="feature_chat_tools">टूल (कैलकुलेटर, तारीख़, इकाइयाँ, नोट्स)</string>
+    <string name="feature_chat_tools_used">इस्तेमाल किया: %1$s</string>
+    <string name="feature_chat_tool_calculator">कैलकुलेटर</string>
+    <string name="feature_chat_tool_date">तारीख़ और समय</string>
+    <string name="feature_chat_tool_units">इकाई बदलने वाला</string>
+    <string name="feature_chat_tool_notes">नोट्स</string>
+    <string name="feature_chat_tool_other">एक टूल</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.sanjay.pocketmind.core.llm
 
 import com.sanjay.pocketmind.core.model.ChatTurn
+import com.sanjay.pocketmind.core.tools.LocalTool
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -58,11 +59,15 @@ interface LlmEngine {
     /**
      * Starts a fresh conversation. [history] restores earlier turns when a saved chat is reopened.
      * Returns the new session's id: pass it to [generate] so the prompt can only run in THIS session.
+     *
+     * [tools] may be called by the model while it answers; the runtime runs them and feeds the result
+     * back ("automatic tool calling"). Which ones ran is reported in [GenerationStats.toolsUsed].
      */
     suspend fun newSession(
         systemPrompt: String,
         history: List<ChatTurn> = emptyList(),
         sampling: SamplingParams = SamplingParams(),
+        tools: List<LocalTool> = emptyList(),
     ): Long
 
     /**

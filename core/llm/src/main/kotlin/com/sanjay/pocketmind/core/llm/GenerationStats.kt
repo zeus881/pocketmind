@@ -9,6 +9,7 @@ package com.sanjay.pocketmind.core.llm
  * @property generatedTokens how many tokens the answer had.
  * @property fromEngine true when the numbers come from LiteRT-LM's own benchmark counters
  *   (exact token counts); false when we estimated them by counting streamed pieces.
+ * @property toolsUsed names of the tools the model called while writing this answer, in order, once each.
  */
 data class GenerationStats(
     val timeToFirstTokenMs: Long,
@@ -16,4 +17,5 @@ data class GenerationStats(
     val generatedTokens: Int,
     val backend: LlmBackend,
     val fromEngine: Boolean,
+    val toolsUsed: List<String> = emptyList(),
 )

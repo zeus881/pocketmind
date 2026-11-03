@@ -60,4 +60,11 @@
     <string name="feature_chat_attached_photo">Attached photo</string>
     <string name="feature_chat_photo_unreadable">This file couldn\'t be opened as a photo.</string>
     <string name="feature_chat_images_not_supported">This model can\'t read photos. Choose a model that can (Gemma 4 E2B) in Models.</string>
+    <string name="feature_chat_tools">Tools (calculator, date, units, notes)</string>
+    <string name="feature_chat_tools_used">Used: %1$s</string>
+    <string name="feature_chat_tool_calculator">Calculator</string>
+    <string name="feature_chat_tool_date">Date and time</string>
+    <string name="feature_chat_tool_units">Unit converter</string>
+    <string name="feature_chat_tool_notes">Notes</string>
+    <string name="feature_chat_tool_other">A tool</string>
 </resources>

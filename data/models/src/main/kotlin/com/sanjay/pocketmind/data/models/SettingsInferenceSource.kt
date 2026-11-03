@@ -33,6 +33,7 @@ internal class SettingsInferenceSource @Inject constructor(
             modelName = catalog.find(modelId)?.displayName.orEmpty(),
             expectedSizeBytes = catalog.find(modelId)?.sizeBytes,
             supportsImages = catalog.find(modelId)?.supportsImages == true,
+            supportsTools = catalog.find(modelId)?.supportsTools == true,
         )
     }
 }

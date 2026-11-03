@@ -23,7 +23,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 14 Personas + prompt library | DONE | 81 % (measured 81.2 %, 294 tests) | Room v6; new module feature:personas; Pro gate comes in phase 20 |
 | 15 Voice in (on-device) and spoken answers | DONE | 81 % (measured 81.4 %, 308 tests) | new core:speech; Android 12+ on-device recognizer only; offline TTS voices only |
 | 16 Image questions (if the model supports vision) | DONE | 81 % (measured 81.1 %, 329 tests) | vision verified in the file (Gemma 4 E2B only); Room v7; photo picker, no permission; to verify on device |
-| 17 Tool calling (calculator, date, units, notes) | NEXT | | |
+| 17 Tool calling (calculator, date, units, notes) | DONE | 82 % (measured 82.5 %, 349 tests) | new core:tools; Room v8; tools for Gemma 4 E2B + Qwen3 0.6B (template checked); KSP cache fix; gate to verify on device |
+| 18 Encryption (SQLCipher) and data control | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -135,6 +136,11 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   order was verified correct; the same task succeeds alone. Mitigations applied (phase 2: `ksp.incremental=false`;
   phase 5: `ksp.classloader.cache.processors=false`). If it recurs: re-run the build (it is not a code error); the
   long-term fix is a KSP release that addresses it — watch Dependabot PRs for KSP.
+  **Phase 17 diagnosis (seen 4 more times in phases 16–17):** the errors kept coming back because the Gradle
+  build cache had stored a KSP result with NO files and restored it ("FROM-CACHE") in later builds; deleting
+  `build/generated/ksp`, `--no-parallel` and restarting the daemon did not help. `--rerun --no-build-cache` produced
+  the files at once. Fix: the Hilt convention plugin now marks every `ksp*` task as not cacheable, so KSP always runs
+  (a few seconds per module). If it ever recurs: `./gradlew :<module>:kspDebugKotlin --rerun --no-build-cache`.
 
 ## MANUAL STEPS FOR SANJAY
 
@@ -155,6 +161,12 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   RAM with and without the encoder (Android Studio profiler, or the Benchmark screen's peak memory) for
   `docs/performance-budget.md`, and measure an image's real token cost (`Conversation.getTokenCount()` before and
   after); the repository reserves 512 tokens until then.
+- **Tool calling gate (phase 17):** `./gradlew :core:llm:connectedDebugAndroidTest
+  -Pandroid.testInstrumentationRunnerArguments.tools=true` (Gemma 4 E2B must call the calculator and answer 6910.4).
+  Then in the app, with Tools on: "What is 123.4 × 56?", "What day is it today?", "Convert 10 km to miles",
+  "Remember my locker code is 4312" and later "What is my locker code?". Each answer should show "Used: …".
+  Also try Qwen3 0.6B: its template has tool calls, but a 0.6B model may call tools badly; if so, set its
+  `supportsTools` to false in `models.json`.
 
 ### v1
 

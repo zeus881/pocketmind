@@ -9,6 +9,7 @@ import com.sanjay.pocketmind.core.database.dao.ChatDao
 import com.sanjay.pocketmind.core.database.dao.DocumentDao
 import com.sanjay.pocketmind.core.database.dao.FolderDao
 import com.sanjay.pocketmind.core.database.dao.MessageDao
+import com.sanjay.pocketmind.core.database.dao.NoteDao
 import com.sanjay.pocketmind.core.database.dao.PersonaDao
 import com.sanjay.pocketmind.core.database.entity.BenchmarkRunEntity
 import com.sanjay.pocketmind.core.database.entity.ChatEntity
@@ -18,6 +19,7 @@ import com.sanjay.pocketmind.core.database.entity.DocumentEntity
 import com.sanjay.pocketmind.core.database.entity.FolderEntity
 import com.sanjay.pocketmind.core.database.entity.MessageEntity
 import com.sanjay.pocketmind.core.database.entity.MessageFtsEntity
+import com.sanjay.pocketmind.core.database.entity.NoteEntity
 import com.sanjay.pocketmind.core.database.entity.PersonaEntity
 import com.sanjay.pocketmind.core.database.entity.PromptEntity
 
@@ -34,6 +36,7 @@ import com.sanjay.pocketmind.core.database.entity.PromptEntity
  *   and current branch filled in, and the search index is built — things Room can't infer.
  * - 6 (v2 phase 14): + personas, prompts, chats.personaId (AutoMigration: purely additive).
  * - 7 (v2 phase 16): + messages.imagePath (AutoMigration).
+ * - 8 (v2 phase 17): + notes, chats.toolsEnabled (default 1), messages.toolsUsed (AutoMigration).
  * Additive changes use AutoMigrations: Room diffs the committed schema JSONs at compile time
  * and generates the SQL. Existing users keep all their data; [MigrationTest] proves it.
  *
@@ -51,8 +54,9 @@ import com.sanjay.pocketmind.core.database.entity.PromptEntity
         MessageFtsEntity::class,
         PersonaEntity::class,
         PromptEntity::class,
+        NoteEntity::class,
     ],
-    version = 7,
+    version = 8,
     exportSchema = true,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),
@@ -60,6 +64,7 @@ import com.sanjay.pocketmind.core.database.entity.PromptEntity
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 5, to = 6),
         AutoMigration(from = 6, to = 7),
+        AutoMigration(from = 7, to = 8),
     ],
 )
 @TypeConverters(Converters::class)
@@ -75,6 +80,8 @@ abstract class PocketMindDatabase : RoomDatabase() {
     abstract fun folderDao(): FolderDao
 
     abstract fun personaDao(): PersonaDao
+
+    abstract fun noteDao(): NoteDao
 
     companion object {
         const val NAME = "pocketmind.db"

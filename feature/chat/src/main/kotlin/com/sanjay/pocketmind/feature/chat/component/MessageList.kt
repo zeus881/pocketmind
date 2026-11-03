@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.outlined.VolumeUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Calculate
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.StopCircle
@@ -69,6 +71,10 @@ import com.sanjay.pocketmind.core.model.BranchInfo
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
+import com.sanjay.pocketmind.core.tools.CalculatorTool
+import com.sanjay.pocketmind.core.tools.DateTimeTool
+import com.sanjay.pocketmind.core.tools.NotesTool
+import com.sanjay.pocketmind.core.tools.UnitConverterTool
 import com.sanjay.pocketmind.feature.chat.R
 import kotlinx.coroutines.launch
 
@@ -307,6 +313,7 @@ private fun AssistantAnswer(
             MessageStatus.FAILED -> StatusLabel(stringResource(R.string.feature_chat_status_failed))
             MessageStatus.COMPLETE -> Unit
         }
+        if (message.toolsUsed.isNotEmpty()) ToolsUsedLabel(message.toolsUsed)
         Row(verticalAlignment = Alignment.CenterVertically) {
             // The "12.4 tok/s · GPU" label from CLAUDE.md, stored with the message.
             val tps = message.tokensPerSecond
@@ -374,4 +381,38 @@ private fun StatusLabel(text: String) {
         color = MaterialTheme.colorScheme.error,
         modifier = Modifier.padding(top = PmSpacing.xs),
     )
+}
+
+/**
+ * "Used: Calculator, Unit converter": shows that a number came from a tool, not from the model's
+ * guess (the user can trust it more, and it explains a short pause before the answer).
+ */
+@Composable
+private fun ToolsUsedLabel(tools: List<String>) {
+    val names = tools.map { stringResource(toolNameRes(it)) }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(start = PmSpacing.s, top = PmSpacing.xs),
+    ) {
+        Icon(
+            Icons.Outlined.Calculate,
+            contentDescription = null, // the text says it
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(PmSpacing.l),
+        )
+        Text(
+            text = stringResource(R.string.feature_chat_tools_used, names.joinToString(", ")),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(start = PmSpacing.xs),
+        )
+    }
+}
+
+private fun toolNameRes(name: String): Int = when (name) {
+    CalculatorTool.NAME -> R.string.feature_chat_tool_calculator
+    DateTimeTool.NAME -> R.string.feature_chat_tool_date
+    UnitConverterTool.NAME -> R.string.feature_chat_tool_units
+    NotesTool.NAME -> R.string.feature_chat_tool_notes
+    else -> R.string.feature_chat_tool_other
 }

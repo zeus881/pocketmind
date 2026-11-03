@@ -62,6 +62,7 @@ class ChatViewModelTest {
     private fun viewModel(chatId: String? = null, draft: String? = null) = ChatViewModel(
         repository,
         repository,
+        repository,
         exporter,
         personas,
         speechIn,
@@ -165,6 +166,47 @@ class ChatViewModelTest {
 
         assertNull(vm.uiState.value.photo.attached)
         assertEquals(listOf("/images/content://cat"), repository.discardedImages)
+    }
+
+    @Test
+    fun `tools can be switched off before a new chat starts`() = runTest(mainRule.testDispatcher) {
+        repository.toolsSupported = true
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+        assertEquals(ToolsUi(available = true, enabled = true), vm.uiState.value.tools)
+
+        vm.toggleTools()
+        advanceUntilIdle()
+        assertFalse(vm.uiState.value.tools.enabled)
+        vm.send("Write a poem")
+        advanceUntilIdle()
+
+        assertFalse(repository.chats.value.values.single().toolsEnabled)
+    }
+
+    @Test
+    fun `in a saved chat the switch is stored on the chat`() = runTest(mainRule.testDispatcher) {
+        repository.toolsSupported = true
+        val id = repository.createChat(null, toolsEnabled = true)
+        val vm = viewModel(chatId = id)
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+
+        vm.toggleTools()
+        advanceUntilIdle()
+
+        assertFalse(repository.chats.value.getValue(id).toolsEnabled)
+        assertFalse(vm.uiState.value.tools.enabled)
+    }
+
+    @Test
+    fun `without tool support the switch is hidden`() = runTest(mainRule.testDispatcher) {
+        val vm = viewModel()
+        backgroundScope.launch { vm.uiState.collect {} }
+        advanceUntilIdle()
+
+        assertFalse(vm.uiState.value.tools.available)
     }
 
     @Test

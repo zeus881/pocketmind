@@ -32,6 +32,8 @@ data class ChatEntity(
     val currentLeafId: String? = null,
     /** v6: the persona the chat uses (built-in id like "builtin:coder", or a custom persona's id). */
     val personaId: String? = null,
+    /** v8: the model may use tools (calculator, date, units, notes) in this chat. */
+    @ColumnInfo(defaultValue = "1") val toolsEnabled: Boolean = true,
 )
 
 fun ChatEntity.asModel() = Chat(
@@ -43,6 +45,7 @@ fun ChatEntity.asModel() = Chat(
     folderId = folderId,
     currentLeafId = currentLeafId,
     personaId = personaId,
+    toolsEnabled = toolsEnabled,
 )
 
 fun Chat.asEntity() = ChatEntity(
@@ -54,6 +57,7 @@ fun Chat.asEntity() = ChatEntity(
     folderId = folderId,
     currentLeafId = currentLeafId,
     personaId = personaId,
+    toolsEnabled = toolsEnabled,
 )
 
 /** Table `folders`: named groups of chats. */

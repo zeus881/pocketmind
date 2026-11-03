@@ -23,6 +23,8 @@ import com.sanjay.pocketmind.core.model.DeletedChat
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
+import com.sanjay.pocketmind.core.tools.LocalTool
+import com.sanjay.pocketmind.core.tools.ToolSchema
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -47,6 +49,7 @@ import kotlinx.coroutines.sync.withLock
  * `@Singleton` because the session bookkeeping must be shared by every screen.
  */
 @Singleton
+@Suppress("LongParameterList") // Hilt-injected collaborators, one per concern (storage, model, summaries, …)
 internal class OfflineChatRepository @Inject constructor(
     private val chatDao: ChatDao,
     private val messageDao: MessageDao,
@@ -56,11 +59,13 @@ internal class OfflineChatRepository @Inject constructor(
     private val summarizer: ConversationSummarizer,
     private val personas: PersonaRepository,
     private val images: ChatImageStore,
+    private val tools: ChatTools,
 ) : ChatRepository,
-    ChatPhotos {
+    ChatPhotos,
+    ChatModel {
 
     /** What the engine's current conversation was built for. */
-    private data class SessionKey(val chatId: String, val settings: InferenceSettings)
+    private data class SessionKey(val chatId: String, val settings: InferenceSettings, val withTools: Boolean)
 
     private val sessionLock = Mutex()
     private var session: SessionKey? = null
@@ -157,7 +162,9 @@ internal class OfflineChatRepository @Inject constructor(
 
     override fun resetModelCrashProtection() = engine.resetCrashProtection()
 
-    override suspend fun imagesSupported(): Boolean = settingsSource.current()?.supportsImages == true
+    override suspend fun modelFeatures(): ModelFeatures = settingsSource.current()
+        ?.let { ModelFeatures(images = it.supportsImages, tools = it.supportsTools) }
+        ?: ModelFeatures()
 
     override suspend fun attachImage(uri: String): String? = images.import(uri)?.also { pendingImages += it }
 
@@ -166,12 +173,22 @@ internal class OfflineChatRepository @Inject constructor(
         images.delete(path)
     }
 
-    override suspend fun createChat(personaId: String?): String {
+    override suspend fun setToolsEnabled(chatId: String, enabled: Boolean) = chatDao.setToolsEnabled(chatId, enabled)
+
+    override suspend fun createChat(personaId: String?, toolsEnabled: Boolean): String {
         // A good moment to delete photos of chats deleted earlier (not at delete time: "Undo" still needs them).
         images.deleteAllExcept(messageDao.imagePaths().toSet() + pendingImages)
         val now = nextTimestamp()
         val id = UUID.randomUUID().toString()
-        chatDao.upsert(Chat(id, title = "", createdAt = now, updatedAt = now, personaId = personaId).asEntity())
+        val chat = Chat(
+            id,
+            title = "",
+            createdAt = now,
+            updatedAt = now,
+            personaId = personaId,
+            toolsEnabled = toolsEnabled,
+        )
+        chatDao.upsert(chat.asEntity())
         return id
     }
 
@@ -250,6 +267,7 @@ internal class OfflineChatRepository @Inject constructor(
                 tokensPerSecond = stats?.decodeTokensPerSecond,
                 backend = stats?.backend?.label,
                 parentId = chatDao.get(chatId)?.currentLeafId, // the question it answers
+                toolsUsed = stats?.toolsUsed.orEmpty(),
             )
             messageDao.upsert(message.asEntity())
             chatDao.setCurrentLeaf(chatId, message.id)
@@ -357,11 +375,14 @@ internal class OfflineChatRepository @Inject constructor(
             .filter { it.status != MessageStatus.FAILED && it.text.isNotBlank() }
             .map { ChatTurn(it.role, it.historyText()) }
         val promptTokens = TokenEstimator.estimate(prompt) + if (withImage) IMAGE_TOKEN_RESERVE else 0
+        val chatTools = toolsFor(chatId, settings)
+        // The tool declarations are part of the prompt the model reads, so they use context too.
+        val toolTokens = TokenEstimator.estimate(chatTools.joinToString("\n") { ToolSchema.describe(it) })
         val budget = engine.contextWindowTokens - RESPONSE_RESERVE_TOKENS -
-            TokenEstimator.estimate(settings.systemPrompt) - promptTokens
+            TokenEstimator.estimate(settings.systemPrompt) - promptTokens - toolTokens
         pendingPromptTokens = promptTokens
 
-        val key = SessionKey(chatId, settings)
+        val key = SessionKey(chatId, settings, withTools = chatTools.isNotEmpty())
         val upToDate = session == key &&
             sessionInSync &&
             // Someone else (benchmark, translate, a reload…) may have replaced the conversation.
@@ -380,14 +401,19 @@ internal class OfflineChatRepository @Inject constructor(
             keptTurns = trimmed.turns
             note = earlierContextNote(chatId, turns.take(turns.size - keptTurns.size), trimmed.summaryNote)
         }
-        val systemPrompt = listOfNotNull(settings.systemPrompt, note).joinToString("\n\n")
+        val toolRules = TOOL_RULES.takeIf { chatTools.isNotEmpty() }
+        val systemPrompt = listOfNotNull(settings.systemPrompt, toolRules, note).joinToString("\n\n")
         // Use the id RETURNED by newSession (reading engine.sessionId afterwards could already
         // see another feature's newer session — or our own summarizer's).
-        ownedSessionId = engine.newSession(systemPrompt, keptTurns, settings.sampling)
+        ownedSessionId = engine.newSession(systemPrompt, keptTurns, settings.sampling, chatTools)
         session = key
         sessionInSync = true
         sessionTokens = keptTurns.sumOf { TokenEstimator.estimate(it.text) } + TokenEstimator.estimate(note.orEmpty())
     }
+
+    /** Tools for this chat: only when the model was made for tool calls and the chat hasn't switched them off. */
+    private suspend fun toolsFor(chatId: String, settings: InferenceSettings): List<LocalTool> =
+        if (settings.supportsTools && chatDao.get(chatId)?.toolsEnabled != false) tools.all else emptyList()
 
     /**
      * A note about the [dropped] (oldest) turns for the system prompt: the cached model-written
@@ -438,6 +464,15 @@ internal class OfflineChatRepository @Inject constructor(
          * (Conversation.getTokenCount before and after a photo).
          */
         const val IMAGE_TOKEN_RESERVE = 512
+
+        /**
+         * Small models do mental arithmetic badly and don't know today's date. Saying plainly WHEN to
+         * use each tool makes them call it instead of guessing.
+         */
+        const val TOOL_RULES = "You have tools. Use the calculator for every calculation, even simple ones, " +
+            "and give its exact result. Use the date tool for today's date, the time or the weekday. Use the unit " +
+            "converter for unit conversions. Use the notes tool when the user asks you to remember or recall " +
+            "something. Don't mention tools the user didn't need."
 
         internal const val PHOTO_NOTE = "[The user attached a photo to this message; it is no longer visible to you.]"
 

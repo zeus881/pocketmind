@@ -60,6 +60,9 @@ interface ChatDao {
     @Query("UPDATE chats SET pinned = :pinned WHERE id = :id")
     suspend fun setPinned(id: String, pinned: Boolean)
 
+    @Query("UPDATE chats SET toolsEnabled = :enabled WHERE id = :id")
+    suspend fun setToolsEnabled(id: String, enabled: Boolean)
+
     @Query("UPDATE chats SET folderId = :folderId WHERE id = :id")
     suspend fun setFolder(id: String, folderId: String?)
 
