@@ -1,6 +1,9 @@
 package com.sanjay.pocketmind.feature.settings
 
 import android.net.Uri
+import com.sanjay.pocketmind.core.common.diagnostics.CrashLog
+import com.sanjay.pocketmind.core.common.diagnostics.DeviceFacts
+import com.sanjay.pocketmind.core.common.diagnostics.DeviceFactsSource
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
@@ -11,13 +14,16 @@ import com.sanjay.pocketmind.core.model.LlmModelInfo
 import com.sanjay.pocketmind.core.model.ModelKind
 import com.sanjay.pocketmind.core.model.ThemeMode
 import com.sanjay.pocketmind.core.testing.FakeLlmEngine
+import com.sanjay.pocketmind.core.testing.FakeProStatus
 import com.sanjay.pocketmind.core.testing.InMemoryPreferencesDataStore
 import com.sanjay.pocketmind.core.testing.MainDispatcherRule
 import com.sanjay.pocketmind.data.chat.UserDataControl
 import com.sanjay.pocketmind.data.models.ModelRepository
 import com.sanjay.pocketmind.data.models.ModelState
 import com.sanjay.pocketmind.data.models.ModelStatus
+import io.mockk.every
 import io.mockk.mockk
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -28,6 +34,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 
@@ -65,7 +72,42 @@ class SettingsViewModelTest {
         }
     }
 
-    private val viewModel by lazy { SettingsViewModel(settings, models, engine, userData) }
+    private val pro = FakeProStatus()
+    private val crashLog = mockk<CrashLog> { every { entries() } returns listOf("== crash at Engine.load") }
+    private val device = DeviceFactsSource { DeviceFacts("2.0.0", "15", 35, "Google Pixel 8", 8) }
+
+    private val viewModel by lazy {
+        SettingsViewModel(settings, models, engine, userData, pro, crashLog, device, Dispatchers.Unconfined)
+    }
+
+    @Test
+    fun proStatusAndPriceAreShownAndRestoreReportsTheResult() = runTest {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
+        advanceUntilIdle()
+        assertEquals("₹249.00", viewModel.uiState.value.proPrice)
+        assertEquals(false, viewModel.uiState.value.isPro)
+
+        pro.isPro.value = true
+        viewModel.restorePro()
+
+        assertEquals(SettingsEvent.Restored(isPro = true), viewModel.events.first())
+        assertEquals(1, pro.refreshes)
+        assertEquals(true, viewModel.uiState.value.isPro)
+    }
+
+    @Test
+    fun theDiagnosticReportHasFactsAndCrashesButNoChats() = runTest {
+        backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.uiState.collect {} }
+        advanceUntilIdle()
+
+        viewModel.shareDiagnostics()
+        val report = (viewModel.events.first() as SettingsEvent.ShareDiagnostics).report
+
+        assertTrue(report.contains("Device: Google Pixel 8, 8 GB RAM"))
+        assertTrue(report.contains("Model: Gemma 4 E2B"))
+        assertTrue(report.contains("== crash at Engine.load"))
+        assertTrue(report.endsWith("This report contains no chats, notes, prompts or documents."))
+    }
 
     @Test
     fun exportAndDeleteReportTheirResult() = runTest {

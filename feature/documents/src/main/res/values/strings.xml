@@ -42,4 +42,5 @@
     <string name="feature_documents_sources">Sources (tap to read)</string>
     <string name="feature_documents_close">Close</string>
     <string name="feature_documents_delete">Delete %1$s</string>
+    <string name="feature_documents_error_needs_pro">The free version reads PDFs of up to 50 pages. PocketMind Pro reads any length: Settings → PocketMind Pro.</string>
 </resources>

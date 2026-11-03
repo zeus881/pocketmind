@@ -31,6 +31,8 @@ data class LlmModelInfo(
      * so it can use the calculator and the other tools.
      */
     val supportsTools: Boolean = false,
+    /** A bigger model that only PocketMind Pro can download (decision 2; none is listed until verified). */
+    val requiresPro: Boolean = false,
 )
 
 /** What a model is used for. */

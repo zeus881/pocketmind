@@ -190,5 +190,6 @@ private fun ErrorKind.messageRes(): Int = when (this) {
     ErrorKind.NOT_ENOUGH_STORAGE -> R.string.feature_models_failed_storage
     ErrorKind.CHECKSUM_MISMATCH -> R.string.feature_models_failed_checksum
     ErrorKind.NETWORK -> R.string.feature_models_failed_network
+    ErrorKind.NEEDS_PRO -> R.string.feature_models_needs_pro
     else -> R.string.feature_models_error_generic
 }

@@ -25,6 +25,12 @@ shared with third parties"** on the store listing.
   app and send no user content. Google's own handling of purchases is covered by Google's policy, not by this form
   (Play's guidance: data handled by Google Play services for those APIs need not be declared).
 
+- **PocketMind Pro** (phase 20) is bought through Google Play Billing; the app asks Play which products the account
+  owns and receives no payment information. Purchase data handled by Google Play for Play Billing need not be
+  declared by the developer.
+- **Crash log / diagnostic report** (phase 20): stored on the phone; shared only when the user picks a target in the
+  share sheet. User-initiated sharing to a destination the user chooses is not "collection" by the developer.
+
 ## Before each release, check
 
 1. `./gradlew :app:dependencies --configuration releaseRuntimeClasspath`: no analytics, crash or ad SDK has been

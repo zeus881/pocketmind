@@ -11,6 +11,7 @@ dependencies {
     api(projects.core.model)
     api(projects.core.llm)
     implementation(projects.core.common)
+    implementation(projects.core.billing) // the free version's PDF page limit
     implementation(projects.core.database)
 
     // PDF text extraction (an Android port of Apache PDFBox). Runs fully offline.

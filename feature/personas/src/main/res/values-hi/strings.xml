@@ -18,4 +18,5 @@
     <string name="feature_personas_no_prompts">अभी कोई सहेजा हुआ प्रॉम्प्ट नहीं। सहेजे गए प्रॉम्प्ट चैट इनपुट से डाले जा सकते हैं।</string>
     <string name="feature_personas_save">सहेजें</string>
     <string name="feature_personas_cancel">रद्द करें</string>
+    <string name="feature_personas_needs_pro">अपने पर्सोना बनाना PocketMind Pro का हिस्सा है (Settings → PocketMind Pro)। पहले से बने पर्सोना मुफ़्त हैं।</string>
 </resources>

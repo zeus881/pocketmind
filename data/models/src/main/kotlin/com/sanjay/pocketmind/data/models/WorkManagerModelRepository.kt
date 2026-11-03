@@ -9,6 +9,7 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
+import com.sanjay.pocketmind.core.billing.ProStatus
 import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
 import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.flowOn
  * second truth that could disagree (e.g. after the app is killed mid-download).
  */
 @Singleton
+@Suppress("LongParameterList") // Hilt-injected collaborators, one per concern
 internal class WorkManagerModelRepository @Inject constructor(
     private val workManager: WorkManager,
     private val catalog: ModelCatalog,
@@ -45,6 +47,7 @@ internal class WorkManagerModelRepository @Inject constructor(
     private val engine: LlmEngine,
     private val verifier: ModelVerifier,
     @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
+    private val pro: ProStatus,
 ) : ModelRepository {
 
     /** File changes (delete/cancel) aren't observable, so we poke this to re-evaluate. */
@@ -86,9 +89,12 @@ internal class WorkManagerModelRepository @Inject constructor(
 
     override suspend fun download(modelId: String): AppResult<Unit> {
         val model = catalog.find(modelId) ?: return AppResult.Failure(ErrorKind.UNKNOWN)
-        if (deviceInfo.freeStorageBytes() < requiredFreeBytes(modelId)) {
-            return AppResult.Failure(ErrorKind.NOT_ENOUGH_STORAGE)
+        val refusal = when {
+            model.requiresPro && !pro.isPro.value -> ErrorKind.NEEDS_PRO
+            deviceInfo.freeStorageBytes() < requiredFreeBytes(modelId) -> ErrorKind.NOT_ENOUGH_STORAGE
+            else -> null
         }
+        if (refusal != null) return AppResult.Failure(refusal)
         val networkType = if (settings.current().allowMobileData) NetworkType.CONNECTED else NetworkType.UNMETERED
         val request = OneTimeWorkRequestBuilder<ModelDownloadWorker>()
             .setInputData(workDataOf(ModelDownloadWorker.KEY_MODEL_ID to model.id))

@@ -101,6 +101,7 @@ dependencies {
     implementation(projects.core.designsystem)
     implementation(projects.core.llm)
     implementation(projects.core.datastore)
+    implementation(projects.core.billing)
     implementation(projects.data.chat)
     implementation(projects.data.models)
 

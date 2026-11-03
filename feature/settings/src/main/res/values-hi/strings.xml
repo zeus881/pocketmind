@@ -65,4 +65,17 @@
     <string name="feature_settings_data_exported">आपका डेटा एक्सपोर्ट हो गया।</string>
     <string name="feature_settings_data_export_failed">एक्सपोर्ट सहेजा नहीं जा सका। कृपया कोई और जगह चुनें।</string>
     <string name="feature_settings_data_deleted">आपका सारा डेटा मिटा दिया गया।</string>
+    <string name="feature_settings_section_pro">PocketMind Pro</string>
+    <string name="feature_settings_pro_get">PocketMind Pro लें: %1$s</string>
+    <string name="feature_settings_pro_price_unknown">कीमत Google Play दिखाता है</string>
+    <string name="feature_settings_pro_benefits">एक बार की ख़रीद। बड़े मॉडल, किसी भी लंबाई की PDF और आपके अपने पर्सोना। आवाज़ से लिखना और पढ़कर सुनाना मुफ़्त रहेंगे।</string>
+    <string name="feature_settings_pro_unlocked">PocketMind Pro चालू है। धन्यवाद!</string>
+    <string name="feature_settings_pro_restore">ख़रीद वापस लाएँ</string>
+    <string name="feature_settings_pro_restore_hint">किसी दूसरे फ़ोन पर या दोबारा इंस्टॉल करने से पहले Pro ख़रीदा था? Google Play आपका खाता जाँचेगा।</string>
+    <string name="feature_settings_pro_unavailable">अभी Google Play उपलब्ध नहीं है। देखें कि Play Store इंस्टॉल है और आपने साइन इन किया है।</string>
+    <string name="feature_settings_pro_restored">PocketMind Pro चालू है।</string>
+    <string name="feature_settings_pro_not_found">इस खाते पर Google Play को कोई Pro ख़रीद नहीं मिली।</string>
+    <string name="feature_settings_diagnostics">डायग्नोस्टिक रिपोर्ट शेयर करें</string>
+    <string name="feature_settings_diagnostics_hint">ऐप और Android का संस्करण, फ़ोन का मॉडल और दर्ज क्रैश, समस्या ठीक करने के लिए। कोई चैट नहीं। कहाँ भेजना है, आप चुनें।</string>
+    <string name="feature_settings_diagnostics_subject">PocketMind डायग्नोस्टिक रिपोर्ट</string>
 </resources>

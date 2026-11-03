@@ -139,5 +139,6 @@ internal fun ErrorKind.messageRes(): Int = when (this) {
     ErrorKind.NO_TEXT_IN_DOCUMENT -> R.string.feature_documents_error_no_text
     ErrorKind.FILE_UNREADABLE -> R.string.feature_documents_error_unreadable
     ErrorKind.NO_MODEL -> R.string.feature_documents_error_no_model
+    ErrorKind.NEEDS_PRO -> R.string.feature_documents_error_needs_pro
     else -> R.string.feature_documents_error_generic
 }

@@ -60,7 +60,17 @@ PocketMind's own code:
 - **In-app review:** after you have used the app for a while, the Play Store may show its rating card. Your rating
   goes to Google Play, like any Play review.
 
-PocketMind sends no chat text, note, photo or other content to Google through these features. Google's handling is
+- **PocketMind Pro purchase:** buying, restoring and refunds are handled by Google Play's billing. The app only asks
+  Play whether your account owns Pro. It receives no payment details.
+
+PocketMind sends no chat text, note, photo or other content to Google through these features.
+
+## Crash log and diagnostic report
+
+If the app crashes, a short technical record (time and code location, no chat content) is kept **on your phone**,
+at most the last three. Nothing is sent automatically. **Settings → Share diagnostic report** puts that record
+together with the app version, Android version, phone model, RAM and the selected model into a text you can read
+in the share sheet and send wherever you choose, or not at all. Google's handling is
 covered by [Google's privacy policy](https://policies.google.com/privacy).
 
 ## On-device features that use other parts of Android

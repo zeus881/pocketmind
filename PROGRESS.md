@@ -26,7 +26,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 17 Tool calling (calculator, date, units, notes) | DONE | 82 % (measured 82.5 %, 349 tests) | new core:tools; Room v8; tools for Gemma 4 E2B + Qwen3 0.6B (template checked); KSP cache fix; gate to verify on device |
 | 18 Encryption (SQLCipher) and data control | DONE | 82 % (measured 82.1 %, 362 tests) | SQLCipher 4.20.0, key wrapped by Keystore, verified one-time migration; export/delete all data; APK 30.22 MB (SQLCipher 2.01 MB); to verify on device |
 | 19 Release notes, In-App Updates/Review, Play publishing | DONE | 82 % (measured 82.0 %, 373 tests) | Play app-update 2.1.0, review 2.0.2, Play Publisher 4.1.1; play.yml → internal track; needs the service-account secret |
-| 20 PocketMind Pro (Play Billing) + local diagnostics | NEXT | | |
+| 20 PocketMind Pro (Play Billing) + local diagnostics | DONE | 82 % (measured 82.6 %, 388 tests) | Billing 9.1.0 in new core:billing; gates: Pro models, PDFs > 50 pages (my choice, one constant), new custom personas; extra themes not built (none exist); crash log + share report; builds now serial (BLOCKERS) |
+| 21 Punjabi, Hindi review, per-app language, accessibility | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -146,6 +147,14 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   **Phase 18:** `assembleRelease` failed once with the same "ChatRepository could not be resolved" in the RELEASE
   KSP tasks of feature:chat and feature:history (not cache-related), and passed straight away with `--no-parallel`.
   Safest choice: release builds (and `release.yml`) use `--no-parallel`; debug builds stay parallel.
+  **Phase 20:** it came back in a parallel DEBUG build (`data:chat` KSP: even `Context` "could not be resolved",
+  so KSP saw an incomplete classpath). That is the third kind of recurrence, so per the workflow rule the safest
+  working alternative was chosen: `org.gradle.parallel=false` in `gradle.properties` for every build. Cost: the
+  full check takes longer; benefit: no more false failures. Re-enable it when a KSP release fixes the race.
+  The next serial run then failed with `Cannot find required type element java.lang.Class`: the real culprit for
+  that one was the phase 5 setting `ksp.classloader.cache.processors=false` (a fresh processor classloader per KSP
+  task fills the daemon's 1 GB metaspace over ~25 modules). With serial builds the cache is safe again, so it is
+  back ON and the metaspace limit is 1.5 GB.
 
 ## MANUAL STEPS FOR SANJAY
 
@@ -186,6 +195,11 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   the GitHub secret `PLAY_SERVICE_ACCOUNT_JSON`. Then a tag runs `play.yml`. Check In-App Update and Review with two
   internal-track versions (steps in `docs/learn/v2-phase-19.md`). Optional: `app/src/main/play/release-notes/hi-IN/
   default.txt` for Hindi release notes.
+- **PocketMind Pro (phase 20):** in Play Console create the in-app product `pocketmind_pro` and set its price
+  (decision 4: only there), add yourself under License testing, then test buy / restore / refund on an
+  internal-track build (steps in `docs/billing.md`). Decide whether 50 free PDF pages is right
+  (`PdfBoxTextExtractor.FREE_PDF_PAGES`). "Extra themes" from decision 2 don't exist yet: say if you want them
+  built (they would be gated with `ProStatus.isPro`).
 
 ### v1
 

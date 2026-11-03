@@ -12,6 +12,7 @@ dependencies {
     api(projects.core.model)
     api(projects.core.llm)
     implementation(projects.core.common)
+    implementation(projects.core.billing) // bigger models are a Pro feature
     implementation(projects.core.datastore)
 
     implementation(libs.okhttp)

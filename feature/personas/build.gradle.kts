@@ -8,6 +8,7 @@ android {
 
 dependencies {
     implementation(projects.data.chat)
+    implementation(projects.core.billing) // new custom personas are a Pro feature
 
     testImplementation(projects.core.testing)
 }

@@ -127,7 +127,16 @@ fun PersonasContent(state: PersonasUiState, onBack: () -> Unit, actions: Persona
                 )
             }
             item {
-                AddRow(stringResource(R.string.feature_personas_new_persona)) { editing = Editing.PersonaForm(null) }
+                if (state.canCreatePersonas) {
+                    AddRow(stringResource(R.string.feature_personas_new_persona)) {
+                        editing = Editing.PersonaForm(null)
+                    }
+                } else {
+                    ListItem(
+                        headlineContent = { Text(stringResource(R.string.feature_personas_new_persona)) },
+                        supportingContent = { Text(stringResource(R.string.feature_personas_needs_pro)) },
+                    )
+                }
             }
             item { Section(stringResource(R.string.feature_personas_section_prompts)) }
             if (state.prompts.isEmpty()) {

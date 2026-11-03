@@ -3,6 +3,7 @@ package com.sanjay.pocketmind.data.documents
 import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
+import com.sanjay.pocketmind.core.billing.ProStatus
 import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
 import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
@@ -39,6 +40,7 @@ interface PdfTextExtractor {
 class PdfBoxTextExtractor @Inject constructor(
     @ApplicationContext private val context: Context,
     @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
+    private val pro: ProStatus,
 ) : PdfTextExtractor {
 
     private val initialized = AtomicBoolean(false)
@@ -51,6 +53,10 @@ class PdfBoxTextExtractor @Inject constructor(
                 ?: return@withContext AppResult.Failure(ErrorKind.FILE_UNREADABLE)
             input.use {
                 PDDocument.load(it, MemoryUsageSetting.setupTempFileOnly()).use { document ->
+                    // Free version: up to FREE_PDF_PAGES pages (decision 2: Pro reads any length).
+                    if (document.numberOfPages > FREE_PDF_PAGES && !pro.isPro.value) {
+                        return@withContext AppResult.Failure(ErrorKind.NEEDS_PRO)
+                    }
                     val stripper = PDFTextStripper()
                     val pages = (1..document.numberOfPages).map { page ->
                         ensureActive() // leaving the screen cancels a long extraction
@@ -70,6 +76,14 @@ class PdfBoxTextExtractor @Inject constructor(
             // Corrupt, password-protected or unreadable file.
             AppResult.Failure(ErrorKind.FILE_UNREADABLE, e)
         }
+    }
+
+    companion object {
+        /**
+         * Pages the free version reads. 50 keeps v1's promise (a 30-page PDF summarized) free with room
+         * to spare; the owner may change it. Checked before any text is extracted.
+         */
+        const val FREE_PDF_PAGES = 50
     }
 
     private fun displayName(uri: Uri): String {

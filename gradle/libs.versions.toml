@@ -14,6 +14,7 @@ aboutlibraries = "15.3.0"
 kover = "0.9.11"
 play-app-update = "2.1.0"
 play-review = "2.0.2"
+play-billing = "9.1.0"
 gradle-play-publisher = "4.1.1"
 
 # Android SDK levels (plain numbers, read by the convention plugins)
@@ -153,6 +154,7 @@ room-gradle-plugin = { module = "androidx.room:room-gradle-plugin", version.ref 
 kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
 play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "play-app-update" }
 play-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "play-review" }
+play-billing-ktx = { module = "com.android.billingclient:billing-ktx", version.ref = "play-billing" }
 roborazzi-gradle-plugin = { module = "io.github.takahirom.roborazzi:roborazzi-gradle-plugin", version.ref = "roborazzi" }
 
 [plugins]

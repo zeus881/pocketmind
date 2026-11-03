@@ -2,6 +2,7 @@ package com.sanjay.pocketmind.feature.personas
 
 import com.sanjay.pocketmind.core.model.Persona
 import com.sanjay.pocketmind.core.model.SavedPrompt
+import com.sanjay.pocketmind.core.testing.FakeProStatus
 import com.sanjay.pocketmind.core.testing.MainDispatcherRule
 import com.sanjay.pocketmind.data.chat.PersonaRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -10,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
 
@@ -45,7 +47,8 @@ class PersonasViewModelTest {
     }
 
     private val repo = FakeRepo()
-    private val viewModel by lazy { PersonasViewModel(repo) }
+    private val pro = FakeProStatus(pro = true)
+    private val viewModel by lazy { PersonasViewModel(repo, pro) }
 
     @Test
     fun `personas and prompts are listed, saved and deleted`() = runTest {
@@ -60,5 +63,17 @@ class PersonasViewModelTest {
         viewModel.deletePrompt("q0")
         state = viewModel.uiState.first { it.prompts.isEmpty() && it.personas.size == 1 }
         assertEquals(listOf("Coder"), state.personas.map { it.name })
+    }
+
+    @Test
+    fun `without Pro no new persona is created, existing ones can still be edited`() = runTest {
+        pro.isPro.value = false
+        assertFalse(viewModel.uiState.first { !it.isLoading }.canCreatePersonas)
+
+        viewModel.savePersona(null, "Pirate", "Arr.", null) // ignored
+        viewModel.savePersona("p0", "Coder", "Better code.", null) // an existing persona
+
+        val state = viewModel.uiState.first { s -> s.personas.any { it.instructions == "Better code." } }
+        assertFalse(state.personas.any { it.name == "Pirate" })
     }
 }

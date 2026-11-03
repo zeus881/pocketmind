@@ -18,4 +18,5 @@
     <string name="feature_personas_no_prompts">No saved prompts yet. Saved prompts can be inserted from the chat input.</string>
     <string name="feature_personas_save">Save</string>
     <string name="feature_personas_cancel">Cancel</string>
+    <string name="feature_personas_needs_pro">Creating your own personas is part of PocketMind Pro (Settings → PocketMind Pro). The built-in personas are free.</string>
 </resources>

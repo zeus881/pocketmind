@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.work.Configuration
+import com.sanjay.pocketmind.core.billing.ProStatus
+import com.sanjay.pocketmind.core.common.diagnostics.CrashLog
 import com.sanjay.pocketmind.core.common.dispatchers.ApplicationScope
 import com.sanjay.pocketmind.core.llm.LlmEngine
 import dagger.hilt.android.HiltAndroidApp
@@ -34,11 +36,17 @@ class PocketMindApp :
 
     @Inject lateinit var modelKeepAlive: ModelKeepAlive
 
+    @Inject lateinit var crashLog: CrashLog
+
+    @Inject lateinit var pro: ProStatus
+
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
 
     override fun onCreate() {
         super.onCreate()
+        // First: so a crash during start-up is recorded too (kept on the phone; decision 1).
+        crashLog.install()
         // Logs only in debug builds. Release builds log nothing, so no chat text can ever
         // leak into the phone's system log (privacy promise).
         if (BuildConfig.DEBUG) {
@@ -48,6 +56,8 @@ class PocketMindApp :
         }
         // Unload the model some minutes after the user leaves the app (see ModelKeepAlive).
         ProcessLifecycleOwner.get().lifecycle.addObserver(modelKeepAlive)
+        // Ask Play once per start who owns Pro (refunds, purchases on another phone, pending payments).
+        appScope.launch { pro.refresh() }
     }
 
     /**

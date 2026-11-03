@@ -34,4 +34,5 @@
     <string name="feature_models_verifying">Checking the file… this takes a few seconds.</string>
     <string name="feature_models_verify_ok">%1$s is intact and ready to use.</string>
     <string name="feature_models_verify_damaged">The file was damaged and has been removed. Please download it again.</string>
+    <string name="feature_models_needs_pro">This bigger model is part of PocketMind Pro (Settings → PocketMind Pro).</string>
 </resources>

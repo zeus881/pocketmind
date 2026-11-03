@@ -28,6 +28,12 @@ class SettingsScreenshotTest {
         override fun exportAllData(uri: android.net.Uri) = Unit
 
         override fun deleteAllData() = Unit
+
+        override fun buyPro(activity: android.app.Activity) = Unit
+
+        override fun restorePro() = Unit
+
+        override fun shareDiagnostics() = Unit
     }
 
     @Test

@@ -10,4 +10,7 @@ android {
 dependencies {
     api(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 }

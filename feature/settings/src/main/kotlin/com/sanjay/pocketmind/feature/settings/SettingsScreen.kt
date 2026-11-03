@@ -1,6 +1,8 @@
 package com.sanjay.pocketmind.feature.settings
 
+import android.content.Intent
 import android.os.Build
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
@@ -68,14 +70,33 @@ fun SettingsScreen(navigation: SettingsNavigation, viewModel: SettingsViewModel 
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             val message = when (event) {
                 SettingsEvent.DataExported -> R.string.feature_settings_data_exported
+
                 SettingsEvent.ExportFailed -> R.string.feature_settings_data_export_failed
+
                 SettingsEvent.DataDeleted -> R.string.feature_settings_data_deleted
+
+                SettingsEvent.ProUnavailable -> R.string.feature_settings_pro_unavailable
+
+                is SettingsEvent.Restored ->
+                    if (event.isPro) R.string.feature_settings_pro_restored else R.string.feature_settings_pro_not_found
+
+                is SettingsEvent.ShareDiagnostics -> {
+                    // The share sheet shows the text; the user decides whether and where to send it.
+                    val subject = resources.getString(R.string.feature_settings_diagnostics_subject)
+                    val send = Intent(Intent.ACTION_SEND)
+                        .setType("text/plain")
+                        .putExtra(Intent.EXTRA_SUBJECT, subject)
+                        .putExtra(Intent.EXTRA_TEXT, event.report)
+                    context.startActivity(Intent.createChooser(send, null))
+                    null
+                }
             }
-            snackbarHostState.showSnackbar(resources.getString(message))
+            message?.let { snackbarHostState.showSnackbar(resources.getString(it)) }
         }
     }
     SettingsContent(state, viewModel, navigation, snackbarHostState)
@@ -106,6 +127,8 @@ internal fun SettingsContent(
                 .readableWidth()
                 .verticalScroll(rememberScrollState()),
         ) {
+            ProSection(state, vm)
+
             Section(R.string.feature_settings_section_model)
             NavRow(
                 title = stringResource(R.string.feature_settings_model),
@@ -170,12 +193,47 @@ internal fun SettingsContent(
                 onClick = navigation.onOpenBenchmark,
             )
             NavRow(
+                title = stringResource(R.string.feature_settings_diagnostics),
+                subtitle = stringResource(R.string.feature_settings_diagnostics_hint),
+                onClick = vm::shareDiagnostics,
+            )
+            NavRow(
                 title = stringResource(R.string.feature_settings_licenses),
                 subtitle = stringResource(R.string.feature_settings_licenses_hint),
                 onClick = navigation.onOpenLicenses,
             )
         }
     }
+}
+
+/**
+ * PocketMind Pro: one-time purchase through Google Play. The price is Play's own text in the user's
+ * currency (set by the owner in Play Console, never in code).
+ */
+@Composable
+private fun ProSection(state: SettingsUiState, vm: SettingsActions) {
+    Section(R.string.feature_settings_section_pro)
+    if (state.isPro) {
+        ListItem(
+            headlineContent = { Text(stringResource(R.string.feature_settings_pro_unlocked)) },
+            supportingContent = { Text(stringResource(R.string.feature_settings_pro_benefits)) },
+        )
+        return
+    }
+    val activity = LocalActivity.current
+    NavRow(
+        title = stringResource(
+            R.string.feature_settings_pro_get,
+            state.proPrice ?: stringResource(R.string.feature_settings_pro_price_unknown),
+        ),
+        subtitle = stringResource(R.string.feature_settings_pro_benefits),
+        onClick = { activity?.let(vm::buyPro) },
+    )
+    NavRow(
+        title = stringResource(R.string.feature_settings_pro_restore),
+        subtitle = stringResource(R.string.feature_settings_pro_restore_hint),
+        onClick = vm::restorePro,
+    )
 }
 
 /**

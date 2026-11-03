@@ -41,4 +41,5 @@
     <string name="feature_documents_sources">स्रोत (पढ़ने के लिए टैप करें)</string>
     <string name="feature_documents_close">बंद करें</string>
     <string name="feature_documents_delete">%1$s हटाएँ</string>
+    <string name="feature_documents_error_needs_pro">मुफ़्त संस्करण 50 पेज तक की PDF पढ़ता है। PocketMind Pro किसी भी लंबाई की PDF पढ़ता है: Settings → PocketMind Pro।</string>
 </resources>

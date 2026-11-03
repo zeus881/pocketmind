@@ -12,6 +12,7 @@ android {
 dependencies {
     api(projects.core.llm)
     api(projects.core.model)
+    api(projects.core.billing) // FakeProStatus
     api(projects.core.designsystem)
     api(libs.junit)
     api(libs.kotlinx.coroutines.test)

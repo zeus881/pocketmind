@@ -48,6 +48,7 @@ include(":core:database")
 include(":core:datastore")
 include(":core:speech")
 include(":core:tools")
+include(":core:billing")
 
 include(":data:chat")
 include(":data:models")

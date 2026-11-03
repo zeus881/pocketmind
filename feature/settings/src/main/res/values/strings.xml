@@ -65,4 +65,17 @@
     <string name="feature_settings_data_exported">Your data was exported.</string>
     <string name="feature_settings_data_export_failed">The export could not be saved. Please try another place.</string>
     <string name="feature_settings_data_deleted">All your data was deleted.</string>
+    <string name="feature_settings_section_pro">PocketMind Pro</string>
+    <string name="feature_settings_pro_get">Get PocketMind Pro: %1$s</string>
+    <string name="feature_settings_pro_price_unknown">price shown by Google Play</string>
+    <string name="feature_settings_pro_benefits">One-time purchase. Unlocks bigger models, PDFs of any length and your own personas. Voice input and reading aloud stay free.</string>
+    <string name="feature_settings_pro_unlocked">PocketMind Pro is unlocked. Thank you!</string>
+    <string name="feature_settings_pro_restore">Restore purchase</string>
+    <string name="feature_settings_pro_restore_hint">Bought Pro on another phone or after reinstalling? Google Play checks your account.</string>
+    <string name="feature_settings_pro_unavailable">Google Play isn\'t available right now. Check that the Play Store is installed and you are signed in.</string>
+    <string name="feature_settings_pro_restored">PocketMind Pro is unlocked.</string>
+    <string name="feature_settings_pro_not_found">Google Play found no Pro purchase for this account.</string>
+    <string name="feature_settings_diagnostics">Share diagnostic report</string>
+    <string name="feature_settings_diagnostics_hint">App and Android version, phone model and recorded crashes, to help fix a problem. No chats. You choose where it goes.</string>
+    <string name="feature_settings_diagnostics_subject">PocketMind diagnostic report</string>
 </resources>

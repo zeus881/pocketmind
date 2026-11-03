@@ -42,6 +42,9 @@ enum class ErrorKind {
     /** A file could not be opened or parsed. */
     FILE_UNREADABLE,
 
+    /** The free version's limit was reached (e.g. a very long PDF); PocketMind Pro removes it. */
+    NEEDS_PRO,
+
     /** A photo was attached but the selected model can't read images. */
     IMAGES_NOT_SUPPORTED,
 

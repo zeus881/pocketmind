@@ -91,6 +91,14 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
             ?: UserSettings.DEFAULT_KEEP_MODEL_MINUTES
     }
 
+    /**
+     * The last Pro entitlement Play confirmed, so Pro features work offline and at once after a
+     * restart. Play stays the authority: every refresh overwrites it (a refund turns it off).
+     */
+    val proCached: Flow<Boolean> = dataStore.data.map { it[Keys.PRO_CACHED] ?: false }
+
+    suspend fun setProCached(owned: Boolean) = update { it[Keys.PRO_CACHED] = owned }
+
     /** Counts one more completed answer (for the review prompt) and returns the new total. */
     suspend fun recordCompletedAnswer(): Int {
         var total = 0
@@ -130,6 +138,7 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
         val SELECTED_MODEL = stringPreferencesKey("selected_model_id")
         val COMPLETED_ANSWERS = intPreferencesKey("completed_answers")
         val REVIEW_ASKED_AT = longPreferencesKey("review_asked_at")
+        val PRO_CACHED = booleanPreferencesKey("pro_cached")
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
         val ALLOW_MOBILE_DATA = booleanPreferencesKey("allow_mobile_data")
         val PREFER_GPU = booleanPreferencesKey("prefer_gpu")

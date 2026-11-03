@@ -17,6 +17,7 @@ import com.sanjay.pocketmind.core.llm.ModelFiles
 import com.sanjay.pocketmind.core.model.LlmModelInfo
 import com.sanjay.pocketmind.core.model.ModelKind
 import com.sanjay.pocketmind.core.testing.FakeLlmEngine
+import com.sanjay.pocketmind.core.testing.FakeProStatus
 import com.sanjay.pocketmind.core.testing.InMemoryPreferencesDataStore
 import com.sanjay.pocketmind.data.models.work.ModelDownloadWorker
 import io.mockk.every
@@ -73,6 +74,8 @@ class WorkManagerModelRepositoryTest {
         license = "Apache-2.0",
     )
 
+    private val pro = FakeProStatus()
+
     @Before
     fun setUp() {
         WorkManagerTestInitHelper.initializeTestWorkManager(
@@ -100,6 +103,7 @@ class WorkManagerModelRepositoryTest {
             verifier = ModelVerifier(catalog, files, guard, Dispatchers.Unconfined),
             // Not a TestDispatcher: the repository is built here, outside runTest's scheduler.
             io = Dispatchers.Unconfined,
+            pro = pro,
         )
     }
 
@@ -240,5 +244,32 @@ class WorkManagerModelRepositoryTest {
         assertTrue(fresh >= chat.sizeBytes)
         assertTrue(repository.requiredFreeBytes(chat.id) <= fresh)
         assertEquals(0L, repository.requiredFreeBytes("nope"))
+    }
+
+    @Test
+    fun `a Pro-only model is refused without Pro and offered with it`() = runTest {
+        val proModel = chat.copy(requiresPro = true)
+        val catalog = mockk<ModelCatalog> {
+            every { models } returns listOf(proModel)
+            every { find(any()) } returns proModel
+        }
+        val gated = WorkManagerModelRepository(
+            workManager = workManager,
+            catalog = catalog,
+            files = files,
+            deviceInfo = object : DeviceInfo {
+                override fun totalRamGb() = 8
+                override fun freeStorageBytes() = Long.MAX_VALUE
+            },
+            settings = SettingsDataSource(InMemoryPreferencesDataStore()),
+            engine = FakeLlmEngine(),
+            verifier = ModelVerifier(catalog, files, guard, Dispatchers.Unconfined),
+            io = Dispatchers.Unconfined,
+            pro = pro,
+        )
+
+        assertEquals(ErrorKind.NEEDS_PRO, (gated.download(proModel.id) as AppResult.Failure).kind)
+        pro.isPro.value = true
+        assertTrue(gated.download(proModel.id) is AppResult.Success)
     }
 }

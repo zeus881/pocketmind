@@ -12,6 +12,7 @@ dependencies {
     implementation(projects.data.models)
     implementation(projects.data.chat) // export / delete all my data
     implementation(projects.core.common)
+    implementation(projects.core.billing)
     implementation(libs.androidx.biometric) // checks whether app lock can be offered
 
     testImplementation(projects.core.testing)
