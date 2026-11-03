@@ -14,9 +14,10 @@ import kotlinx.serialization.json.put
 class CalculatorTool : LocalTool {
     override val name = NAME
     override val description =
-        "Calculates an arithmetic expression exactly. Use it for EVERY calculation instead of doing maths " +
-            "in your head. Supports + - * / ^, parentheses, percentages like 15%, sqrt(), abs(), round(), " +
-            "ln(), log() and the constants pi and e."
+        "Calculates an arithmetic expression exactly. Use it whenever the answer needs a calculation with " +
+            "numbers, instead of doing maths in your head; not for questions without arithmetic. Supports " +
+            "+ - * / ^, parentheses, percentages like 15%, sqrt(), abs(), round(), ln(), log() and the constants " +
+            "pi and e."
     override val parameters = listOf(
         ToolParameter("expression", ParameterType.STRING, "The expression, for example (123.4 * 56) / 3"),
     )

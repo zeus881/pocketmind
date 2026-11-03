@@ -1,5 +1,6 @@
 package com.sanjay.pocketmind.core.designsystem.component
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -11,6 +12,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import com.mikepenz.markdown.m3.Markdown
+import com.mikepenz.markdown.m3.markdownTypography
+import com.mikepenz.markdown.model.MarkdownTypography
 import com.mikepenz.markdown.model.markdownAnimations
 import com.mikepenz.markdown.model.rememberMarkdownState
 import com.mikepenz.markdown.model.rememberStreamingMarkdownState
@@ -32,6 +35,7 @@ fun MarkdownText(text: String, modifier: Modifier = Modifier, immediate: Boolean
     Markdown(
         markdownState = rememberMarkdownState(text, retainState = true, immediate = immediate),
         modifier = modifier,
+        typography = answerTypography(),
         animations = markdownAnimations(animateTextSize = { this }),
     )
 }
@@ -68,7 +72,26 @@ fun StreamingMarkdownText(text: String, modifier: Modifier = Modifier) {
         Markdown(
             state,
             modifier = modifier,
+            typography = answerTypography(),
             animations = markdownAnimations(animateTextSize = { this }),
         )
     }
+}
+
+/**
+ * Heading sizes for answers. The renderer's defaults are Material DISPLAY styles (`#` = 57 sp), made for
+ * posters, not for a chat answer in 16 sp body text: on the phone a model's "# Summary" filled half the
+ * screen width in giant letters. Headings now step down from 24 sp, still clearly above the body.
+ */
+@Composable
+private fun answerTypography(): MarkdownTypography {
+    val type = MaterialTheme.typography
+    return markdownTypography(
+        h1 = type.headlineSmall,
+        h2 = type.titleLarge,
+        h3 = type.titleMedium,
+        h4 = type.titleSmall,
+        h5 = type.titleSmall,
+        h6 = type.titleSmall,
+    )
 }

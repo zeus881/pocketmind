@@ -13,9 +13,10 @@ import kotlinx.serialization.json.put
 class UnitConverterTool : LocalTool {
     override val name = NAME
     override val description =
-        "Converts a value between units. Use it for every unit conversion. Units: length (mm, cm, m, km, in, ft, " +
-            "yd, mi, nmi), mass (mg, g, kg, t, oz, lb), volume (ml, l, tsp, tbsp, cup, fl_oz, gal), temperature " +
-            "(c, f, k), speed (m/s, km/h, mph, knot), area (cm2, m2, km2, ha, acre, ft2), data (b, kb, mb, gb, tb)."
+        "Converts a value between units. Use it ONLY when the user asks to convert a value. Units: length (mm, cm, " +
+            "m, km, in, ft, yd, mi, nmi), mass (mg, g, kg, t, oz, lb), volume (ml, l, tsp, tbsp, cup, fl_oz, gal), " +
+            "temperature (c, f, k), speed (m/s, km/h, mph, knot), area (cm2, m2, km2, ha, acre, ft2), " +
+            "data (b, kb, mb, gb, tb)."
     override val parameters = listOf(
         ToolParameter("value", ParameterType.NUMBER, "The number to convert"),
         ToolParameter("from", ParameterType.STRING, "The unit of the value, e.g. km"),

@@ -22,8 +22,8 @@ class DateTimeTool(
 ) : LocalTool {
     override val name = NAME
     override val description =
-        "Gives the current date, time and weekday on the user's phone, or does date arithmetic. Use it for any " +
-            "question about today, now, a weekday, or how many days are between two dates."
+        "Gives the current date, time and weekday on the user's phone, or does date arithmetic. Use it ONLY for " +
+            "questions about today, now, a weekday, or days between dates; never for other questions."
     override val parameters = listOf(
         ToolParameter(
             "operation",

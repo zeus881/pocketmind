@@ -475,12 +475,14 @@ internal class OfflineChatRepository @Inject constructor(
 
         /**
          * Small models do mental arithmetic badly and don't know today's date. Saying plainly WHEN to
-         * use each tool makes them call it instead of guessing.
+         * use each tool makes them call it instead of guessing. Saying when NOT to use them matters as much:
+         * on the phone the model also called Notes for a photo question and Date and time for a capital city.
          */
-        const val TOOL_RULES = "You have tools. Use the calculator for every calculation, even simple ones, " +
-            "and give its exact result. Use the date tool for today's date, the time or the weekday. Use the unit " +
-            "converter for unit conversions. Use the notes tool when the user asks you to remember or recall " +
-            "something. Don't mention tools the user didn't need."
+        const val TOOL_RULES = "You have tools. Call a tool ONLY when the question needs it; answer everything " +
+            "else (facts, explanations, stories, photos) directly, without a tool. Use the calculator for every " +
+            "calculation, even simple ones, and give its exact result. Use the date tool only for today's date, " +
+            "the time or the weekday. Use the unit converter only for unit conversions. Use the notes tool only " +
+            "when the user asks you to remember or recall something. Don't mention tools the user didn't need."
 
         internal const val PHOTO_NOTE = "[The user attached a photo to this message; it is no longer visible to you.]"
 

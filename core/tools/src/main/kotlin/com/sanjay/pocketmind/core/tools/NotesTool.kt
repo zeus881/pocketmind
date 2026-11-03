@@ -36,7 +36,8 @@ class NotesTool(private val store: NoteStore, private val zone: () -> ZoneId = Z
     override val name = NAME
     override val description =
         "Saves and finds the user's personal notes on the phone. Use save when the user asks you to remember " +
-            "something, search or list when they ask what they told you before, delete when they ask to forget a note."
+            "something, search or list when they ask what they told you before, delete when they ask to forget a " +
+            "note. Use it ONLY for those requests, never to answer other questions."
     override val parameters = listOf(
         ToolParameter("action", ParameterType.STRING, "What to do", allowed = listOf(SAVE, SEARCH, LIST, DELETE)),
         ToolParameter("text", ParameterType.STRING, "The note to save (for save)", required = false),
