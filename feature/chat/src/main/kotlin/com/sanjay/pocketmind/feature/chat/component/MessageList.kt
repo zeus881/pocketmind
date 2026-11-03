@@ -62,6 +62,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.sanjay.pocketmind.core.designsystem.component.MarkdownText
+import com.sanjay.pocketmind.core.designsystem.component.StreamingMarkdownText
 import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
 import com.sanjay.pocketmind.core.designsystem.theme.PmBubbleShapes
 import com.sanjay.pocketmind.core.designsystem.theme.PmMotion
@@ -94,7 +95,9 @@ private const val STREAMING_KEY = "streaming"
  * (`animateItem`), and a "jump to latest" button appears after scrolling up (AUDIT L-7).
  *
  * Stable `key`s let Compose keep each item's state when the list changes, instead of
- * re-creating every message on every new one.
+ * re-creating every message on every new one. Items fade in and out but have NO placement
+ * animation: the answer being written grows every 50 ms and pushes the messages above it, and a
+ * spring on each push made the whole list shimmer while typing (seen on the phone).
  */
 @Composable
 internal fun MessageList(
@@ -127,11 +130,11 @@ internal fun MessageList(
             verticalArrangement = Arrangement.spacedBy(PmSpacing.l),
         ) {
             if (streamingText != null) {
-                item(key = STREAMING_KEY) { StreamingAnswer(streamingText, Modifier.animateItem()) }
+                item(key = STREAMING_KEY) { StreamingAnswer(streamingText, Modifier.animateItem(placementSpec = null)) }
             }
             items(newestFirst, key = { it.id }) { message ->
                 val versions = branches[message.id]
-                Column(Modifier.animateItem()) {
+                Column(Modifier.animateItem(placementSpec = null)) {
                     if (message.role == TurnRole.USER) {
                         message.imagePath?.let { path ->
                             PhotoThumbnail(
@@ -368,7 +371,7 @@ private fun StreamingAnswer(text: String, modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         } else {
-            MarkdownText(text)
+            StreamingMarkdownText(text)
         }
     }
 }
