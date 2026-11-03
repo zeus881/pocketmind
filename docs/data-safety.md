@@ -28,6 +28,11 @@ shared with third parties"** on the store listing.
 - **PocketMind Pro** (phase 20) is bought through Google Play Billing; the app asks Play which products the account
   owns and receives no payment information. Purchase data handled by Google Play for Play Billing need not be
   declared by the developer.
+- **Play Billing's built-in logging is switched off** (found on the phone on 2026-11-03). Billing 9.1 includes Google's
+  `datatransport` library, whose CCT backend would upload device diagnostics (model, build fingerprint, carrier code,
+  country, locale, time zone) from the app to Google. `AndroidManifest.xml` removes that backend's registration, so
+  queued events are deleted on the phone and never sent. `NoTelemetryBackendTest` fails the build if a library
+  update registers a backend again. **Re-check this before every release**, together with the list below.
 - **Crash log / diagnostic report** (phase 20): stored on the phone; shared only when the user picks a target in the
   share sheet. User-initiated sharing to a destination the user chooses is not "collection" by the developer.
 

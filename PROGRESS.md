@@ -134,6 +134,21 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
 - A 2 B model will still make mistakes in harder code; Gemma 4 E2B is the best that fits 8 GB comfortably.
 - `docs/benchmarks.md` and README benchmark table are empty until measured on phones (by design: no invented numbers).
 
+## On-device findings (2026-11-03, iQOO I2221, Android 16)
+
+- **Backup first:** the v1 database (schema 3, integrity ok, 11 chats, 98 messages) and settings were copied to
+  `C:\Users\CHIFE\Desktop\pocketmind-backup-2026-11-03\` before installing v2 (outside the repo).
+- **Play Billing telemetry (privacy):** after the first v2 start, `databases/com.google.android.datatransport.events`
+  appeared. Play Billing 9.1.0 depends on Google's `datatransport` + CCT backend, which queued one
+  `PLAY_BILLING_LIBRARY` event (library version, package, device model, build fingerprint, carrier code 40554,
+  country, locale, time zone; no user content) for upload to Google. It contradicted the privacy policy.
+  **Owner's decision: block it, keep Pro.** The queued event was deleted on the phone before its first upload
+  attempt (0 attempts). `AndroidManifest.xml` now removes the CCT backend registration (the uploader then deletes
+  events: "Unknown backend … deleting event batch", checked in transport-runtime 3.1.8); `NoTelemetryBackendTest`
+  guards it. To verify on device: Pro buy / restore still works (docs/billing.md).
+- **App logs:** this phone shows no app log lines in logcat (vivo/iQOO suppresses them unless enabled in developer
+  options), so on-device checks read files instead.
+
 ## BLOCKERS
 
 - **Intermittent KSP2 errors in parallel builds** (seen 5 times, phases 0–5): `InjectProcessingStep was unable to

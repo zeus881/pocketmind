@@ -31,6 +31,8 @@ If a session restarts: read this file, V2_PLAN.md and PROGRESS.md, then continue
 4. The Pro price is set by the owner in Play Console; never hard-coded.
 5. **Network rule (amends §4):** PocketMind's own code makes no network calls except model downloads. Google Play
    features (Billing, In-App Updates, In-App Review) run through the Play Store app and send no user content.
+   Library telemetry is NOT allowed either: Play Billing's built-in `datatransport` upload is blocked in the manifest
+   (owner's decision 2026-11-03; `NoTelemetryBackendTest`). Check every new SDK for its own logging before adding it.
 6. Chats are encrypted with SQLCipher (key wrapped by Android Keystore); the APK size cost is measured and reported.
 
 ### v2 quality gates

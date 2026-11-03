@@ -61,7 +61,8 @@ PocketMind's own code:
   goes to Google Play, like any Play review.
 
 - **PocketMind Pro purchase:** buying, restoring and refunds are handled by Google Play's billing. The app only asks
-  Play whether your account owns Pro. It receives no payment details.
+  Play whether your account owns Pro. It receives no payment details. The billing library's own diagnostic
+  logging (which would send device details to Google) is switched off in PocketMind.
 
 PocketMind sends no chat text, note, photo or other content to Google through these features.
 

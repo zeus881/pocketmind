@@ -85,6 +85,21 @@
                 android:value="androidx.startup"
                 tools:node="remove" />
         </provider>
+        <!--
+          Privacy (owner's decision, 2026-11-03): Google Play Billing 9.1 brings Google's "datatransport"
+          logging, whose CCT backend uploads device diagnostics (model, build fingerprint, carrier code,
+          country, locale, time zone) from THIS app to Google. Removing the backend's registration means the
+          uploader finds no backend and deletes queued events on the phone ("Unknown backend ... deleting
+          event batch", checked in transport-runtime 3.1.8). Billing itself is unchanged.
+        -->
+        <service
+            android:name="com.google.android.datatransport.runtime.backends.TransportBackendDiscovery"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="backend:com.google.android.datatransport.cct.CctBackendFactory"
+                tools:node="remove" />
+        </service>
     </application>
 
 </manifest>
