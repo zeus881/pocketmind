@@ -60,6 +60,10 @@ interface ChatDao {
     @Query("UPDATE chats SET pinned = :pinned WHERE id = :id")
     suspend fun setPinned(id: String, pinned: Boolean)
 
+    /** Every chat, oldest first (for "Export all my data"). */
+    @Query("SELECT * FROM chats ORDER BY createdAt, id")
+    suspend fun getAll(): List<ChatEntity>
+
     @Query("UPDATE chats SET toolsEnabled = :enabled WHERE id = :id")
     suspend fun setToolsEnabled(id: String, enabled: Boolean)
 

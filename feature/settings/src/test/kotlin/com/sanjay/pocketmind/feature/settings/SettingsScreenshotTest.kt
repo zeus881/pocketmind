@@ -24,6 +24,10 @@ class SettingsScreenshotTest {
         override fun setAppLockTimeout(seconds: Int) = Unit
         override fun setKeepModelLoaded(minutes: Int) = Unit
         override fun setDynamicColor(enabled: Boolean) = Unit
+
+        override fun exportAllData(uri: android.net.Uri) = Unit
+
+        override fun deleteAllData() = Unit
     }
 
     @Test

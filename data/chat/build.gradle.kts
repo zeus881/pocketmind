@@ -12,6 +12,7 @@ dependencies {
     api(projects.core.llm)
     implementation(projects.core.common)
     implementation(projects.core.database)
+    implementation(projects.core.datastore) // settings, for the data export and "delete all my data"
     implementation(libs.androidx.core.ktx) // Canvas.withSave for the PDF export
     // Photo orientation; the framework ExifInterface has parsing bugs on old Android versions.
     implementation(libs.androidx.exifinterface)

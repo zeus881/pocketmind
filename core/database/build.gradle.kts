@@ -11,6 +11,13 @@ android {
 dependencies {
     api(projects.core.model)
     implementation(libs.kotlinx.serialization.json)
+    // Encrypts the database file (chats, notes) with a key kept by Android Keystore.
+    implementation(libs.sqlcipher.android)
+
+    androidTestImplementation(libs.androidx.test.core)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    androidTestImplementation(libs.androidx.test.runner)
+    androidTestImplementation(libs.kotlinx.coroutines.test)
 
     testImplementation(libs.robolectric)
     testImplementation(libs.androidx.test.core)

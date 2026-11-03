@@ -2,6 +2,7 @@ package com.sanjay.pocketmind.data.chat.di
 
 import com.sanjay.pocketmind.data.chat.AndroidChatExporter
 import com.sanjay.pocketmind.data.chat.AndroidChatImageStore
+import com.sanjay.pocketmind.data.chat.AndroidUserDataControl
 import com.sanjay.pocketmind.data.chat.ChatExporter
 import com.sanjay.pocketmind.data.chat.ChatImageStore
 import com.sanjay.pocketmind.data.chat.ChatModel
@@ -14,6 +15,7 @@ import com.sanjay.pocketmind.data.chat.OfflineChatRepository
 import com.sanjay.pocketmind.data.chat.PersonaRepository
 import com.sanjay.pocketmind.data.chat.RoomFolderRepository
 import com.sanjay.pocketmind.data.chat.RoomPersonaRepository
+import com.sanjay.pocketmind.data.chat.UserDataControl
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -42,6 +44,9 @@ internal abstract class ChatDataModule {
 
     @Binds
     abstract fun bindsChatPhotos(repository: OfflineChatRepository): ChatPhotos
+
+    @Binds
+    abstract fun bindsUserDataControl(control: AndroidUserDataControl): UserDataControl
 
     @Binds
     abstract fun bindsChatImageStore(store: AndroidChatImageStore): ChatImageStore

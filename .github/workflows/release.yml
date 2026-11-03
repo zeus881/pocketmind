@@ -50,7 +50,8 @@ jobs:
           POCKETMIND_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           # versionName/versionCode come from this tag (AppVersion in build-logic).
           POCKETMIND_VERSION_TAG: ${{ github.ref_name }}
-        run: ./gradlew bundleRelease assembleRelease
+        # --no-parallel: release KSP tasks once raced in parallel builds (PROGRESS.md, BLOCKERS).
+        run: ./gradlew bundleRelease assembleRelease --no-parallel
 
       - name: Rename artifacts with the version
         run: |

@@ -91,6 +91,17 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
     }
 
     /**
+     * "Delete all my data": every setting back to its default, except which model is selected and
+     * that onboarding was seen (the downloaded models stay on the phone, so the app keeps working).
+     */
+    suspend fun resetKeepingModel() = update { prefs ->
+        val model = prefs[Keys.SELECTED_MODEL]
+        prefs.clear()
+        model?.let { prefs[Keys.SELECTED_MODEL] = it }
+        prefs[Keys.ONBOARDING_DONE] = true
+    }
+
+    /**
      * Applies [block] in one DataStore transaction. Returns Unit on purpose: DataStore's own
      * `edit` returns its `Preferences` type, which would leak DataStore into every caller's API.
      */

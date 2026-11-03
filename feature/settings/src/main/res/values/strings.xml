@@ -54,4 +54,15 @@
     <string name="feature_settings_dynamic_color_hint">Off: use the PocketMind colours.</string>
     <string name="feature_settings_personas">Personas and prompts</string>
     <string name="feature_settings_personas_hint">Ways of answering, and prompts you use often</string>
+    <string name="feature_settings_section_data">Your data</string>
+    <string name="feature_settings_export_data">Export all my data</string>
+    <string name="feature_settings_export_data_hint">One ZIP file: chats (Markdown and JSON), notes, personas, prompts, photos and settings. Not encrypted.</string>
+    <string name="feature_settings_delete_data">Delete all my data</string>
+    <string name="feature_settings_delete_data_hint">Chats, notes, personas, prompts, photos and settings. Downloaded models stay.</string>
+    <string name="feature_settings_delete_data_confirm_title">Delete all your data?</string>
+    <string name="feature_settings_delete_data_confirm_body">All chats, notes, personas, saved prompts, attached photos, the PDF index and your settings are deleted from this phone. This can\'t be undone. Downloaded models stay, so you can keep chatting. Export your data first if you want a copy.</string>
+    <string name="feature_settings_delete_data_confirm">Delete everything</string>
+    <string name="feature_settings_data_exported">Your data was exported.</string>
+    <string name="feature_settings_data_export_failed">The export could not be saved. Please try another place.</string>
+    <string name="feature_settings_data_deleted">All your data was deleted.</string>
 </resources>

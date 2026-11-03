@@ -1,5 +1,6 @@
 package com.sanjay.pocketmind.feature.settings
 
+import android.net.Uri
 import com.sanjay.pocketmind.core.model.ThemeMode
 
 /**
@@ -18,4 +19,10 @@ interface SettingsActions {
     fun setAppLockTimeout(seconds: Int)
     fun setKeepModelLoaded(minutes: Int)
     fun setDynamicColor(enabled: Boolean)
+
+    /** Writes the ZIP of all the user's data to [uri] (picked with "Save as"). */
+    fun exportAllData(uri: Uri)
+
+    /** Deletes chats, notes, personas, prompts, photos and settings (after the user confirmed). */
+    fun deleteAllData()
 }

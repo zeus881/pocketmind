@@ -1,21 +1,30 @@
 package com.sanjay.pocketmind.feature.settings
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.llm.DefaultPrompts
 import com.sanjay.pocketmind.core.llm.EngineState
 import com.sanjay.pocketmind.core.llm.LlmEngine
 import com.sanjay.pocketmind.core.model.ThemeMode
 import com.sanjay.pocketmind.core.model.UserSettings
+import com.sanjay.pocketmind.data.chat.UserDataControl
 import com.sanjay.pocketmind.data.models.ModelRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+
+/** Results of "Export all my data" / "Delete all my data". */
+enum class SettingsEvent { DataExported, ExportFailed, DataDeleted }
 
 data class SettingsUiState(
     val isLoading: Boolean = true,
@@ -37,6 +46,7 @@ class SettingsViewModel @Inject constructor(
     private val settings: SettingsDataSource,
     models: ModelRepository,
     engine: LlmEngine,
+    private val userData: UserDataControl,
 ) : ViewModel(),
     SettingsActions {
 
@@ -77,6 +87,25 @@ class SettingsViewModel @Inject constructor(
     override fun setKeepModelLoaded(minutes: Int) = save { settings.setKeepModelLoadedMinutes(minutes) }
 
     override fun setDynamicColor(enabled: Boolean) = save { settings.setDynamicColor(enabled) }
+
+    private val _events = Channel<SettingsEvent>(Channel.BUFFERED)
+
+    /** One-off results of the data actions, shown as a snackbar. */
+    val events: Flow<SettingsEvent> = _events.receiveAsFlow()
+
+    override fun exportAllData(uri: Uri) {
+        viewModelScope.launch {
+            val result = userData.exportAll(uri)
+            _events.send(if (result is AppResult.Success) SettingsEvent.DataExported else SettingsEvent.ExportFailed)
+        }
+    }
+
+    override fun deleteAllData() {
+        viewModelScope.launch {
+            userData.deleteAll()
+            _events.send(SettingsEvent.DataDeleted)
+        }
+    }
 
     private fun save(block: suspend () -> Unit) {
         viewModelScope.launch { block() }

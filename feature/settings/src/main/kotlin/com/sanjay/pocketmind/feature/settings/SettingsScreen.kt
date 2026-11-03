@@ -1,6 +1,8 @@
 package com.sanjay.pocketmind.feature.settings
 
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -26,11 +28,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +44,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -53,19 +59,40 @@ import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.ThemeMode
 import com.sanjay.pocketmind.core.model.UserSettings
+import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
 fun SettingsScreen(navigation: SettingsNavigation, viewModel: SettingsViewModel = hiltViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    SettingsContent(state, viewModel, navigation)
+    val snackbarHostState = remember { SnackbarHostState() }
+    val resources = LocalResources.current
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            val message = when (event) {
+                SettingsEvent.DataExported -> R.string.feature_settings_data_exported
+                SettingsEvent.ExportFailed -> R.string.feature_settings_data_export_failed
+                SettingsEvent.DataDeleted -> R.string.feature_settings_data_deleted
+            }
+            snackbarHostState.showSnackbar(resources.getString(message))
+        }
+    }
+    SettingsContent(state, viewModel, navigation, snackbarHostState)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun SettingsContent(state: SettingsUiState, vm: SettingsActions, navigation: SettingsNavigation) {
-    Scaffold(topBar = { TopAppBar(title = { Text(stringResource(R.string.feature_settings_title)) }) }) { padding ->
+internal fun SettingsContent(
+    state: SettingsUiState,
+    vm: SettingsActions,
+    navigation: SettingsNavigation,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+) {
+    Scaffold(
+        topBar = { TopAppBar(title = { Text(stringResource(R.string.feature_settings_title)) }) },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+    ) { padding ->
         if (state.isLoading) {
             LoadingState(Modifier.padding(padding))
             return@Scaffold
@@ -133,6 +160,9 @@ internal fun SettingsContent(state: SettingsUiState, vm: SettingsActions, naviga
                 modifier = Modifier.padding(horizontal = PmSpacing.l, vertical = PmSpacing.s),
             )
 
+            Section(R.string.feature_settings_section_data)
+            YourData(vm)
+
             Section(R.string.feature_settings_section_tools)
             NavRow(
                 title = stringResource(R.string.feature_settings_benchmark),
@@ -145,6 +175,51 @@ internal fun SettingsContent(state: SettingsUiState, vm: SettingsActions, naviga
                 onClick = navigation.onOpenLicenses,
             )
         }
+    }
+}
+
+/**
+ * Export everything (a ZIP the user saves where they like) and delete everything (after an explicit
+ * confirmation that says what goes and what stays).
+ */
+@Composable
+private fun YourData(vm: SettingsActions) {
+    val saveZip = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
+        uri?.let(vm::exportAllData)
+    }
+    var confirmDelete by rememberSaveable { mutableStateOf(false) }
+    NavRow(
+        title = stringResource(R.string.feature_settings_export_data),
+        subtitle = stringResource(R.string.feature_settings_export_data_hint),
+        onClick = { saveZip.launch("pocketmind-export-${LocalDate.now()}.zip") },
+    )
+    NavRow(
+        title = stringResource(R.string.feature_settings_delete_data),
+        subtitle = stringResource(R.string.feature_settings_delete_data_hint),
+        onClick = { confirmDelete = true },
+    )
+    if (confirmDelete) {
+        AlertDialog(
+            onDismissRequest = { confirmDelete = false },
+            title = { Text(stringResource(R.string.feature_settings_delete_data_confirm_title)) },
+            text = { Text(stringResource(R.string.feature_settings_delete_data_confirm_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    confirmDelete = false
+                    vm.deleteAllData()
+                }) {
+                    Text(
+                        stringResource(R.string.feature_settings_delete_data_confirm),
+                        color = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmDelete = false }) {
+                    Text(stringResource(R.string.feature_settings_cancel))
+                }
+            },
+        )
     }
 }
 

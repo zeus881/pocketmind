@@ -1,6 +1,8 @@
 package com.sanjay.pocketmind.feature.settings
 
+import android.net.Uri
 import com.sanjay.pocketmind.core.common.result.AppResult
+import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.llm.DefaultPrompts
 import com.sanjay.pocketmind.core.llm.EngineState
@@ -11,11 +13,14 @@ import com.sanjay.pocketmind.core.model.ThemeMode
 import com.sanjay.pocketmind.core.testing.FakeLlmEngine
 import com.sanjay.pocketmind.core.testing.InMemoryPreferencesDataStore
 import com.sanjay.pocketmind.core.testing.MainDispatcherRule
+import com.sanjay.pocketmind.data.chat.UserDataControl
 import com.sanjay.pocketmind.data.models.ModelRepository
 import com.sanjay.pocketmind.data.models.ModelState
 import com.sanjay.pocketmind.data.models.ModelStatus
+import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -49,7 +54,32 @@ class SettingsViewModelTest {
         override fun requiredFreeBytes(modelId: String) = 0L
     }
 
-    private val viewModel by lazy { SettingsViewModel(settings, models, engine) }
+    private val userData = object : UserDataControl {
+        var exportResult: AppResult<Unit> = AppResult.Success(Unit)
+        var deletes = 0
+
+        override suspend fun exportAll(uri: Uri) = exportResult
+
+        override suspend fun deleteAll() {
+            deletes++
+        }
+    }
+
+    private val viewModel by lazy { SettingsViewModel(settings, models, engine, userData) }
+
+    @Test
+    fun exportAndDeleteReportTheirResult() = runTest {
+        viewModel.exportAllData(mockk())
+        assertEquals(SettingsEvent.DataExported, viewModel.events.first())
+
+        userData.exportResult = AppResult.Failure(ErrorKind.FILE_UNREADABLE)
+        viewModel.exportAllData(mockk())
+        assertEquals(SettingsEvent.ExportFailed, viewModel.events.first())
+
+        viewModel.deleteAllData()
+        assertEquals(SettingsEvent.DataDeleted, viewModel.events.first())
+        assertEquals(1, userData.deletes)
+    }
 
     @Test
     fun showsSelectedModelAndTheBackendThatActuallyLoaded() = runTest {

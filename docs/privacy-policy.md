@@ -1,6 +1,6 @@
 # PocketMind — Privacy Policy
 
-_Last updated: 2026-11-01_
+_Last updated: 2026-11-03_
 
 PocketMind is an AI assistant that runs **entirely on your phone**. This policy explains, in plain
 language, what happens to your data. The short version: **nothing leaves your phone.**
@@ -14,22 +14,34 @@ and no tracking of any kind. The developer receives no data from the app.
 
 | Data | Where | Who can see it |
 |---|---|---|
-| Your chats and answers | App-private database on your phone | Only you (through the app) |
-| PDFs you index for "Ask your PDF" (extracted text and search vectors) | App-private database | Only you |
-| Benchmark results | App-private database | Only you |
+| Your chats and answers, including every edited or regenerated version | App-private database, **encrypted** | Only you (through the app) |
+| Notes you ask the assistant to remember | Same encrypted database | Only you |
+| Personas and saved prompts you create | Same encrypted database | Only you |
+| PDFs you index for "Ask your PDF" (extracted text and search vectors) | Same encrypted database | Only you |
+| Photos you attach to a question (a smaller copy) | App-private storage | Only you |
+| Benchmark results | Same encrypted database | Only you |
 | Settings (theme, model choice, system prompt…) | App-private storage | Only you |
 | Downloaded AI models | App-private storage | — |
 
-This data is **excluded from cloud backups and device-to-device transfers** (see the app's backup
-rules). Uninstalling the app deletes all of it. You can delete individual chats, documents, benchmark
-results and models inside the app at any time.
+**Encryption.** The database is encrypted with SQLCipher (AES-256). Its key is random, created on
+your phone, and stored only in encrypted form; the key that unlocks it is kept by Android Keystore
+and can't be taken off the device. A copy of the database file is unreadable on any other phone.
 
-PDFs you summarize are read through the Android file picker; PocketMind only gets access to the single
-file you choose, and does not copy the file itself.
+This data is **excluded from cloud backups and device-to-device transfers** (see the app's backup
+rules). Uninstalling the app deletes all of it.
+
+## Your controls
+
+- Delete single chats, folders, personas, prompts, documents, benchmark results and models in the app.
+- **Settings → Your data → Export all my data** saves one ZIP file wherever you choose: every chat as
+  Markdown, everything as JSON, your notes, personas, prompts, settings and attached photos. The ZIP
+  is **not** encrypted; store it somewhere safe.
+- **Settings → Your data → Delete all my data** deletes chats, notes, personas, prompts, photos, the
+  PDF index and settings from the phone. Downloaded models stay.
 
 ## Network use
 
-PocketMind connects to the internet for **one purpose only**: downloading AI model files from
+PocketMind's own code connects to the internet for **one purpose only**: downloading AI model files from
 **Hugging Face** (`huggingface.co` and its download servers) when you tap "Download".
 
 - Downloads use HTTPS only; the app refuses connections to any other host.
@@ -38,6 +50,14 @@ PocketMind connects to the internet for **one purpose only**: downloading AI mod
   [Hugging Face's privacy policy](https://huggingface.co/privacy).
 - After the download, every feature works in airplane mode.
 
+## On-device features that use other parts of Android
+
+- **Voice input** uses Android's *on-device* speech recognizer only (Android 12+). The app never uses the
+  version that may send audio to a server.
+- **Read aloud** uses only text-to-speech voices that work without a network connection.
+- **Photos** are chosen with the Android photo picker; the app sees only the one photo you pick.
+- **Tools** (calculator, date, unit converter, notes) are plain code that runs inside the app.
+
 ## Permissions
 
 | Permission | Why |
@@ -45,9 +65,10 @@ PocketMind connects to the internet for **one purpose only**: downloading AI mod
 | Internet / network state | Model download only |
 | Foreground service (data sync) | Keep a multi-gigabyte download running when you leave the app |
 | Notifications (Android 13+, optional) | Show download progress |
+| Microphone (optional, asked when you first tap the mic) | Voice input, recognised on the phone |
 | Biometric (optional) | Unlock the app if you turn on App lock; the check is done by Android, the app never sees your fingerprint |
 
-PocketMind does **not** request storage, contacts, location, microphone or camera permissions.
+PocketMind does **not** request storage, contacts, location or camera permissions.
 
 ## Children
 

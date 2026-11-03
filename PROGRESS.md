@@ -24,7 +24,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 15 Voice in (on-device) and spoken answers | DONE | 81 % (measured 81.4 %, 308 tests) | new core:speech; Android 12+ on-device recognizer only; offline TTS voices only |
 | 16 Image questions (if the model supports vision) | DONE | 81 % (measured 81.1 %, 329 tests) | vision verified in the file (Gemma 4 E2B only); Room v7; photo picker, no permission; to verify on device |
 | 17 Tool calling (calculator, date, units, notes) | DONE | 82 % (measured 82.5 %, 349 tests) | new core:tools; Room v8; tools for Gemma 4 E2B + Qwen3 0.6B (template checked); KSP cache fix; gate to verify on device |
-| 18 Encryption (SQLCipher) and data control | NEXT | | |
+| 18 Encryption (SQLCipher) and data control | DONE | 82 % (measured 82.1 %, 362 tests) | SQLCipher 4.20.0, key wrapped by Keystore, verified one-time migration; export/delete all data; APK 30.22 MB (SQLCipher 2.01 MB); to verify on device |
+| 19 Release notes, In-App Updates/Review, Play publishing | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -141,6 +142,9 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   `build/generated/ksp`, `--no-parallel` and restarting the daemon did not help. `--rerun --no-build-cache` produced
   the files at once. Fix: the Hilt convention plugin now marks every `ksp*` task as not cacheable, so KSP always runs
   (a few seconds per module). If it ever recurs: `./gradlew :<module>:kspDebugKotlin --rerun --no-build-cache`.
+  **Phase 18:** `assembleRelease` failed once with the same "ChatRepository could not be resolved" in the RELEASE
+  KSP tasks of feature:chat and feature:history (not cache-related), and passed straight away with `--no-parallel`.
+  Safest choice: release builds (and `release.yml`) use `--no-parallel`; debug builds stay parallel.
 
 ## MANUAL STEPS FOR SANJAY
 
@@ -167,6 +171,15 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   "Remember my locker code is 4312" and later "What is my locker code?". Each answer should show "Used: …".
   Also try Qwen3 0.6B: its template has tool calls, but a 0.6B model may call tools badly; if so, set its
   `supportsTools` to false in `models.json`.
+- **Encryption (phase 18), most important:** install the new build OVER the current app, which has your real chats.
+  All chats must still be there. Then check that the file is encrypted:
+  `adb shell run-as com.sanjay.pocketmind head -c 16 databases/pocketmind.db | xxd` must NOT show
+  "SQLite format 3". `adb logcat -s PocketMind` (or the Timber tag) shows `Database encryption: MIGRATED` once.
+  Before installing, keep a copy of your chats from the CURRENT (debug) app:
+  `adb exec-out run-as com.sanjay.pocketmind cat databases/pocketmind.db > chats-backup.db` (backups are off by
+  design, so this is the way).
+  Then run `./gradlew :core:database:connectedDebugAndroidTest` (real SQLCipher + Keystore) and try
+  Settings → Your data → Export all my data, and Delete all my data (after the export).
 
 ### v1
 
