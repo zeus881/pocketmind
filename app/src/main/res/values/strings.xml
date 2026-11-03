@@ -23,4 +23,7 @@
     <string name="widget_untitled">Untitled chat</string>
     <string name="widget_locked">App lock is on: open PocketMind to see your chats.</string>
     <string name="tile_label">PocketMind</string>
+    <string name="update_ready">A new version of PocketMind is ready.</string>
+    <string name="update_restart">Restart</string>
+    <string name="update_later">Later</string>
 </resources>

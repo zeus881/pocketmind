@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.os.SystemClock
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -27,15 +29,23 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.IntentCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.glance.appwidget.updateAll
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.sanjay.pocketmind.core.designsystem.theme.PocketMindTheme
+import com.sanjay.pocketmind.data.chat.AnswerEvents
 import com.sanjay.pocketmind.feature.chat.navigation.ChatRoute
 import com.sanjay.pocketmind.feature.onboarding.navigation.OnboardingRoute
+import com.sanjay.pocketmind.play.InAppReview
+import com.sanjay.pocketmind.play.InAppUpdates
+import com.sanjay.pocketmind.play.UpdateState
 import com.sanjay.pocketmind.ui.LockScreen
 import com.sanjay.pocketmind.ui.PocketMindAppUi
+import com.sanjay.pocketmind.ui.UpdateReadyBar
 import com.sanjay.pocketmind.widget.PocketMindWidget
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 
 /**
@@ -54,13 +64,32 @@ import kotlinx.coroutines.launch
 class MainActivity : FragmentActivity() {
     private val viewModel: MainActivityViewModel by viewModels()
 
+    @Inject lateinit var updates: InAppUpdates
+
+    @Inject lateinit var review: InAppReview
+
+    @Inject lateinit var answers: AnswerEvents
+
+    /** Play's update dialog; its result needs no handling (Play reports progress through [updates]). */
+    private val updateDialog = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {}
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         // Draw behind the status and navigation bars; Scaffold adds the right insets.
         enableEdgeToEdge()
         // Widget, tile or "Share → PocketMind". Only on a fresh start: after a rotation the
         // request was already handled (and the Intent is still the same).
-        if (savedInstanceState == null) viewModel.onLaunchRequest(intent.toLaunchRequest())
+        if (savedInstanceState == null) {
+            viewModel.onLaunchRequest(intent.toLaunchRequest())
+            // Play's dialog is ours: the lock timer must not lock the app while it is open.
+            lifecycleScope.launch { updates.check(updateDialog, beforeDialog = viewModel::onLaunchingForResult) }
+        }
+        // The review card may appear after a completed answer, only while the app is on screen.
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                answers.completed.collect { review.onAnswerCompleted(this@MainActivity) }
+            }
+        }
         setContent {
             val state by viewModel.uiState.collectAsStateWithLifecycle()
             when (val current = state) {
@@ -81,11 +110,21 @@ class MainActivity : FragmentActivity() {
                     HideRecentsPreview(current.settings.appLockEnabled)
                     val launch by viewModel.pendingLaunch.collectAsStateWithLifecycle()
                     LockedAppFrame(locked = current.locked) {
-                        PocketMindAppUi(
-                            startDestination = start,
-                            launchRequest = launch,
-                            onLaunchHandled = viewModel::onLaunchHandled,
-                        )
+                        Box(Modifier.fillMaxSize()) {
+                            PocketMindAppUi(
+                                startDestination = start,
+                                launchRequest = launch,
+                                onLaunchHandled = viewModel::onLaunchHandled,
+                            )
+                            val update by updates.state.collectAsStateWithLifecycle()
+                            if (update == UpdateState.READY_TO_INSTALL) {
+                                UpdateReadyBar(
+                                    onRestart = { lifecycleScope.launch { updates.install() } },
+                                    onLater = updates::postpone,
+                                    modifier = Modifier.align(Alignment.BottomCenter),
+                                )
+                            }
+                        }
                     }
                 }
             }

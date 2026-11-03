@@ -12,6 +12,9 @@ ktlint = "1.8.0"
 detekt = "1.23.8"
 aboutlibraries = "15.3.0"
 kover = "0.9.11"
+play-app-update = "2.1.0"
+play-review = "2.0.2"
+gradle-play-publisher = "4.1.1"
 
 # Android SDK levels (plain numbers, read by the convention plugins)
 compileSdk = "37"
@@ -148,6 +151,8 @@ ksp-gradle-plugin = { module = "com.google.devtools.ksp:com.google.devtools.ksp.
 compose-gradle-plugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 room-gradle-plugin = { module = "androidx.room:room-gradle-plugin", version.ref = "androidx-room" }
 kover-gradle-plugin = { module = "org.jetbrains.kotlinx:kover-gradle-plugin", version.ref = "kover" }
+play-app-update-ktx = { module = "com.google.android.play:app-update-ktx", version.ref = "play-app-update" }
+play-review-ktx = { module = "com.google.android.play:review-ktx", version.ref = "play-review" }
 roborazzi-gradle-plugin = { module = "io.github.takahirom.roborazzi:roborazzi-gradle-plugin", version.ref = "roborazzi" }
 
 [plugins]
@@ -165,6 +170,7 @@ aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.re
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
+play-publisher = { id = "com.github.triplet.play", version.ref = "gradle-play-publisher" }
 roborazzi = { id = "io.github.takahirom.roborazzi", version.ref = "roborazzi" }
 
 # Our own convention plugins (defined in build-logic/convention)

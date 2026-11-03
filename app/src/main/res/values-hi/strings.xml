@@ -22,4 +22,7 @@
     <string name="widget_untitled">बिना शीर्षक की चैट</string>
     <string name="widget_locked">ऐप लॉक चालू है: अपनी चैट देखने के लिए PocketMind खोलें।</string>
     <string name="tile_label">PocketMind</string>
+    <string name="update_ready">PocketMind का नया संस्करण तैयार है।</string>
+    <string name="update_restart">फिर से शुरू करें</string>
+    <string name="update_later">बाद में</string>
 </resources>

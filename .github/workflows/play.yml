@@ -1,0 +1,67 @@
+# Google Play: pushing a version tag (e.g. `git tag v2.0.0 && git push origin v2.0.0`) builds the SIGNED
+# app bundle and uploads it, with "What's new" generated from the commits since the previous tag, to
+# the INTERNAL test track. Moving it on to closed testing / production is done by hand in Play Console
+# (docs/release-guide.md), so nothing reaches users without a person deciding it.
+#
+# Required repository secrets, in addition to the four keystore secrets of release.yml:
+#   PLAY_SERVICE_ACCOUNT_JSON  the JSON key of a Google Cloud service account that has the
+#                              "Release to testing tracks" permission in Play Console (Users and permissions).
+# The first upload of a new app must be done by hand in Play Console; the API can only update an existing app.
+name: Play
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  internal-track:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      ANDROID_PUBLISHER_CREDENTIALS: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # all commits and tags: the release notes list what changed since the last tag
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            17
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Stop if the Play secret is missing
+        if: env.ANDROID_PUBLISHER_CREDENTIALS == ''
+        run: |
+          echo "::error::Secret PLAY_SERVICE_ACCOUNT_JSON is not set (see docs/release-guide.md)."
+          exit 1
+
+      - name: Quality gate (same checks as CI)
+        run: ./gradlew spotlessCheck detekt lint testDebugUnitTest koverVerifyApp
+
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/pocketmind-release.jks"
+          echo "POCKETMIND_KEYSTORE_PATH=$RUNNER_TEMP/pocketmind-release.jks" >> "$GITHUB_ENV"
+
+      - name: Release notes from conventional commits
+        run: |
+          ./gradlew :app:generateReleaseNotes
+          cat app/src/main/play/release-notes/en-US/default.txt
+
+      - name: Build and upload to the internal track
+        env:
+          POCKETMIND_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          POCKETMIND_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          POCKETMIND_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          POCKETMIND_VERSION_TAG: ${{ github.ref_name }}
+        # --no-parallel: release KSP tasks once raced in parallel builds (PROGRESS.md, BLOCKERS).
+        run: ./gradlew :app:publishReleaseBundle --no-parallel

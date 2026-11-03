@@ -57,6 +57,7 @@ class UserDataControlTest {
             personas = RoomPersonaRepository(db.personaDao()) { 1_000L },
             images = images,
             tools = ChatTools(db.noteDao()) { 1_000L },
+            answerEvents = AnswerEvents(),
         )
         val clock = { 1_762_158_900_000 }
         control = AndroidUserDataControl(context, UserDataStore(db), settings, images, clock, Dispatchers.Unconfined)

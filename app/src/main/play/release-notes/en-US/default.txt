@@ -1,0 +1,9 @@
+• New: Encrypt chats at rest with SQLCipher; export and delete all my data
+• New: On-device tool calling (calculator, date, units, notes)
+• New: Ask about a photo with on-device vision (Gemma 4 E2B)
+• New: On-device voice input and offline read-aloud
+• New: Personas and a prompt library
+• New: Share to PocketMind, home-screen widget, quick-settings tile
+• New: Export chats as Markdown or PDF
+• New: Edit and resend, versions, pins, folders, highlighted search
+• …and more improvements.

@@ -25,7 +25,8 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 16 Image questions (if the model supports vision) | DONE | 81 % (measured 81.1 %, 329 tests) | vision verified in the file (Gemma 4 E2B only); Room v7; photo picker, no permission; to verify on device |
 | 17 Tool calling (calculator, date, units, notes) | DONE | 82 % (measured 82.5 %, 349 tests) | new core:tools; Room v8; tools for Gemma 4 E2B + Qwen3 0.6B (template checked); KSP cache fix; gate to verify on device |
 | 18 Encryption (SQLCipher) and data control | DONE | 82 % (measured 82.1 %, 362 tests) | SQLCipher 4.20.0, key wrapped by Keystore, verified one-time migration; export/delete all data; APK 30.22 MB (SQLCipher 2.01 MB); to verify on device |
-| 19 Release notes, In-App Updates/Review, Play publishing | NEXT | | |
+| 19 Release notes, In-App Updates/Review, Play publishing | DONE | 82 % (measured 82.0 %, 373 tests) | Play app-update 2.1.0, review 2.0.2, Play Publisher 4.1.1; play.yml → internal track; needs the service-account secret |
+| 20 PocketMind Pro (Play Billing) + local diagnostics | NEXT | | |
 
 Check command for v2: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
 
@@ -180,6 +181,11 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   design, so this is the way).
   Then run `./gradlew :core:database:connectedDebugAndroidTest` (real SQLCipher + Keystore) and try
   Settings → Your data → Export all my data, and Delete all my data (after the export).
+- **Play publishing (phase 19):** follow `docs/release-guide.md` → "One-time setup": upload the FIRST signed AAB by
+  hand (Play's API can't create an app), create the service account, give it "Release to testing tracks", and add
+  the GitHub secret `PLAY_SERVICE_ACCOUNT_JSON`. Then a tag runs `play.yml`. Check In-App Update and Review with two
+  internal-track versions (steps in `docs/learn/v2-phase-19.md`). Optional: `app/src/main/play/release-notes/hi-IN/
+  default.txt` for Hindi release notes.
 
 ### v1
 

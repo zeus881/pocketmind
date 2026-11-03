@@ -60,6 +60,7 @@ internal class OfflineChatRepository @Inject constructor(
     private val personas: PersonaRepository,
     private val images: ChatImageStore,
     private val tools: ChatTools,
+    private val answerEvents: AnswerEvents,
 ) : ChatRepository,
     ChatPhotos,
     ChatModel {
@@ -273,7 +274,10 @@ internal class OfflineChatRepository @Inject constructor(
             chatDao.setCurrentLeaf(chatId, message.id)
             chatDao.touch(chatId, now)
             sessionInSync = status == MessageStatus.COMPLETE
-            if (sessionInSync) sessionTokens += pendingPromptTokens + TokenEstimator.estimate(text)
+            if (sessionInSync) {
+                sessionTokens += pendingPromptTokens + TokenEstimator.estimate(text)
+                answerEvents.answerCompleted()
+            }
             pendingPromptTokens = 0
         }
     }

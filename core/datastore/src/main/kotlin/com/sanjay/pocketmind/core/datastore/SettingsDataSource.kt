@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.sanjay.pocketmind.core.model.ThemeMode
 import com.sanjay.pocketmind.core.model.UserSettings
@@ -90,6 +91,21 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
             ?: UserSettings.DEFAULT_KEEP_MODEL_MINUTES
     }
 
+    /** Counts one more completed answer (for the review prompt) and returns the new total. */
+    suspend fun recordCompletedAnswer(): Int {
+        var total = 0
+        update { prefs ->
+            total = (prefs[Keys.COMPLETED_ANSWERS] ?: 0) + 1
+            prefs[Keys.COMPLETED_ANSWERS] = total
+        }
+        return total
+    }
+
+    /** When PocketMind last asked for a Play review (epoch millis), or null if never. */
+    suspend fun reviewAskedAt(): Long? = dataStore.data.first()[Keys.REVIEW_ASKED_AT]
+
+    suspend fun setReviewAskedAt(millis: Long) = update { it[Keys.REVIEW_ASKED_AT] = millis }
+
     /**
      * "Delete all my data": every setting back to its default, except which model is selected and
      * that onboarding was seen (the downloaded models stay on the phone, so the app keeps working).
@@ -112,6 +128,8 @@ class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Pr
     /** Key names are part of the on-disk format: never rename them. */
     private object Keys {
         val SELECTED_MODEL = stringPreferencesKey("selected_model_id")
+        val COMPLETED_ANSWERS = intPreferencesKey("completed_answers")
+        val REVIEW_ASKED_AT = longPreferencesKey("review_asked_at")
         val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
         val ALLOW_MOBILE_DATA = booleanPreferencesKey("allow_mobile_data")
         val PREFER_GPU = booleanPreferencesKey("prefer_gpu")

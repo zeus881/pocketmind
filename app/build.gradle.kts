@@ -1,5 +1,7 @@
 import com.sanjay.pocketmind.buildlogic.AppVersion
+import com.sanjay.pocketmind.buildlogic.GitCommitSubjectsValueSource
 import com.sanjay.pocketmind.buildlogic.GitTagValueSource
+import com.sanjay.pocketmind.buildlogic.ReleaseNotes
 
 plugins {
     alias(libs.plugins.pocketmind.android.application)
@@ -12,6 +14,8 @@ plugins {
     alias(libs.plugins.aboutlibraries)
     // Screenshot tests (lock screen): recordRoborazziDebug / verifyRoborazziDebug.
     alias(libs.plugins.roborazzi)
+    // Uploads the signed App Bundle and release notes to Google Play (play.yml, internal track).
+    alias(libs.plugins.play.publisher)
 }
 
 /*
@@ -129,6 +133,9 @@ dependencies {
     implementation(libs.glance.material3)
     // Applies the Baseline Profile at install time even on phones without the Play Store.
     implementation(libs.androidx.profileinstaller)
+    // Play In-App Updates (flexible) and In-App Review; both run through the Play Store app.
+    implementation(libs.play.app.update.ktx)
+    implementation(libs.play.review.ktx)
     baselineProfile(projects.benchmark)
 
     // Debug builds only: watches destroyed Activities/ViewModels/Fragments and reports memory leaks
@@ -139,4 +146,33 @@ dependencies {
     testImplementation(libs.turbine)
     testImplementation(libs.androidx.datastore.preferences)
     testImplementation(libs.robolectric)
+}
+
+/*
+ * Google Play publishing (Gradle Play Publisher). Credentials come ONLY from the environment
+ * variable ANDROID_PUBLISHER_CREDENTIALS (the service-account JSON, a GitHub secret in play.yml);
+ * nothing is stored in the repository. Release notes: src/main/play/release-notes/<locale>/default.txt.
+ */
+play {
+    track.set("internal")
+    defaultToAppBundles.set(true)
+}
+
+// Play's "What's new" from conventional commits since the last v* tag (feat → New, fix → Fixed,
+// perf → Faster; developer-only commits left out). Run by play.yml before uploading; review the
+// file before a production release. Other languages fall back to en-US unless their file exists.
+val commitSubjects = providers.of(GitCommitSubjectsValueSource::class.java) {}
+tasks.register("generateReleaseNotes") {
+    description = "Writes src/main/play/release-notes/en-US/default.txt from the commits since the last tag."
+    val subjects = commitSubjects
+    val target = layout.projectDirectory.file("src/main/play/release-notes/en-US/default.txt")
+    outputs.file(target)
+    outputs.upToDateWhen { false }
+    doLast {
+        val notes = ReleaseNotes.fromCommits(subjects.get().lines().filter { it.isNotBlank() })
+        target.asFile.apply {
+            parentFile.mkdirs()
+            writeText(notes + "\n")
+        }
+    }
 }

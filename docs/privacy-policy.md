@@ -50,6 +50,19 @@ PocketMind's own code connects to the internet for **one purpose only**: downloa
   [Hugging Face's privacy policy](https://huggingface.co/privacy).
 - After the download, every feature works in airplane mode.
 
+## Google Play features
+
+If you installed PocketMind from Google Play, two Play features run **through the Play Store app**, not through
+PocketMind's own code:
+
+- **In-app updates:** the Play Store tells the app that a newer version exists and downloads it, as it does for any
+  app update.
+- **In-app review:** after you have used the app for a while, the Play Store may show its rating card. Your rating
+  goes to Google Play, like any Play review.
+
+PocketMind sends no chat text, note, photo or other content to Google through these features. Google's handling is
+covered by [Google's privacy policy](https://policies.google.com/privacy).
+
 ## On-device features that use other parts of Android
 
 - **Voice input** uses Android's *on-device* speech recognizer only (Android 12+). The app never uses the

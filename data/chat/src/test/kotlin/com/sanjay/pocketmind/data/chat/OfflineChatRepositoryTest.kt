@@ -15,8 +15,11 @@ import com.sanjay.pocketmind.core.model.ChatTurn
 import com.sanjay.pocketmind.core.model.MessageStatus
 import com.sanjay.pocketmind.core.model.TurnRole
 import com.sanjay.pocketmind.core.testing.FakeLlmEngine
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -41,6 +44,7 @@ class OfflineChatRepositoryTest {
     private val summaryCalls = mutableListOf<Pair<String?, Int>>()
     private var summaryResult: String? = "S"
     private val images = FakeChatImageStore()
+    private val answerEvents = AnswerEvents()
 
     @Before
     fun setUp() {
@@ -62,6 +66,7 @@ class OfflineChatRepositoryTest {
             personas = RoomPersonaRepository(db.personaDao()) { now },
             images = images,
             tools = ChatTools(db.noteDao()) { now },
+            answerEvents = answerEvents,
         )
     }
 
@@ -483,5 +488,21 @@ class OfflineChatRepositoryTest {
 
         assertTrue(engine.sessions.last().tools.isEmpty())
         assertTrue(!repository.observeChat(chatId).first()!!.toolsEnabled)
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun onlyCompletedAnswersAreAnnounced() = runTest {
+        val heard = mutableListOf<Unit>()
+        val listener = backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+            answerEvents.completed.collect { heard += it }
+        }
+        val chatId = repository.createChat()
+
+        sendAndFinish(chatId, "Hi")
+        repository.saveAssistantMessage(chatId, "half", MessageStatus.STOPPED, null)
+
+        assertEquals(1, heard.size)
+        listener.cancel()
     }
 }
