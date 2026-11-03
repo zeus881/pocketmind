@@ -189,7 +189,7 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   resumes it). The finished answer replaces the live one in a single frame (ViewModel waits for Room's copy).
   3 Robolectric tests (`MessageListFollowTest`). Commit `221d652`.
 - **Voice input: works** ("What is the capital of France", microphone permission granted, answer correct).
-  **Read aloud:** a speech audio stream was seen; the owner still has to confirm hearing it.
+  **Read aloud: works** (the owner heard the answer; the icon turned into Stop and back).
 - **Export all my data: works.** ZIP with 17 chats (Markdown), JSON with 116 messages, 1 note, 2 photos
   (same as on the phone), settings, README.
 - **Seen:** unneeded tool calls (Notes for a photo question, Date and time for "capital of France"); the
