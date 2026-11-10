@@ -11,6 +11,14 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 2 Plan | DONE | V3_PLAN.md: phases 1, 2a–2e, 3–16, Final |
 | 3 Build | **WAITING for the owner's "approved"** | open decisions A–G in V3_PLAN.md §1 |
 
+**GitHub (2026-11-10):** public repo https://github.com/zeus881/pocketmind; branches main, v2, v3 and tag v2-final pushed.
+Commit email changed to sanjaykumarr99009@gmail.com in the whole history before the first push (old history kept in a
+bundle outside the repo). First CI ever: the workflow file had an unterminated `if:` string and `gradlew` was not
+executable (committed from Windows); both fixed on main, v2 and v3. Result on Linux: main fully green; v2 and v3 pass
+formatting, detekt, Lint, all unit + E2E tests and the coverage gate; only the screenshot comparison fails because
+the goldens are stale and Windows-rendered. "Record screenshots" now commits Linux images itself.
+**Owner:** Actions → Record screenshots → Run workflow on v3 (and v2), then re-run CI.
+
 
 ## v2 status (branch `v2`, plan: V2_PLAN.md, approved 2026-11-02)
 
