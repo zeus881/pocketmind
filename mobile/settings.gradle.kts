@@ -42,6 +42,7 @@ include(":androidApp")
 // V3 shared Kotlin Multiplatform code (Android + iOS). composeApp = the shared UI, built as the iOS framework.
 include(":composeApp")
 include(":shared:core")
+include(":shared:data")
 
 include(":core:common")
 include(":core:designsystem")

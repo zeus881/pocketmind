@@ -39,7 +39,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       - name: Shared code tests on the iOS simulator target
-        run: ./gradlew :shared:core:iosSimulatorArm64Test
+        run: ./gradlew :shared:core:iosSimulatorArm64Test :shared:data:iosSimulatorArm64Test
 
       - name: Generate the Xcode project (XcodeGen)
         working-directory: mobile/iosApp
@@ -47,12 +47,24 @@ jobs:
           brew install xcodegen
           xcodegen generate --spec project.yml
 
+      # The Kotlin framework on its own first: a Kotlin/Native error then shows up as this step's failure.
+      - name: Link the shared Kotlin framework (simulator, arm64)
+        run: ./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64
+
+      # ARCHS=arm64: a "generic" simulator build would also ask for x86_64, which the shared code doesn't
+      # target (Apple-silicon simulators only). Xcode's errors are copied into annotations, which GitHub shows
+      # on the run page without a login (full logs need one).
       - name: Build the iOS app for the simulator
         working-directory: mobile/iosApp
-        run: >
-          xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Debug
-          -sdk iphonesimulator -destination "generic/platform=iOS Simulator"
-          CODE_SIGNING_ALLOWED=NO build
+        run: |
+          set -o pipefail
+          if ! xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Debug \
+              -sdk iphonesimulator -destination "generic/platform=iOS Simulator" ARCHS=arm64 \
+              CODE_SIGNING_ALLOWED=NO build 2>&1 | tee "$RUNNER_TEMP/xcodebuild.log"; then
+            grep -E "error:|What went wrong|FAILURE|\*\* BUILD FAILED" -A2 "$RUNNER_TEMP/xcodebuild.log" \
+              | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          fi
 
       - uses: actions/upload-artifact@v7
         if: failure()

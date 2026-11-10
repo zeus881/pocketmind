@@ -14,6 +14,7 @@ import java.time.Instant
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.runBlocking
 
 /** The tools a chat can offer the model. All of them run on the phone. */
 @Singleton
@@ -26,21 +27,27 @@ class ChatTools @Inject internal constructor(noteDao: NoteDao, clock: Clock) {
     )
 }
 
-/** [NoteStore] in the app's Room database, next to the chats (so exports and "delete all" include them). */
+/**
+ * [NoteStore] in the app's Room database, next to the chats (so exports and "delete all" include them).
+ *
+ * Tools are synchronous: LiteRT-LM calls them on its own background thread during generation and needs
+ * the result at once. The DAO is `suspend` (Room on Kotlin Multiplatform requires it), so each call waits
+ * with [runBlocking] — on that background thread, never on the main thread.
+ */
 internal class RoomNoteStore(private val dao: NoteDao, private val clock: Clock) : NoteStore {
     override fun save(text: String): Note {
         val note = NoteEntity(UUID.randomUUID().toString(), text, clock.nowMillis())
-        dao.insert(note)
+        runBlocking { dao.insert(note) }
         return note.asNote()
     }
 
-    override fun recent(limit: Int) = dao.recent(limit).map { it.asNote() }
+    override fun recent(limit: Int) = runBlocking { dao.recent(limit) }.map { it.asNote() }
 
     // Same escaping as chat search: "%" and "_" in the query are literal characters, not wildcards.
     override fun search(query: String, limit: Int) =
-        dao.search(SearchQuery.from(query).likePattern, limit).map { it.asNote() }
+        runBlocking { dao.search(SearchQuery.from(query).likePattern, limit) }.map { it.asNote() }
 
-    override fun delete(id: String) = dao.delete(id) > 0
+    override fun delete(id: String) = runBlocking { dao.delete(id) } > 0
 
     private fun NoteEntity.asNote() = Note(id, text, createdAt)
 }

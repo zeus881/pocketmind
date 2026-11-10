@@ -33,7 +33,7 @@ val koverMinLineCoverage = 84 // v2 phase 22: 84.2 % measured (target 80 reached
 
 val coveredModules = listOf(
     ":androidApp",
-    ":shared:core", ":core:common", ":core:designsystem", ":core:llm",
+    ":shared:core", ":shared:data", ":core:common", ":core:designsystem", ":core:llm",
     ":core:database", ":core:datastore", ":core:speech", ":core:tools", ":core:billing",
     ":data:chat", ":data:models", ":data:benchmark", ":data:documents",
     ":feature:chat", ":feature:history", ":feature:models", ":feature:settings",

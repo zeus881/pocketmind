@@ -65,5 +65,13 @@ gradlePlugin {
             id = "pocketmind.kmp.library"
             implementationClass = "KmpLibraryConventionPlugin"
         }
+        register("kmpAndroidLibrary") {
+            id = "pocketmind.kmp.android.library"
+            implementationClass = "KmpAndroidLibraryConventionPlugin"
+        }
+        register("kmpRoom") {
+            id = "pocketmind.kmp.room"
+            implementationClass = "KmpRoomConventionPlugin"
+        }
     }
 }

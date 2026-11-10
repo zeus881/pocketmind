@@ -149,6 +149,7 @@ class MigrationTest {
 
     private companion object {
         // Gradle runs unit tests with the module folder as the working directory.
-        const val SCHEMA_DIR = "schemas/com.sanjay.pocketmind.core.database.PocketMindDatabase"
+        // The committed schemas live with the database class in shared:data (V3); tests run in this module dir.
+        const val SCHEMA_DIR = "../../shared/data/schemas/com.sanjay.pocketmind.core.database.PocketMindDatabase"
     }
 }

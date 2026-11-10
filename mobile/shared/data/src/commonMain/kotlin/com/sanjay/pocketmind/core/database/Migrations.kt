@@ -1,7 +1,8 @@
 package com.sanjay.pocketmind.core.database
 
 import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
+import androidx.sqlite.SQLiteConnection
+import androidx.sqlite.execSQL
 
 /**
  * Hand-written migrations, for changes Room can't work out from the schema diff alone.
@@ -9,6 +10,10 @@ import androidx.sqlite.db.SupportSQLiteDatabase
  * Every statement is plain SQL that runs inside one transaction: if any line fails, SQLite rolls
  * the whole migration back and the user keeps their v4 database untouched. [MigrationTest] runs
  * it against real v1–v4 databases built from the committed schema files.
+ *
+ * V3: written against `SQLiteConnection` (multiplatform) instead of Android's `SupportSQLiteDatabase`, so the same
+ * migration runs on iOS. On Android, Room calls `migrate(SQLiteConnection)` from its open-helper path too
+ * (checked in the room-runtime 2.8.5 bytecode: RoomOpenHelper), so SQLCipher keeps working.
  */
 object Migrations {
 
@@ -24,22 +29,22 @@ object Migrations {
      * - the search index is filled from all existing messages (`'rebuild'`).
      */
     val MIGRATION_4_5 = object : Migration(4, 5) {
-        override fun migrate(db: SupportSQLiteDatabase) {
+        override fun migrate(connection: SQLiteConnection) {
             // Structure — chats and messages only GAIN columns (no table rebuild, no cascade risk).
-            db.execSQL("ALTER TABLE `chats` ADD COLUMN `pinned` INTEGER NOT NULL DEFAULT 0")
-            db.execSQL("ALTER TABLE `chats` ADD COLUMN `folderId` TEXT")
-            db.execSQL("ALTER TABLE `chats` ADD COLUMN `currentLeafId` TEXT")
-            db.execSQL("CREATE INDEX IF NOT EXISTS `index_chats_folderId` ON `chats` (`folderId`)")
-            db.execSQL("ALTER TABLE `messages` ADD COLUMN `parentId` TEXT")
-            db.execSQL("CREATE INDEX IF NOT EXISTS `index_messages_parentId` ON `messages` (`parentId`)")
-            db.execSQL(
+            connection.execSQL("ALTER TABLE `chats` ADD COLUMN `pinned` INTEGER NOT NULL DEFAULT 0")
+            connection.execSQL("ALTER TABLE `chats` ADD COLUMN `folderId` TEXT")
+            connection.execSQL("ALTER TABLE `chats` ADD COLUMN `currentLeafId` TEXT")
+            connection.execSQL("CREATE INDEX IF NOT EXISTS `index_chats_folderId` ON `chats` (`folderId`)")
+            connection.execSQL("ALTER TABLE `messages` ADD COLUMN `parentId` TEXT")
+            connection.execSQL("CREATE INDEX IF NOT EXISTS `index_messages_parentId` ON `messages` (`parentId`)")
+            connection.execSQL(
                 "CREATE TABLE IF NOT EXISTS `folders` (`id` TEXT NOT NULL, `name` TEXT NOT NULL, " +
                     "`createdAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
             )
 
             // Data — link each message to the one before it (same order the app always used:
             // createdAt, then id), and point each chat at its newest message.
-            db.execSQL(
+            connection.execSQL(
                 """
                 UPDATE messages SET parentId = (
                     SELECT p.id FROM messages p
@@ -50,7 +55,7 @@ object Migrations {
                 )
                 """.trimIndent(),
             )
-            db.execSQL(
+            connection.execSQL(
                 """
                 UPDATE chats SET currentLeafId = (
                     SELECT m.id FROM messages m WHERE m.chatId = chats.id
@@ -62,12 +67,12 @@ object Migrations {
 
             // Full-text search: the FTS table, the triggers that keep it in sync, then index
             // everything that already exists.
-            db.execSQL(
+            connection.execSQL(
                 "CREATE VIRTUAL TABLE IF NOT EXISTS `messages_fts` USING FTS4(`text` TEXT NOT NULL, " +
                     "tokenize=unicode61, content=`messages`)",
             )
-            FTS_TRIGGERS.forEach(db::execSQL)
-            db.execSQL("INSERT INTO `messages_fts`(`messages_fts`) VALUES('rebuild')")
+            FTS_TRIGGERS.forEach { connection.execSQL(it) }
+            connection.execSQL("INSERT INTO `messages_fts`(`messages_fts`) VALUES('rebuild')")
         }
     }
 
