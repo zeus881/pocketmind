@@ -38,6 +38,8 @@ class KmpAndroidLibraryConventionPlugin : Plugin<Project> {
                     // Runs commonTest on the JVM too (task testAndroidHostTest): fast local runs, Linux CI and
                     // coverage. Without it, a module's common tests would only run on the iOS simulator.
                     withHostTest {
+                        // Robolectric tests (Compose UI, Room) need the merged Android resources.
+                        isIncludeAndroidResources = true
                         isReturnDefaultValues = true
                     }
                 }

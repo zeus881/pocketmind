@@ -52,6 +52,8 @@ compose-bom = "2026.09.00"
 # AndroidX Compose 1.12.1 and supports iOS 14+. Its Material 3 has its own version line.
 compose-multiplatform = "1.12.2"
 compose-multiplatform-material3 = "1.9.0"
+# The last JetBrains material-icons release (Maven Central, 2026-11-10); on Android it resolves to AndroidX icons.
+compose-multiplatform-icons = "1.7.3"
 # Icons were frozen at 1.7.8 and removed from the Compose BOM, so they are pinned separately.
 compose-material-icons = "1.7.8"
 
@@ -142,6 +144,7 @@ jb-compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version
 jb-compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose-multiplatform" }
 jb-compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose-multiplatform" }
 jb-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-multiplatform-material3" }
+jb-compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose-multiplatform-icons" }
 jb-compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
@@ -153,7 +156,8 @@ okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
 pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfbox-android" }
-markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3-android", version.ref = "markdown-renderer" }
+# V3: the multiplatform coordinate (Android + iOS variants checked); v2 used the -android artifact directly.
+markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown-renderer" }
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutlibraries" }
 glance-appwidget = { module = "androidx.glance:glance-appwidget", version.ref = "glance" }
 glance-material3 = { module = "androidx.glance:glance-material3", version.ref = "glance" }
@@ -211,3 +215,4 @@ pocketmind-hilt = { id = "pocketmind.hilt" }
 pocketmind-kmp-library = { id = "pocketmind.kmp.library" }
 pocketmind-kmp-android-library = { id = "pocketmind.kmp.android.library" }
 pocketmind-kmp-room = { id = "pocketmind.kmp.room" }
+pocketmind-kmp-compose = { id = "pocketmind.kmp.compose" }

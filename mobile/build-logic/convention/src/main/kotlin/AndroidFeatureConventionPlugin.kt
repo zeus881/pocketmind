@@ -31,7 +31,7 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             dependencies {
                 add("implementation", project(":shared:core"))
                 add("implementation", project(":core:common"))
-                add("implementation", project(":core:designsystem"))
+                add("implementation", project(":shared:designsystem"))
 
                 // hiltViewModel(): gets a Hilt-injected ViewModel inside a composable.
                 add("implementation", libs.lib("androidx-hilt-lifecycle-viewmodel-compose"))

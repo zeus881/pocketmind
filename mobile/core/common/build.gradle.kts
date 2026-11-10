@@ -8,6 +8,9 @@ android {
 }
 
 dependencies {
+    // V3: AppResult, the Flow helpers and the Clock interface live in shared:core; every module that uses
+    // core:common keeps seeing them.
+    api(projects.shared.core)
     api(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
 

@@ -15,13 +15,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
-import com.sanjay.pocketmind.core.designsystem.R
+import com.sanjay.pocketmind.core.designsystem.resources.Res
+import com.sanjay.pocketmind.core.designsystem.resources.core_designsystem_retry
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
+import org.jetbrains.compose.resources.stringResource
 
 /*
  * CLAUDE.md requires every screen to have loading, empty, error and content states.
@@ -104,7 +105,7 @@ fun ErrorState(
     ) {
         PmIllustration(Icons.Outlined.ErrorOutline, tone = IllustrationTone.Error)
         Text(text = message, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
-        Button(onClick = onRetry) { Text(stringResource(R.string.core_designsystem_retry)) }
+        Button(onClick = onRetry) { Text(stringResource(Res.string.core_designsystem_retry)) }
         if (secondaryActionLabel != null && onSecondaryAction != null) {
             OutlinedButton(onClick = onSecondaryAction) { Text(secondaryActionLabel) }
         }

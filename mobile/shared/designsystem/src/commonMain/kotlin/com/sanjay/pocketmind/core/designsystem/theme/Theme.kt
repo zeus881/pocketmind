@@ -1,12 +1,9 @@
 package com.sanjay.pocketmind.core.designsystem.theme
 
-import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import com.sanjay.pocketmind.core.model.ThemeMode
 
 /**
@@ -14,8 +11,8 @@ import com.sanjay.pocketmind.core.model.ThemeMode
  *
  * - [themeMode] comes from the user's setting (system / light / dark).
  * - On Android 12+ "dynamic colour" (colours taken from the user's wallpaper) is used when
- *   [dynamicColor] is on (the user's setting, on by default). Otherwise, and on older
- *   phones, the PocketMind brand palette.
+ *   [dynamicColor] is on (the user's setting, on by default). Otherwise, on older phones and
+ *   on iOS (no wallpaper colours there), the PocketMind brand palette.
  * - Type scale, shapes and the other tokens (Tokens.kt) are the same in every case.
  *
  * Every screen is wrapped in this once (in MainActivity), so all composables read colours
@@ -33,16 +30,8 @@ fun PocketMindTheme(
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
     }
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-
-        darkTheme -> PocketMindDarkColors
-
-        else -> PocketMindLightColors
-    }
+    val colorScheme = (if (dynamicColor) dynamicColorScheme(darkTheme) else null)
+        ?: if (darkTheme) PocketMindDarkColors else PocketMindLightColors
     MaterialTheme(
         colorScheme = colorScheme,
         typography = PocketMindTypography,
@@ -50,3 +39,10 @@ fun PocketMindTheme(
         content = content,
     )
 }
+
+/**
+ * The wallpaper-based colour scheme where the platform has one (Android 12+), else null.
+ * V3: platform code — Android reads it from the system; iOS has no such colours.
+ */
+@Composable
+internal expect fun dynamicColorScheme(darkTheme: Boolean): ColorScheme?

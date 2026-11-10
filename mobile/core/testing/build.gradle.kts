@@ -13,7 +13,7 @@ dependencies {
     api(projects.core.llm)
     api(projects.shared.core)
     api(projects.core.billing) // FakeProStatus
-    api(projects.core.designsystem)
+    api(projects.shared.designsystem)
     api(libs.junit)
     api(libs.kotlinx.coroutines.test)
     api(libs.androidx.datastore.preferences)

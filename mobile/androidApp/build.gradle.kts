@@ -98,7 +98,7 @@ aboutLibraries {
 dependencies {
     implementation(projects.shared.core)
     implementation(projects.core.common)
-    implementation(projects.core.designsystem)
+    implementation(projects.shared.designsystem)
     implementation(projects.core.llm)
     implementation(projects.core.datastore)
     implementation(projects.core.billing)

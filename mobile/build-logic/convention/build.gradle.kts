@@ -69,5 +69,9 @@ gradlePlugin {
             id = "pocketmind.kmp.room"
             implementationClass = "KmpRoomConventionPlugin"
         }
+        register("kmpCompose") {
+            id = "pocketmind.kmp.compose"
+            implementationClass = "KmpComposeConventionPlugin"
+        }
     }
 }

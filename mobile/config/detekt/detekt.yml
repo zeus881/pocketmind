@@ -30,6 +30,8 @@ naming:
   FunctionNaming:
     # @Composable functions are PascalCase by Compose convention (e.g. ChatScreen()).
     ignoreAnnotated: ['Composable']
+    # Test names may read like sentences. Detekt's default list plus AGP 9's KMP host-test folder (androidHostTest).
+    excludes: ['**/test/**', '**/androidTest/**', '**/commonTest/**', '**/jvmTest/**', '**/androidUnitTest/**', '**/androidInstrumentedTest/**', '**/iosTest/**', '**/androidHostTest/**']
   TopLevelPropertyNaming:
     constantPattern: '[A-Z][A-Za-z0-9_]*'
 

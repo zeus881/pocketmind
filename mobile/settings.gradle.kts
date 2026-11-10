@@ -45,9 +45,10 @@ include(":shared:core")
 include(":shared:data")
 include(":shared:tools")
 include(":shared:ai")
+include(":shared:designsystem")
 
 include(":core:common")
-include(":core:designsystem")
+
 include(":core:llm")
 include(":core:testing")
 include(":core:database")
