@@ -1,8 +1,15 @@
 package com.sanjay.pocketmind.core.tools
 
-import java.math.BigDecimal
-import java.math.MathContext
-import java.math.RoundingMode
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.DecimalMode
+import com.ionspin.kotlin.bignum.decimal.RoundingMode
+import kotlin.math.cos
+import kotlin.math.ln
+import kotlin.math.log10
+import kotlin.math.pow
+import kotlin.math.sin
+import kotlin.math.sqrt
+import kotlin.math.tan
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -50,10 +57,13 @@ class CalculatorTool : LocalTool {
  */
 object Expression {
     /** 34 significant digits for division and roots: far beyond what an answer shows. */
-    private val CONTEXT = MathContext.DECIMAL128
+    private val CONTEXT = DECIMAL128
 
     /** Digits shown in a result. */
     private const val SHOWN_DIGITS = 15
+
+    /** "15%" = 15 × 10^-2: the decimal point moves two places left. */
+    private const val PERCENT_SHIFT = -2
 
     fun evaluate(expression: String): BigDecimal {
         val parser = Parser(normalize(expression))
@@ -64,7 +74,7 @@ object Expression {
 
     /** Plain digits (no "1E+3"), at most [SHOWN_DIGITS] significant digits, no trailing zeros. */
     fun format(value: BigDecimal): String {
-        val rounded = value.round(MathContext(SHOWN_DIGITS, RoundingMode.HALF_EVEN)).stripTrailingZeros()
+        val rounded = value.roundSignificand(DecimalMode(SHOWN_DIGITS.toLong(), RoundingMode.ROUND_HALF_TO_EVEN))
         return if (rounded.signum() == 0) "0" else rounded.toPlainString()
     }
 
@@ -115,7 +125,7 @@ object Expression {
 
         private fun postfix(): BigDecimal {
             val value = primary()
-            return if (take('%')) value.movePointLeft(2) else value
+            return if (take('%')) value.moveDecimalPoint(PERCENT_SHIFT) else value
         }
 
         private fun primary(): BigDecimal {
@@ -137,7 +147,7 @@ object Expression {
                 while (peek()?.isDigit() == true) position++
             }
             val literal = text.substring(start, position)
-            return literal.toBigDecimalOrNull() ?: throw ToolArgumentException("'$literal' is not a number")
+            return literal.toDecimalOrNull() ?: throw ToolArgumentException("'$literal' is not a number")
         }
 
         private fun named(): BigDecimal {
@@ -184,44 +194,47 @@ object Expression {
 
     /** Whole exponents stay exact; others (2^0.5) go through double precision. */
     private fun raise(base: BigDecimal, exponent: BigDecimal): BigDecimal {
-        val whole = exponent.stripTrailingZeros().scale() <= 0
+        val whole = exponent.isWholeNumber()
         return when {
             whole && exponent.abs() <= MAX_EXACT_EXPONENT -> {
-                val n = exponent.toInt()
-                if (n >= 0) base.pow(n, CONTEXT) else divide(BigDecimal.ONE, base.pow(-n, CONTEXT))
+                val n = exponent.intValue(exactRequired = true)
+                if (n >= 0) exactPower(base, n) else divide(BigDecimal.ONE, exactPower(base, -n))
             }
 
-            else -> real(Math.pow(base.toDouble(), exponent.toDouble()))
+            else -> real(base.toDouble().pow(exponent.toDouble()))
         }
     }
 
-    private val MAX_EXACT_EXPONENT = BigDecimal(999)
+    /** base^n with whole n, rounded to [CONTEXT] like v2's `BigDecimal.pow(n, MathContext.DECIMAL128)`. */
+    private fun exactPower(base: BigDecimal, n: Int): BigDecimal = base.pow(n.toLong()).roundSignificand(CONTEXT)
+
+    private val MAX_EXACT_EXPONENT = BigDecimal.fromInt(999)
 
     /** A double result back to BigDecimal; NaN and infinity become a readable error. */
     private fun real(value: Double): BigDecimal {
         if (value.isNaN() || value.isInfinite()) throw ArithmeticException("the result is not a real number")
-        return BigDecimal(value.toString())
+        return BigDecimal.fromDouble(value)
     }
 
     private val CONSTANTS = mapOf(
-        "pi" to BigDecimal("3.14159265358979323846264338327950288"),
-        "e" to BigDecimal("2.71828182845904523536028747135266250"),
+        "pi" to BigDecimal.parseString("3.14159265358979323846264338327950288"),
+        "e" to BigDecimal.parseString("2.71828182845904523536028747135266250"),
     )
 
     private val FUNCTIONS: Map<String, (BigDecimal) -> BigDecimal> = mapOf(
         "sqrt" to { x ->
             if (x.signum() < 0) throw ArithmeticException("square root of a negative number")
-            real(Math.sqrt(x.toDouble()))
+            real(sqrt(x.toDouble()))
         },
         "abs" to { x -> x.abs() },
-        "round" to { x -> x.setScale(0, RoundingMode.HALF_UP) },
-        "floor" to { x -> x.setScale(0, RoundingMode.FLOOR) },
-        "ceil" to { x -> x.setScale(0, RoundingMode.CEILING) },
-        "ln" to { x -> positive(x) { real(Math.log(it)) } },
-        "log" to { x -> positive(x) { real(Math.log10(it)) } },
-        "sin" to { x -> real(Math.sin(x.toDouble())) },
-        "cos" to { x -> real(Math.cos(x.toDouble())) },
-        "tan" to { x -> real(Math.tan(x.toDouble())) },
+        "round" to { x -> x.roundToDigitPositionAfterDecimalPoint(0, RoundingMode.ROUND_HALF_AWAY_FROM_ZERO) },
+        "floor" to { x -> x.floor() },
+        "ceil" to { x -> x.ceil() },
+        "ln" to { x -> positive(x) { real(ln(it)) } },
+        "log" to { x -> positive(x) { real(log10(it)) } },
+        "sin" to { x -> real(sin(x.toDouble())) },
+        "cos" to { x -> real(cos(x.toDouble())) },
+        "tan" to { x -> real(tan(x.toDouble())) },
     )
 
     private fun positive(x: BigDecimal, f: (Double) -> BigDecimal): BigDecimal {

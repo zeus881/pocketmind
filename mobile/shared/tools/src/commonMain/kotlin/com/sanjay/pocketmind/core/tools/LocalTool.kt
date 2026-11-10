@@ -1,6 +1,6 @@
 package com.sanjay.pocketmind.core.tools
 
-import java.math.BigDecimal
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
@@ -53,7 +53,7 @@ data class ToolParameter(
 )
 
 /** The model's arguments can't be used; the model reads the message and can try again. */
-class ToolArgumentException(message: String) : IllegalArgumentException(message)
+class ToolArgumentException(message: String, cause: Throwable? = null) : IllegalArgumentException(message, cause)
 
 /**
  * The JSON description of a tool, in the shape LiteRT-LM's own reflection tools produce
@@ -108,7 +108,7 @@ fun JsonObject.requireText(name: String): String = text(name) ?: throw ToolArgum
 
 /** A number argument, exact. Accepts JSON numbers and numbers written as text ("12.5", "1,000"). */
 fun JsonObject.number(name: String): BigDecimal? = text(name)?.let { raw ->
-    raw.replace(",", "").replace("_", "").toBigDecimalOrNull()
+    raw.replace(",", "").replace("_", "").toDecimalOrNull()
         ?: throw ToolArgumentException("'$name' must be a number, got '$raw'")
 }
 

@@ -39,7 +39,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       - name: Shared code tests on the iOS simulator target
-        run: ./gradlew :shared:core:iosSimulatorArm64Test :shared:data:iosSimulatorArm64Test
+        run: ./gradlew :shared:core:iosSimulatorArm64Test :shared:data:iosSimulatorArm64Test :shared:tools:iosSimulatorArm64Test
 
       - name: Generate the Xcode project (XcodeGen)
         working-directory: mobile/iosApp

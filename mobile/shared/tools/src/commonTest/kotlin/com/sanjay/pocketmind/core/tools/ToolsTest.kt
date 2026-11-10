@@ -1,15 +1,15 @@
 package com.sanjay.pocketmind.core.tools
 
-import java.time.Instant
-import java.time.ZoneId
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
 
 /** Date, unit and notes tools, and the JSON schema the model sees: all without a model. */
 class ToolsTest {
@@ -21,11 +21,11 @@ class ToolsTest {
     // Tuesday 3 November 2026, 14:05 in India.
     private val dates = DateTimeTool(
         now = { Instant.parse("2026-11-03T08:35:00Z") },
-        zone = { ZoneId.of("Asia/Kolkata") },
+        zone = { TimeZone.of("Asia/Kolkata") },
     )
 
     @Test
-    fun `now gives the phone's local date, weekday and time`() {
+    fun nowGivesThePhonesLocalDateWeekdayAndTime() {
         val now = call(dates, """{"operation": "now"}""")
 
         assertEquals("2026-11-03", now.str("date"))
@@ -35,7 +35,7 @@ class ToolsTest {
     }
 
     @Test
-    fun `date arithmetic`() {
+    fun dateArithmetic() {
         assertEquals("52", call(dates, """{"operation": "days_between", "other_date": "2026-12-25"}""").str("days"))
         val later = call(dates, """{"operation": "add_days", "date": "2026-02-27", "days": 2}""")
         assertEquals("2026-03-01", later.str("date"))
@@ -50,7 +50,7 @@ class ToolsTest {
         call(units, """{"value": $value, "from": "$from", "to": "$to"}""").str("result")
 
     @Test
-    fun `conversions use exact factors`() {
+    fun conversionsUseExactFactors() {
         assertEquals("6.21371192237334", convert("10", "km", "mi"))
         assertEquals("2.54", convert("1", "inch", "cm"))
         assertEquals("1", convert("0.45359237", "kg", "lb"))
@@ -60,7 +60,7 @@ class ToolsTest {
     }
 
     @Test
-    fun `temperatures convert with offsets`() {
+    fun temperaturesConvertWithOffsets() {
         assertEquals("212", convert("100", "c", "f"))
         assertEquals("37", convert("98.6", "fahrenheit", "celsius"))
         assertEquals("0", convert("273.15", "k", "c"))
@@ -68,7 +68,7 @@ class ToolsTest {
     }
 
     @Test
-    fun `wrong units are explained to the model`() {
+    fun wrongUnitsAreExplainedToTheModel() {
         assertEquals("unknown unit 'parsec'", call(units, """{"value": 1, "from": "parsec", "to": "m"}""").str("error"))
         assertEquals(
             "can't convert length (m) to mass (kg)",
@@ -92,9 +92,9 @@ class ToolsTest {
     }
 
     @Test
-    fun `notes are saved, found, listed and deleted`() {
+    fun notesAreSavedFoundListedAndDeleted() {
         val store = MemoryNotes()
-        val tool = NotesTool(store, zone = { ZoneId.of("Asia/Kolkata") })
+        val tool = NotesTool(store, zone = { TimeZone.of("Asia/Kolkata") })
 
         assertEquals("n1", call(tool, """{"action": "save", "text": "Locker code is 4312"}""").str("id"))
         call(tool, """{"action": "save", "text": "Buy milk"}""")
@@ -108,7 +108,7 @@ class ToolsTest {
     }
 
     @Test
-    fun `the schema lists parameters, required ones and allowed values`() {
+    fun theSchemaListsParametersRequiredOnesAndAllowedValues() {
         val schema = Json.parseToJsonElement(ToolSchema.describe(units)).jsonObject
 
         assertEquals("unit_converter", schema.str("name"))

@@ -1,13 +1,14 @@
 package com.sanjay.pocketmind.core.tools
 
-import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
-import java.time.format.TextStyle
-import java.time.temporal.ChronoUnit
-import java.util.Locale
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -15,10 +16,13 @@ import kotlinx.serialization.json.put
 /**
  * Today's date and time from the phone's clock, and date arithmetic. A model only knows the world
  * up to its training data; without this it guesses what "today" is.
+ *
+ * V3: kotlinx-datetime (0.8.0) instead of java.time, so the same tool runs on iOS. Output is unchanged:
+ * ISO date, English weekday name, 24-hour "HH:mm", IANA time-zone id.
  */
 class DateTimeTool(
-    private val now: () -> Instant = Instant::now,
-    private val zone: () -> ZoneId = ZoneId::systemDefault,
+    private val now: () -> Instant = { Clock.System.now() },
+    private val zone: () -> TimeZone = { TimeZone.currentSystemDefault() },
 ) : LocalTool {
     override val name = NAME
     override val description =
@@ -37,29 +41,29 @@ class DateTimeTool(
     )
 
     override fun run(arguments: JsonObject): JsonObject {
-        val zoneId = zone()
-        val today = now().atZone(zoneId).toLocalDate()
+        val timeZone = zone()
+        val today = now().toLocalDateTime(timeZone).date
         return when (val operation = arguments.text("operation") ?: NOW) {
             NOW -> buildJsonObject {
-                val time = now().atZone(zoneId)
-                put("date", time.toLocalDate().toString())
-                put("weekday", time.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH))
-                put("time", time.format(DateTimeFormatter.ofPattern("HH:mm")))
-                put("time_zone", zoneId.id)
+                val time = now().toLocalDateTime(timeZone)
+                put("date", time.date.toString())
+                put("weekday", time.dayOfWeek.englishName())
+                put("time", "${time.hour.twoDigits()}:${time.minute.twoDigits()}")
+                put("time_zone", timeZone.id)
             }
 
             DAYS_BETWEEN -> {
                 val from = arguments.date("date") ?: today
                 val to = arguments.date("other_date") ?: throw ToolArgumentException("'other_date' is missing")
-                buildJsonObject { put("days", ChronoUnit.DAYS.between(from, to)) }
+                buildJsonObject { put("days", from.daysUntil(to)) }
             }
 
             ADD_DAYS -> {
-                val days = arguments.requireNumber("days").toLong()
-                val result = (arguments.date("date") ?: today).plusDays(days)
+                val days = arguments.requireNumber("days").longValue(exactRequired = false)
+                val result = (arguments.date("date") ?: today).plus(days, DateTimeUnit.DAY)
                 buildJsonObject {
                     put("date", result.toString())
-                    put("weekday", result.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.ENGLISH))
+                    put("weekday", result.dayOfWeek.englishName())
                 }
             }
 
@@ -70,10 +74,16 @@ class DateTimeTool(
     private fun JsonObject.date(name: String): LocalDate? = text(name)?.let { raw ->
         try {
             LocalDate.parse(raw)
-        } catch (e: DateTimeParseException) {
-            throw ToolArgumentException("'$name' must be a date like 2026-11-03, got '$raw' (${e.errorIndex})")
+        } catch (e: IllegalArgumentException) {
+            // kotlinx-datetime's parse error (DateTimeFormatException) is an IllegalArgumentException.
+            throw ToolArgumentException("'$name' must be a date like 2026-11-03, got '$raw'", e)
         }
     }
+
+    /** "TUESDAY" → "Tuesday": what java.time's English full name gave in v2. */
+    private fun DayOfWeek.englishName() = name.lowercase().replaceFirstChar { it.uppercase() }
+
+    private fun Int.twoDigits() = toString().padStart(2, '0')
 
     companion object {
         const val NAME = "date_time"

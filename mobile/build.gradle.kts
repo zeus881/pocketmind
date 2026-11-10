@@ -34,7 +34,7 @@ val koverMinLineCoverage = 84 // v2 phase 22: 84.2 % measured (target 80 reached
 val coveredModules = listOf(
     ":androidApp",
     ":shared:core", ":shared:data", ":core:common", ":core:designsystem", ":core:llm",
-    ":core:database", ":core:datastore", ":core:speech", ":core:tools", ":core:billing",
+    ":core:database", ":core:datastore", ":core:speech", ":shared:tools", ":core:billing",
     ":data:chat", ":data:models", ":data:benchmark", ":data:documents",
     ":feature:chat", ":feature:history", ":feature:models", ":feature:settings",
     ":feature:benchmark", ":feature:onboarding", ":feature:documents", ":feature:translate", ":feature:personas",
@@ -141,7 +141,7 @@ tasks.register("testDebugUnitTest") {
     description = "Runs the build-logic unit tests together with the modules' debug unit tests."
     dependsOn(gradle.includedBuild("build-logic").task(":convention:test"))
     // Pure Kotlin modules have a plain "test" task; KMP modules test their JVM target with "jvmTest".
-    dependsOn(":shared:core:jvmTest", ":core:tools:test")
+    dependsOn(":shared:core:jvmTest", ":shared:tools:jvmTest")
 }
 
 // ---------- Design-token guard ----------

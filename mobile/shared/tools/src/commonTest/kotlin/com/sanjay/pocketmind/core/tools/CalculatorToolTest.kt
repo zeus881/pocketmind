@@ -1,17 +1,17 @@
 package com.sanjay.pocketmind.core.tools
 
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
 
 class CalculatorToolTest {
     private fun calc(expression: String) = Expression.format(Expression.evaluate(expression))
 
     @Test
-    fun `decimal arithmetic is exact`() {
+    fun decimalArithmeticIsExact() {
         assertEquals("6910.4", calc("123.4 * 56"))
         assertEquals("6910.4", calc("123.4 × 56"))
         assertEquals("0.3", calc("0.1 + 0.2"))
@@ -20,7 +20,7 @@ class CalculatorToolTest {
     }
 
     @Test
-    fun `precedence, parentheses, powers and signs`() {
+    fun precedenceParenthesesPowersAndSigns() {
         assertEquals("14", calc("2 + 3 * 4"))
         assertEquals("20", calc("(2 + 3) * 4"))
         assertEquals("512", calc("2 ^ 3 ^ 2")) // right-associative
@@ -30,7 +30,7 @@ class CalculatorToolTest {
     }
 
     @Test
-    fun `division, percent and functions`() {
+    fun divisionPercentAndFunctions() {
         assertEquals("0.333333333333333", calc("1/3"))
         assertEquals("7.5", calc("50 * 15%"))
         assertEquals("12", calc("sqrt(144)"))
@@ -41,7 +41,7 @@ class CalculatorToolTest {
     }
 
     @Test
-    fun `bad input becomes a readable error for the model`() {
+    fun badInputBecomesAReadableErrorForTheModel() {
         val tool = CalculatorTool()
         fun error(json: String) =
             Json.parseToJsonElement(ToolRunner.run(tool, json)).jsonObject.getValue("error").jsonPrimitive.content
@@ -55,7 +55,7 @@ class CalculatorToolTest {
     }
 
     @Test
-    fun `the result names the expression it answers`() {
+    fun theResultNamesTheExpressionItAnswers() {
         val result = ToolRunner.run(CalculatorTool(), """{"expression": "123.4 * 56"}""")
 
         assertEquals("""{"expression":"123.4 * 56","result":"6910.4"}""", result)

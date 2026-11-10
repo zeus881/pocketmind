@@ -9,7 +9,7 @@ android {
 
 dependencies {
     api(projects.shared.core)
-    api(projects.core.tools)
+    api(projects.shared.tools)
     implementation(projects.core.common)
 
     // "implementation", NOT "api": LiteRT-LM classes are invisible to every module that

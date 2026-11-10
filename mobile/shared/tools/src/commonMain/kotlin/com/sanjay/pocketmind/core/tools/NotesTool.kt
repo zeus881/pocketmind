@@ -1,7 +1,8 @@
 package com.sanjay.pocketmind.core.tools
 
-import java.time.Instant
-import java.time.ZoneId
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.addJsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -32,7 +33,8 @@ interface NoteStore {
  * "Remember that my locker code is 4312" → the model saves a note; later "what is my locker code?"
  * → it searches the notes. Notes stay on the phone like chats do.
  */
-class NotesTool(private val store: NoteStore, private val zone: () -> ZoneId = ZoneId::systemDefault) : LocalTool {
+class NotesTool(private val store: NoteStore, private val zone: () -> TimeZone = { TimeZone.currentSystemDefault() }) :
+    LocalTool {
     override val name = NAME
     override val description =
         "Saves and finds the user's personal notes on the phone. Use save when the user asks you to remember " +
@@ -70,7 +72,7 @@ class NotesTool(private val store: NoteStore, private val zone: () -> ZoneId = Z
                 addJsonObject {
                     put("id", note.id)
                     put("text", note.text)
-                    put("date", Instant.ofEpochMilli(note.createdAt).atZone(zone()).toLocalDate().toString())
+                    put("date", Instant.fromEpochMilliseconds(note.createdAt).toLocalDateTime(zone()).date.toString())
                 }
             }
         }

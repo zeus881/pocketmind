@@ -1,7 +1,6 @@
 package com.sanjay.pocketmind.core.tools
 
-import java.math.BigDecimal
-import java.math.MathContext
+import com.ionspin.kotlin.bignum.decimal.BigDecimal
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
@@ -34,7 +33,7 @@ class UnitConverterTool : LocalTool {
         val result = if (from.dimension == TEMPERATURE) {
             Temperature.convert(value, from.symbol, to.symbol)
         } else {
-            value.multiply(from.factor).divide(to.factor, MathContext.DECIMAL128)
+            value.multiply(from.factor).divide(to.factor, DECIMAL128)
         }
         return buildJsonObject {
             put("value", Expression.format(value))
@@ -53,14 +52,14 @@ class UnitConverterTool : LocalTool {
     }
 
     private object Temperature {
-        private val NINE_FIFTHS = BigDecimal("1.8")
-        private val FREEZING_F = BigDecimal(32)
-        private val ZERO_C_IN_K = BigDecimal("273.15")
+        private val NINE_FIFTHS = BigDecimal.parseString("1.8")
+        private val FREEZING_F = BigDecimal.fromInt(32)
+        private val ZERO_C_IN_K = BigDecimal.parseString("273.15")
 
         fun convert(value: BigDecimal, from: String, to: String): BigDecimal = fromCelsius(toCelsius(value, from), to)
 
         private fun toCelsius(value: BigDecimal, unit: String): BigDecimal = when (unit) {
-            "f" -> value.subtract(FREEZING_F).divide(NINE_FIFTHS, MathContext.DECIMAL128)
+            "f" -> value.subtract(FREEZING_F).divide(NINE_FIFTHS, DECIMAL128)
             "k" -> value.subtract(ZERO_C_IN_K)
             else -> value
         }
@@ -116,7 +115,7 @@ class UnitConverterTool : LocalTool {
                 "tb" to "1000000000000",
             ),
         ).flatMap { (dimension, units) ->
-            units.map { (symbol, factor) -> symbol to MeasureUnit(symbol, dimension, BigDecimal(factor)) }
+            units.map { (symbol, factor) -> symbol to MeasureUnit(symbol, dimension, BigDecimal.parseString(factor)) }
         }.toMap()
 
         /** Other ways to write the same unit. */

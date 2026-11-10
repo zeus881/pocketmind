@@ -57,10 +57,6 @@ gradlePlugin {
             id = "pocketmind.hilt"
             implementationClass = "HiltConventionPlugin"
         }
-        register("jvmLibrary") {
-            id = "pocketmind.jvm.library"
-            implementationClass = "JvmLibraryConventionPlugin"
-        }
         register("kmpLibrary") {
             id = "pocketmind.kmp.library"
             implementationClass = "KmpLibraryConventionPlugin"
