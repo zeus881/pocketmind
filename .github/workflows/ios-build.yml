@@ -39,9 +39,15 @@ jobs:
       - uses: gradle/actions/setup-gradle@v6
 
       - name: Shared code tests on the iOS simulator target
-        run: >
-          ./gradlew --continue :shared:core:iosSimulatorArm64Test :shared:data:iosSimulatorArm64Test
-          :shared:tools:iosSimulatorArm64Test :shared:ai:iosSimulatorArm64Test
+        run: |
+          set -o pipefail
+          if ! ./gradlew --continue :shared:core:iosSimulatorArm64Test :shared:data:iosSimulatorArm64Test \
+              :shared:tools:iosSimulatorArm64Test :shared:ai:iosSimulatorArm64Test 2>&1 | tee "$RUNNER_TEMP/ios-tests.log"; then
+            # Compiler errors and crashes leave no test report; copy Gradle's own error lines into annotations.
+            grep -E "^e: |What went wrong|FAILED|Exception|Signal|Crashed|Undefined symbols" -A2 "$RUNNER_TEMP/ios-tests.log" \
+              | head -40 | while IFS= read -r line; do echo "::error::$line"; done
+            exit 1
+          fi
 
       # Failed iOS tests as annotations (visible on the run page without a login; full logs need one).
       - name: Report failed iOS tests
