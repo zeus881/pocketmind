@@ -2,6 +2,16 @@
 
 Read this file and CLAUDE.md first when a session restarts. Never redo finished phases.
 
+## V3 status (branch `v3`, from tag `v2-final`; spec: CLAUDE.md; plan: V3_PLAN.md)
+
+| Stage | State | Notes |
+|---|---|---|
+| 0 Setup | DONE | tag `v2-final` = 539803e; branch `v3`; spec committed (8a218ec) |
+| 1 Audit | DONE | AUDIT_V3.md (baseline score 28 / 130 against the V3 spec) |
+| 2 Plan | DONE | V3_PLAN.md: phases 1, 2a–2e, 3–16, Final |
+| 3 Build | **WAITING for the owner's "approved"** | open decisions A–G in V3_PLAN.md §1 |
+
+
 ## v2 status (branch `v2`, plan: V2_PLAN.md, approved 2026-11-02)
 
 | Phase | State | Coverage gate (logic) | Notes |
