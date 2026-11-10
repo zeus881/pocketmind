@@ -1,0 +1,62 @@
+# iOS build (V3): Kotlin/Native can only build Apple targets on macOS, and this PC is Windows, so
+# every iOS check runs here. Unsigned simulator build: no Apple account or certificate is needed.
+name: iOS build
+
+on:
+  push:
+    branches: [main, v3]
+    paths: ["mobile/**", ".github/workflows/ios-build.yml"]
+  pull_request:
+    paths: ["mobile/**", ".github/workflows/ios-build.yml"]
+  workflow_dispatch:
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ios:
+    # Apple-silicon runner: matches the iosSimulatorArm64 target.
+    runs-on: macos-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v7
+
+      # JDK 21 runs the JVM unit tests (Gradle toolchain); JDK 17 (listed last = default) runs Gradle.
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            17
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Shared code tests on the iOS simulator target
+        run: ./gradlew :shared:core:iosSimulatorArm64Test
+
+      - name: Generate the Xcode project (XcodeGen)
+        working-directory: mobile/iosApp
+        run: |
+          brew install xcodegen
+          xcodegen generate --spec project.yml
+
+      - name: Build the iOS app for the simulator
+        working-directory: mobile/iosApp
+        run: >
+          xcodebuild -project iosApp.xcodeproj -scheme iosApp -configuration Debug
+          -sdk iphonesimulator -destination "generic/platform=iOS Simulator"
+          CODE_SIGNING_ALLOWED=NO build
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: ios-reports
+          path: mobile/**/build/reports/
+          retention-days: 7
