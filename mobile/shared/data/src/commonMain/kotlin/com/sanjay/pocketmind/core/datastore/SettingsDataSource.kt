@@ -11,8 +11,6 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.sanjay.pocketmind.core.model.ThemeMode
 import com.sanjay.pocketmind.core.model.UserSettings
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -25,9 +23,11 @@ import kotlinx.coroutines.flow.map
  * applies all changes or none. SharedPreferences can block the UI thread and lose writes.
  *
  * Values are validated (clamped) on write, so a bad value can never reach the engine.
+ *
+ * V3: shared with iOS (shared:data). No DI annotations here: each platform creates it with its own file
+ * location (Android: core:datastore's Hilt module, same "user_settings" file and keys as v2).
  */
-@Singleton
-class SettingsDataSource @Inject constructor(private val dataStore: DataStore<Preferences>) {
+class SettingsDataSource(private val dataStore: DataStore<Preferences>) {
 
     val settings: Flow<UserSettings> = dataStore.data.map { prefs ->
         UserSettings(

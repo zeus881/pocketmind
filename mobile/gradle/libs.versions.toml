@@ -95,6 +95,8 @@ androidx-room-testing = { module = "androidx.room:room-testing", version.ref = "
 androidx-sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "androidx-sqlite" }
 sqlcipher-android = { module = "net.zetetic:sqlcipher-android", version.ref = "sqlcipher" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx-datastore" }
+# The multiplatform part of DataStore Preferences (Android, iOS, JVM): what shared code compiles against.
+androidx-datastore-preferences-core = { module = "androidx.datastore:datastore-preferences-core", version.ref = "androidx-datastore" }
 androidx-work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "androidx-work" }
 androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "androidx-work" }
 androidx-hilt-lifecycle-viewmodel-compose = { module = "androidx.hilt:hilt-lifecycle-viewmodel-compose", version.ref = "androidx-hilt" }

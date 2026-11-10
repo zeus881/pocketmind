@@ -14,6 +14,7 @@ kotlin {
             api(projects.shared.core)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.kotlinx.coroutines.core)
+            api(libs.androidx.datastore.preferences.core)
         }
         iosTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)
