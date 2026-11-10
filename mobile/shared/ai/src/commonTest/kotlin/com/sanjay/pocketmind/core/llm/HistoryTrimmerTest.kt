@@ -2,11 +2,11 @@ package com.sanjay.pocketmind.core.llm
 
 import com.sanjay.pocketmind.core.model.ChatTurn
 import com.sanjay.pocketmind.core.model.TurnRole
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotNull
-import org.junit.Assert.assertNull
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class HistoryTrimmerTest {
     private fun user(text: String) = ChatTurn(TurnRole.USER, text)
@@ -14,7 +14,7 @@ class HistoryTrimmerTest {
     private fun bot(text: String) = ChatTurn(TurnRole.ASSISTANT, text)
 
     @Test
-    fun `short history is kept whole with no note`() {
+    fun shortHistoryIsKeptWholeWithNoNote() {
         val history = listOf(user("Hi"), bot("Hello! How can I help?"))
         val result = HistoryTrimmer.trim(history, budgetTokens = 1000)
         assertEquals(history, result.turns)
@@ -22,7 +22,7 @@ class HistoryTrimmerTest {
     }
 
     @Test
-    fun `long history keeps the newest turns and summarizes the oldest`() {
+    fun longHistoryKeepsTheNewestTurnsAndSummarizesTheOldest() {
         val history = listOf(
             user("Tell me about drones. " + "x".repeat(2000)),
             bot("Drones are aircraft without a pilot. " + "y".repeat(2000)),
@@ -35,12 +35,12 @@ class HistoryTrimmerTest {
         assertEquals(listOf(user("And batteries?"), bot("Lithium polymer is common.")), result.turns)
         val note = result.summaryNote
         assertNotNull(note)
-        assertTrue(note!!.startsWith("Earlier in this conversation:"))
+        assertTrue(note.startsWith("Earlier in this conversation:"))
         assertTrue(note.contains("Drones are aircraft without a pilot."))
     }
 
     @Test
-    fun `kept history never starts with an assistant turn`() {
+    fun keptHistoryNeverStartsWithAnAssistantTurn() {
         val history = listOf(user("q1 " + "x".repeat(300)), bot("a1"), user("q2"), bot("a2"))
         // Budget fits a1, q2, a2 but not q1 — a1 would be an orphan reply.
         val result = HistoryTrimmer.trim(history, budgetTokens = 10)
@@ -48,7 +48,7 @@ class HistoryTrimmerTest {
     }
 
     @Test
-    fun `zero budget keeps nothing`() {
+    fun zeroBudgetKeepsNothing() {
         val result = HistoryTrimmer.trim(listOf(user("hi")), budgetTokens = 0)
         assertTrue(result.turns.isEmpty())
     }

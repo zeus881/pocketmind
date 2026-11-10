@@ -4,7 +4,6 @@ import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.LlmTask
 import com.sanjay.pocketmind.core.llm.TokenEstimator
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -35,7 +34,7 @@ sealed interface SummaryProgress {
  * short text far better than a long one. Cost: one LLM call per chunk (progress is shown, and
  * collection can be cancelled at any point — cancelling the Flow stops the current generation).
  */
-class Summarizer @Inject constructor(private val task: LlmTask) {
+class Summarizer(private val task: LlmTask) {
 
     fun summarize(pages: List<PageText>): Flow<SummaryProgress> = flow {
         emit(SummaryProgress.Preparing)

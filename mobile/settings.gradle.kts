@@ -44,6 +44,7 @@ include(":composeApp")
 include(":shared:core")
 include(":shared:data")
 include(":shared:tools")
+include(":shared:ai")
 
 include(":core:common")
 include(":core:designsystem")

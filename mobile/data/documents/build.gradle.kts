@@ -8,7 +8,7 @@ android {
 }
 
 dependencies {
-    api(projects.shared.core)
+    api(projects.shared.ai) // V3: chunker, summarizer, translator and the local RAG maths are shared with iOS
     api(projects.core.llm)
     implementation(projects.core.common)
     implementation(projects.core.billing) // the free version's PDF page limit

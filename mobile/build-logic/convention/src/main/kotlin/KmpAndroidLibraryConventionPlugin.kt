@@ -35,6 +35,11 @@ class KmpAndroidLibraryConventionPlugin : Plugin<Project> {
                     minSdk = libs.intVersion("minSdk")
                     compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
                     configureLint(lint)
+                    // Runs commonTest on the JVM too (task testAndroidHostTest): fast local runs, Linux CI and
+                    // coverage. Without it, a module's common tests would only run on the iOS simulator.
+                    withHostTest {
+                        isReturnDefaultValues = true
+                    }
                 }
                 iosArm64()
                 iosSimulatorArm64()

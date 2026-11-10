@@ -2,7 +2,6 @@ package com.sanjay.pocketmind.core.llm
 
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -17,7 +16,7 @@ import kotlinx.coroutines.flow.fold
  * what the user did before. It also changes [LlmEngine.sessionId], so the chat knows to rebuild
  * its own conversation afterwards.
  */
-class LlmTask @Inject constructor(private val engine: LlmEngine, private val settingsSource: InferenceSettingsSource) {
+class LlmTask(private val engine: LlmEngine, private val settingsSource: InferenceSettingsSource) {
     /** Context window of the loaded model (for sizing chunks). */
     val contextWindowTokens: Int get() = engine.contextWindowTokens
 

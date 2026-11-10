@@ -3,7 +3,6 @@ package com.sanjay.pocketmind.data.documents
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.llm.LlmTask
 import com.sanjay.pocketmind.core.llm.TokenEstimator
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
@@ -47,7 +46,7 @@ object Languages {
  * - Long texts are split at paragraph boundaries into parts that fit the context window and
  *   translated one after another, streamed as one continuous answer.
  */
-class Translator @Inject constructor(private val task: LlmTask) {
+class Translator(private val task: LlmTask) {
 
     /** Loads the model; call before [translate]. */
     suspend fun prepare(): AppResult<Unit> = when (val loaded = task.ensureLoaded()) {

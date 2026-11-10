@@ -1,12 +1,12 @@
 package com.sanjay.pocketmind.core.llm
 
 /**
- * Small pure functions used by [LiteRtLmEngine].
+ * Small pure functions used by the platform engines (LiteRtLmEngine on Android; the iOS engine bridge in V3).
  *
- * WHY separate? The engine itself needs the native library and a real phone, so it can't run
+ * WHY separate? An engine needs the native library and a real phone, so it can't run
  * in unit tests. Pulling the decision logic out into plain functions lets us test it on the JVM.
  */
-internal object EngineMath {
+object EngineMath {
     private const val MILLIS_PER_SECOND = 1000.0
 
     /**

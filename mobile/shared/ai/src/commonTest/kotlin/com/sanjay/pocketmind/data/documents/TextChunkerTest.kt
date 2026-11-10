@@ -1,9 +1,9 @@
 package com.sanjay.pocketmind.data.documents
 
 import com.sanjay.pocketmind.core.llm.TokenEstimator
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Test
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class TextChunkerTest {
     private fun sentence(i: Int) = "Sentence number $i talks about drones and batteries."
@@ -23,7 +23,7 @@ class TextChunkerTest {
         val chunks = TextChunker.chunk(pages, maxTokens = 120, overlapTokens = 12)
         assertTrue(chunks.size > 5)
         // +1 per sentence for the joining space; the chunk text itself must fit.
-        chunks.forEach { assertTrue("chunk ${it.index} too long", TokenEstimator.estimate(it.text) <= 120) }
+        chunks.forEach { assertTrue(TokenEstimator.estimate(it.text) <= 120, "chunk ${it.index} too long") }
     }
 
     @Test
@@ -32,7 +32,7 @@ class TextChunkerTest {
         val chunks = TextChunker.chunk(pages, maxTokens = 100, overlapTokens = 20)
         for (i in 1 until chunks.size) {
             val lastSentenceOfPrevious = chunks[i - 1].text.substringAfterLast("Sentence")
-            assertTrue("chunk $i must start with overlap", chunks[i].text.contains(lastSentenceOfPrevious))
+            assertTrue(chunks[i].text.contains(lastSentenceOfPrevious), "chunk $i must start with overlap")
         }
     }
 
@@ -41,7 +41,7 @@ class TextChunkerTest {
         val pages = (1..5).map { page(it, (it * 10)..(it * 10 + 4)) }
         val chunks = TextChunker.chunk(pages, maxTokens = 60, overlapTokens = 0)
         val joined = chunks.joinToString(" ") { it.text }
-        (10..54).filter { it % 10 < 5 }.forEach { assertTrue("missing $it", joined.contains("number $it ")) }
+        (10..54).filter { it % 10 < 5 }.forEach { assertTrue(joined.contains("number $it "), "missing $it") }
         assertEquals(1, chunks.first().startPage)
         assertEquals(5, chunks.last().endPage)
         chunks.forEach { assertTrue(it.startPage <= it.endPage) }

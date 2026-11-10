@@ -8,8 +8,8 @@ android {
 }
 
 dependencies {
-    api(projects.shared.core)
-    api(projects.shared.tools)
+    // V3: the engine contract, its states and the pure AI logic live in shared:ai (Android + iOS).
+    api(projects.shared.ai)
     implementation(projects.core.common)
 
     // "implementation", NOT "api": LiteRT-LM classes are invisible to every module that
