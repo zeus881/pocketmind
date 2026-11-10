@@ -4,7 +4,7 @@ name: CI
 
 on:
   push:
-    branches: [main, v2]
+    branches: [main, v2, v3]
   pull_request:
 
 # Cancel an older run of the same branch when a newer commit arrives (saves CI minutes).
@@ -65,7 +65,7 @@ jobs:
 
       # The same summary as a pull-request comment, updated in place on every push (first-party action).
       - name: Coverage comment on the pull request
-        if: always() && github.event_name == 'pull_request' && hashFiles('coverage-summary.md') != '
+        if: always() && github.event_name == 'pull_request' && hashFiles('coverage-summary.md') != ''
         uses: actions/github-script@v9
         with:
           script: |
