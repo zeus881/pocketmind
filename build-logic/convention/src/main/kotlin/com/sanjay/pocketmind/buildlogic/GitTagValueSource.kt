@@ -23,7 +23,7 @@ abstract class GitTagValueSource : ValueSource<String, ValueSourceParameters.Non
     override fun obtain(): String? = try {
         val output = ByteArrayOutputStream()
         val result = execOperations.exec {
-            commandLine("git", "describe", "--tags", "--match", "v*", "--abbrev=0")
+            commandLine("git", "describe", "--tags", "--match", "v[0-9]*.[0-9]*.[0-9]*", "--abbrev=0")
             standardOutput = output
             errorOutput = ByteArrayOutputStream()
             isIgnoreExitValue = true

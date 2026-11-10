@@ -56,7 +56,7 @@ abstract class GitCommitSubjectsValueSource : ValueSource<String, ValueSourcePar
 
     @Suppress("TooGenericExceptionCaught") // no git means no notes, not a failed build
     override fun obtain(): String = try {
-        val tag = run("git", "describe", "--tags", "--match", "v*", "--abbrev=0", "HEAD^")
+        val tag = run("git", "describe", "--tags", "--match", "v[0-9]*.[0-9]*.[0-9]*", "--abbrev=0", "HEAD^")
         val range = if (tag.isNullOrBlank()) "HEAD" else "$tag..HEAD"
         run("git", "log", range, "--no-merges", "--pretty=%s").orEmpty()
     } catch (e: Exception) {
