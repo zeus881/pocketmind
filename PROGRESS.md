@@ -9,7 +9,13 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 0 Setup | DONE | tag `v2-final` = af6890f; branch `v3`; spec committed (5473486) |
 | 1 Audit | DONE | AUDIT_V3.md (baseline score 28 / 130 against the V3 spec) |
 | 2 Plan | DONE | V3_PLAN.md: phases 1, 2a–2e, 3–16, Final |
-| 3 Build | **WAITING for the owner's "approved"** | open decisions A–G in V3_PLAN.md §1 |
+| 3 Build | IN PROGRESS (approved 2026-11-10) | decisions A–G as proposed in V3_PLAN.md §1; name: **Sanjay Kumar** (owner's GitHub profile + earlier "use Sanjay everywhere"; one constant) |
+
+### V3 phases
+
+| Phase | State | Gate | Notes |
+|---|---|---|---|
+| 1 Monorepo, KMP skeleton, CI | DONE | 402 tests, 0 failures (Linux/WSL); logic coverage 84.17 % (gate 84) | see "Phase 1 notes" |
 
 **GitHub (2026-11-10):** public repo https://github.com/zeus881/pocketmind; branches main, v2, v3 and tag v2-final pushed.
 Commit email changed to sanjaykumarr99009@gmail.com in the whole history before the first push (old history kept in a
@@ -18,6 +24,28 @@ executable (committed from Windows); both fixed on main, v2 and v3. Result on Li
 formatting, detekt, Lint, all unit + E2E tests and the coverage gate; only the screenshot comparison fails because
 the goldens are stale and Windows-rendered. "Record screenshots" now commits Linux images itself.
 **Owner:** Actions → Record screenshots → Run workflow on v3 (and v2), then re-run CI.
+
+### Phase 1 notes (2026-11-10)
+- v2 moved into `mobile/` with `git mv` (history kept); `app` → `androidApp` (same app ID); stray `AskPane.kt`
+  removed. Workflows run Gradle from `mobile/` (`defaults.run.working-directory`); `ci.yml` → `mobile-ci.yml`
+  (path-filtered); new `ios-build.yml` (macOS runner: `:shared:core:iosSimulatorArm64Test`, XcodeGen, unsigned
+  simulator `xcodebuild`). **iOS build: to verify on CI** (first run after this push).
+- `shared:core` = v2 `core:model` in commonMain (KMP: jvm + iosArm64 + iosSimulatorArm64; Android modules use the
+  JVM jar unchanged). Convention plugin `pocketmind.kmp.library`. 4 new shared tests (catalog JSON + benchmark maths).
+- `composeApp` (Compose Multiplatform 1.12.2, AGP `com.android.kotlin.multiplatform.library`, target DSL
+  `kotlin { android {} }` checked in the AGP 9.5.0 jars) builds the iOS framework `ComposeApp`; first shared screen
+  = v2's onboarding texts (en/hi/pa). `iosApp/project.yml` (XcodeGen, iOS 16, bundle `com.sanjay.pocketmind`).
+- **Deviation from V3_PLAN phase 1:** `core:tools` stays a JVM module until phase 2b. It uses `java.math.BigDecimal`,
+  `Math` and `java.time`, which Kotlin/Native lacks; replacing them needs verified KMP libraries.
+- Bugs found and fixed: release/version tags matched `v2-final` (`git describe --match v*` → AppVersion rejected
+  it → every build with tags failed) → pattern `v[0-9]*.[0-9]*.[0-9]*`, workflows `v[0-9]+.[0-9]+.[0-9]+*`;
+  the design-token guard scanned the old `app/` path; the architecture guard now knows `shared:*` (core/data may
+  use it; shared → shared only) and reads KMP source-set configurations; detekt treats `*Test/kotlin` as tests.
+- Verified for phase 2a (Room 2.8.5 Android artifact, javap): the builder has both `openHelperFactory(…)` (keeps
+  v2's SQLCipher factory on Android) and `setDriver(…)` (iOS); `RoomOpenHelper` and `BaseRoomConnectionManager` both
+  call `Migration.migrate(SQLiteConnection)`, so migrations written once in commonMain run on both (AUDIT_V3 D-3, D-7).
+- Facts: Compose Multiplatform 1.12.2 supports iOS 14+ (official compatibility page, read 2026-11-10); built on
+  AndroidX Compose 1.12.1, Kotlin stdlib ≥ 2.2.20.
 
 
 ## v2 status (branch `v2`, plan: V2_PLAN.md, approved 2026-11-02)
@@ -231,6 +259,16 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
 
 ## BLOCKERS
 
+- **V3: Windows blocks Robolectric's native runtime (2026-11-10).** On this PC, Windows app control (likely Smart
+  App Control) now refuses `libandroid_runtime.dll`, which Robolectric unpacks into `%TEMP%`: 26 tests (Room DAO
+  tests on native SQLite, a Compose test) fail with "An Application Control policy has blocked this file". Not a
+  code problem: the same tests pass on Linux. Safest working alternative (not switching off a Windows security
+  feature, which can't be turned back on without reinstalling Windows): the gate runs on **Linux in WSL** with a
+  private toolchain in `~/pm-toolchain` (Temurin 17.0.21 + 21.0.13, Android SDK platforms 36/37, build-tools
+  36.0.0; every download checksum-verified) and a copy of `mobile/` in `~/pm-build/mobile`. WSL has 7.7 GB, so WSL
+  builds use `--max-workers=2`, a 3 GB Gradle heap and a 1.5 GB Kotlin daemon (the default 4 GB daemon was
+  OOM-killed, dmesg). `spotlessApply` still runs on Windows (it edits the real files).
+
 - **Intermittent KSP2 errors in parallel builds** (seen 5 times, phases 0–5): `InjectProcessingStep was unable to
   process X because Y could not be resolved`, and once a module's KSP output was empty (→ `MissingBinding`). Task
   order was verified correct; the same task succeeds alone. Mitigations applied (phase 2: `ksp.incremental=false`;
@@ -260,6 +298,14 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   `kspDebugKotlin --rerun`). Status: **resolved**, keep watching.
 
 ## MANUAL STEPS FOR SANJAY
+
+### V3 (MANUAL STEPS / UNKNOWNS)
+- **Screenshots:** Actions → "Record screenshots" → Run workflow on `v3` (it now commits the Linux images itself).
+- **iOS on a Mac (optional now, needed in phase 2e):** `brew install xcodegen`; in `mobile/iosApp`: `xcodegen generate`,
+  open `iosApp.xcodeproj`, pick a simulator, Run. On an iPhone: a free Apple ID in Xcode → Signing.
+- Unverified until checked: Oracle A1 free limits, Supabase free limits/idle pause, free LLM provider limits and
+  data-use terms, FTS4 in Room's bundled SQLite on iOS, LiteRT-LM Swift embeddings, pgvector inside pgserver,
+  the free weather API.
 
 ### v2 (added during the v2 build)
 - **Engine test on the phone (phase 4):** `adb push gemma-4-E2B-it.litertlm /data/local/tmp/llm/model.litertlm`, then
