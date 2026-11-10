@@ -16,6 +16,7 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | Phase | State | Gate | Notes |
 |---|---|---|---|
 | 1 Monorepo, KMP skeleton, CI | DONE | 402 tests, 0 failures (Linux/WSL); logic coverage 84.17 % (gate 84) | see "Phase 1 notes" |
+| 2a Shared data layer (Room KMP, DataStore KMP) | DONE | 402 tests, 0 failures (Linux/WSL) + 3 iOS tests (CI); logic coverage 84.09 % | see "Phase 2a notes"; iOS build green on CI |
 
 **GitHub (2026-11-10):** public repo https://github.com/zeus881/pocketmind; branches main, v2, v3 and tag v2-final pushed.
 Commit email changed to sanjaykumarr99009@gmail.com in the whole history before the first push (old history kept in a
@@ -46,6 +47,28 @@ the goldens are stale and Windows-rendered. "Record screenshots" now commits Lin
   call `Migration.migrate(SQLiteConnection)`, so migrations written once in commonMain run on both (AUDIT_V3 D-3, D-7).
 - Facts: Compose Multiplatform 1.12.2 supports iOS 14+ (official compatibility page, read 2026-11-10); built on
   AndroidX Compose 1.12.1, Kotlin stdlib ≥ 2.2.20.
+- CI after phase 1: Mobile CI green except the stale screenshots; iOS build first failed at the Xcode step (a
+  generic simulator destination builds x86_64 too, which the shared code doesn't target) → arm64-only build,
+  framework linked in its own step, Xcode errors as annotations → **iOS build green** (run 42784456193).
+
+### Phase 2a notes (2026-11-10)
+- `shared:data` (KMP Android + iOS; plugins `pocketmind.kmp.android.library` + `pocketmind.kmp.room`) owns the Room
+  entities, DAOs, `Migrations`, `PocketMindDatabase` (+ `@ConstructedBy`/`expect object`) and `SettingsDataSource`,
+  moved with `git mv` (packages unchanged, so no consumer changed). **Schema still version 8**: Room's KMP export
+  reproduced `8.json` exactly (no diff), so no v9 and no new migration were needed (V3_PLAN said v9: not needed).
+- Migrations on `SQLiteConnection`; `NoteDao` suspend (`RoomNoteStore` waits with `runBlocking` on LiteRT-LM's thread).
+- `core:database` = SQLCipher + Keystore + Hilt; `core:datastore` = the "user_settings" file + Hilt
+  (`SettingsModule` separate so E2E tests keep the real settings class).
+- `androidx.sqlite` **2.6.2** (= what Room 2.8.5 requires per its Gradle module metadata) for `sqlite-bundled`;
+  `datastore-preferences-core` 1.3.0 has iOS variants (checked).
+- **iOS:** `IosDatabaseTest` (bundled driver: FTS4 search incl. Hindi, notes) passed on the macOS runner →
+  AUDIT_V3 D-6 resolved (FTS4 works in Room's bundled SQLite on iOS).
+- Coverage: moving the DAO code out of the report dropped the merged figure to 83.57 % although every test passed;
+  `shared:data` joined the merged report (Kover variant name "android", probed) → 84.09 %.
+- **Deviation:** no Koin yet. Shared classes carry no DI annotations; Android provides them with Hilt `@Provides`.
+  Koin arrives with the shared UI (phase 2c), so the Android app never runs two DI frameworks at once.
+- Not yet done (planned for 2d/2e): creating the database file and the DataStore file on iOS (paths, Data
+  Protection) — they are only needed once iOS screens exist.
 
 
 ## v2 status (branch `v2`, plan: V2_PLAN.md, approved 2026-11-02)
