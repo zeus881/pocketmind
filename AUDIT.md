@@ -1,6 +1,6 @@
 # PocketMind v1 — Audit
 
-Date: 2026-11-02 · Commit audited: `9589ca3` (branch `main`) · Auditor roles: principal Android engineer,
+Date: 2026-11-02 · Commit audited: `68a7544` (branch `main`) · Auditor roles: principal Android engineer,
 senior product designer, Play Store release manager.
 
 Every number below was **measured** on this codebase or on the real test phone (iQOO Neo 10R, Snapdragon 8s Gen 3,

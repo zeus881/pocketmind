@@ -1,6 +1,6 @@
 # PocketMind V3 — Audit of v2 against the V3 spec (2026-11-10)
 
-Stage 1 of CLAUDE.md §9. No code was changed. Starting point: tag `v2-final` (commit `539803e`, branch `v2`).
+Stage 1 of CLAUDE.md §9. No code was changed. Starting point: tag `v2-final` (commit `af6890f`, branch `v2`).
 Every version below was read from Maven Central, Google Maven, PyPI or GitHub on 2026-11-10; every count was
 measured in this repo. Anything not verified is marked **UNVERIFIED**.
 

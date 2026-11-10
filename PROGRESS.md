@@ -6,7 +6,7 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 
 | Stage | State | Notes |
 |---|---|---|
-| 0 Setup | DONE | tag `v2-final` = 539803e; branch `v3`; spec committed (8a218ec) |
+| 0 Setup | DONE | tag `v2-final` = af6890f; branch `v3`; spec committed (5473486) |
 | 1 Audit | DONE | AUDIT_V3.md (baseline score 28 / 130 against the V3 spec) |
 | 2 Plan | DONE | V3_PLAN.md: phases 1, 2a–2e, 3–16, Final |
 | 3 Build | **WAITING for the owner's "approved"** | open decisions A–G in V3_PLAN.md §1 |
@@ -190,14 +190,14 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   Two causes: the whole Markdown text was re-parsed and re-composed on every 50 ms update, and `animateItem()`
   sprang every message above into place each time the answer grew. Now `StreamingMarkdownText` uses the
   renderer's append-only `StreamingMarkdownState` (0.46.0, checked with javap; finished blocks stay put), and list
-  items keep their fade but have no placement animation. Commit `b77222b`. Owner confirmed on the phone: no
+  items keep their fade but have no placement animation. Commit `a30ab97`. Owner confirmed on the phone: no
   flicker any more.
 - **Reading while an answer is written (owner's report): fixed, to verify on device.** The text kept moving up,
   even after scrolling up to read. Cause: `reverseLayout` anchors the list to the bottom of the newest item.
   Now the list is laid out top-down and follows the newest text only while the user is at the end
   (`FollowLatestState`: a drag towards older messages stops following; reaching the end or "Jump to latest"
   resumes it). The finished answer replaces the live one in a single frame (ViewModel waits for Room's copy).
-  Commit `221d652`; owner confirmed: the text stays steady. Owner's follow-up wish: the answer should start at the
+  Commit `6f61544`; owner confirmed: the text stays steady. Owner's follow-up wish: the answer should start at the
   TOP, not the bottom. Now (like current AI assistant apps) a new question moves to the top of the screen and its
   answer is written downwards below it; nothing scrolls on its own; the newest answer is at least one screen tall
   so this works for short answers too; "Jump to latest" shows while there is more below (`ChatScrollEffect`,
@@ -211,7 +211,7 @@ Reported by Sanjay: (1) code answers poor, (2) answer bubble flickers while stre
   temperature setting on the phone was 1.5, which may make this more likely.
 - **App language: works** (checked on the phone: Hindi applies instantly, back to English, then restored to
   "Same as the phone" as the owner had it; a Punjabi option is listed too).
-- **Unneeded tool calls: fixed and measured** (commit `c694683`). Tool descriptions and the system rule now say when
+- **Unneeded tool calls: fixed and measured** (commit `cc5e804`). Tool descriptions and the system rule now say when
   NOT to use a tool. 5 fresh chats on the phone, temperature 1.5 (the owner's setting; default 0.4):
   capital of Japan: no tool ✓; why the sky is blue: no tool ✓; 123.4 × 56: Calculator, 6910.4 ✓; photosynthesis
   with a heading: no tool ✓; weekday today: Date and time, "Tuesday" ✓. 5 of 5 right, a small sample.
