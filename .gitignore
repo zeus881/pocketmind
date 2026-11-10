@@ -28,3 +28,9 @@ keystore.properties
 # OS junk
 .DS_Store
 Thumbs.db
+
+# iOS (V3): the Xcode project is generated from mobile/iosApp/project.yml by XcodeGen
+mobile/iosApp/iosApp.xcodeproj/
+mobile/iosApp/iosApp/Info.plist
+xcuserdata/
+DerivedData/

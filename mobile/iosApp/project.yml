@@ -1,0 +1,45 @@
+# PocketMind for iOS (V3). The Xcode project is GENERATED from this file with XcodeGen, never committed:
+#   brew install xcodegen && cd mobile/iosApp && xcodegen generate && open iosApp.xcodeproj
+# The app is a thin SwiftUI host; all UI and logic come from the shared Kotlin framework "ComposeApp"
+# (mobile/composeApp), which Gradle builds in the "Compile Kotlin framework" step below.
+name: iosApp
+options:
+  bundleIdPrefix: com.sanjay
+  deploymentTarget:
+    # iOS 16: the spec's minimum. It also covers Compose Multiplatform 1.12.2 (iOS 14+) and the
+    # LiteRT-LM Swift package (iOS 15+) that phase 2e adds.
+    iOS: "16.0"
+targets:
+  iosApp:
+    type: application
+    platform: iOS
+    sources: [iosApp]
+    info:
+      path: iosApp/Info.plist
+      properties:
+        CFBundleDisplayName: PocketMind
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        UILaunchScreen: {}
+        # Lets Compose animate at 120 Hz on ProMotion iPhones (recommended by Compose Multiplatform).
+        CADisableMinimumFrameDurationOnPhone: true
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait, UIInterfaceOrientationLandscapeLeft, UIInterfaceOrientationLandscapeRight]
+    settings:
+      base:
+        PRODUCT_NAME: PocketMind
+        PRODUCT_BUNDLE_IDENTIFIER: com.sanjay.pocketmind
+        MARKETING_VERSION: "3.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        # Where Gradle's embedAndSignAppleFrameworkForXcode task puts the framework for this build.
+        FRAMEWORK_SEARCH_PATHS: ["$(inherited)", "$(SRCROOT)/../composeApp/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"]
+        OTHER_LDFLAGS: ["$(inherited)", "-framework", "ComposeApp"]
+        # The Gradle step reads and writes outside the Xcode sandbox (the Kotlin build).
+        ENABLE_USER_SCRIPT_SANDBOXING: NO
+        CODE_SIGN_STYLE: Automatic
+    preBuildScripts:
+      - name: Compile Kotlin framework
+        basedOnDependencyAnalysis: false
+        script: |
+          cd "$SRCROOT/.."
+          ./gradlew :composeApp:embedAndSignAppleFrameworkForXcode
+    scheme: {}

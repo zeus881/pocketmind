@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shared UI strings (Compose Multiplatform). Texts copied unchanged from v2 feature:onboarding. -->
+<resources>
+    <string name="app_name">PocketMind</string>
+    <string name="about_what_title">एक AI सहायक जो आपके फ़ोन में रहता है</string>
+    <string name="about_what_body">चैट करें, PDF का सारांश बनाएँ, दस्तावेज़ों से सवाल पूछें और अनुवाद करें — सब इसी फ़ोन पर चलने वाले भाषा मॉडल से।</string>
+    <string name="about_privacy_title">पूरी तरह निजी</string>
+    <string name="about_privacy_body">कोई अकाउंट नहीं। कोई क्लाउड नहीं। कोई एनालिटिक्स नहीं। आपकी चैट कभी इस फ़ोन से बाहर नहीं जातीं। इंटरनेट का इस्तेमाल सिर्फ़ एक बार मॉडल डाउनलोड करने के लिए होता है।</string>
+    <string name="about_disclaimer_title">जवाब गलत हो सकते हैं</string>
+    <string name="about_disclaimer_body">फ़ोन पर चलने वाले छोटे मॉडल गलतियाँ करते हैं और गलत होने पर भी भरोसे से बोल सकते हैं। ज़रूरी तथ्य जाँचें, और चिकित्सा, कानूनी या वित्तीय फ़ैसलों के लिए PocketMind पर निर्भर न रहें।</string>
+</resources>

@@ -3,12 +3,13 @@
 **A private AI assistant that runs entirely on your Android phone: chat, ask about photos, summarize and question
 PDFs with page citations, translate, and speak. No account. No cloud. Works in airplane mode.**
 
-[![CI](https://github.com/YOUR_GITHUB_USER/pocketmind/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_GITHUB_USER/pocketmind/actions/workflows/ci.yml)
-[![Latest release](https://img.shields.io/github/v/release/YOUR_GITHUB_USER/pocketmind)](https://github.com/YOUR_GITHUB_USER/pocketmind/releases/latest)
+[![Mobile CI](https://github.com/zeus881/pocketmind/actions/workflows/mobile-ci.yml/badge.svg)](https://github.com/zeus881/pocketmind/actions/workflows/mobile-ci.yml)
+[![iOS build](https://github.com/zeus881/pocketmind/actions/workflows/ios-build.yml/badge.svg)](https://github.com/zeus881/pocketmind/actions/workflows/ios-build.yml)
+[![Latest release](https://img.shields.io/github/v/release/zeus881/pocketmind)](https://github.com/zeus881/pocketmind/releases/latest)
 ![Min SDK](https://img.shields.io/badge/minSdk-26-blue) ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 
 > Demo GIF: `docs/screenshots/demo.gif` (recorded on a real phone in airplane mode).
-> Google Play: _internal testing_ · APK: [GitHub Releases](https://github.com/YOUR_GITHUB_USER/pocketmind/releases/latest)
+> Google Play: _internal testing_ · APK: [GitHub Releases](https://github.com/zeus881/pocketmind/releases/latest)
 
 ---
 
@@ -112,18 +113,22 @@ Measured with v1; v2 adds encryption and features whose speed cost is to be meas
 Requirements: JDK 17 (runs Gradle) and JDK 21 (runs unit tests), Android SDK (platform 37).
 
 ```bash
-git clone https://github.com/YOUR_GITHUB_USER/pocketmind.git && cd pocketmind
-./gradlew assembleDebug                 # → app/build/outputs/apk/debug/app-debug.apk
+git clone https://github.com/zeus881/pocketmind.git && cd pocketmind/mobile
+./gradlew assembleDebug                 # → androidApp/build/outputs/apk/debug/androidApp-debug.apk
 ./gradlew installDebug                  # phone connected with USB debugging
 ```
 
-Full checks: `./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
+The Android/iOS app lives in `mobile/` (V3 monorepo). Full checks, from `mobile/`:
+`./gradlew spotlessApply detekt lint testDebugUnitTest koverVerifyApp assembleDebug`.
+
+iOS (needs a Mac with Xcode): `brew install xcodegen`, then in `mobile/iosApp`: `xcodegen generate` and open
+`iosApp.xcodeproj`. CI builds the iOS app on every push (`ios-build.yml`).
 
 ### Release
 
 Set `POCKETMIND_KEYSTORE_PATH`, `POCKETMIND_KEYSTORE_PASSWORD`, `POCKETMIND_KEY_ALIAS`, `POCKETMIND_KEY_PASSWORD`,
-then `./gradlew bundleRelease assembleRelease`. Without them you get an unsigned release build. Pushing a tag
-`v*` builds and signs the AAB + APK for GitHub Releases (`release.yml`) and uploads the AAB with generated release
+then `./gradlew bundleRelease assembleRelease` (in `mobile/`). Without them you get an unsigned release build. Pushing a version tag
+(`v1.2.3`) builds and signs the AAB + APK for GitHub Releases (`release.yml`) and uploads the AAB with generated release
 notes to Play's internal track (`play.yml`). See [docs/release-guide.md](docs/release-guide.md).
 
 ## Learn how it's built

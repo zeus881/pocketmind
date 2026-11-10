@@ -38,11 +38,11 @@ shared with third parties"** on the store listing.
 
 ## Before each release, check
 
-1. `./gradlew :app:dependencies --configuration releaseRuntimeClasspath`: no analytics, crash or ad SDK has been
+1. `cd mobile && ./gradlew :androidApp:dependencies --configuration releaseRuntimeClasspath`: no analytics, crash or ad SDK has been
    added (for example Firebase, Crashlytics, Sentry or AdMob).
 2. `grep -r "http" --include=*.kt`: the only URLs are the Hugging Face model URLs in `models.json`, plus
    documentation links.
-3. `app/src/main/res/xml/network_security_config.xml` still allows HTTPS only.
+3. `mobile/androidApp/src/main/res/xml/network_security_config.xml` still allows HTTPS only.
 
 If any of these changes, update this page, the privacy policy (`docs/privacy-policy.md`) and the Play form
 together.

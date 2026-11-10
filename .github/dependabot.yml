@@ -4,7 +4,7 @@
 version: 2
 updates:
   - package-ecosystem: gradle
-    directory: "/"
+    directory: "/mobile"
     schedule:
       interval: weekly
     open-pull-requests-limit: 10

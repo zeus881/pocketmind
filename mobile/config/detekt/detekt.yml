@@ -1,0 +1,52 @@
+# Detekt rules for PocketMind. We start from Detekt's defaults (buildUponDefaultConfig = true)
+# and only change rules that clash with Jetpack Compose conventions.
+
+complexity:
+  LongMethod:
+    threshold: 80
+    # Composable screens are naturally long: they describe a whole UI tree.
+    ignoreAnnotated: ['Composable']
+  LongParameterList:
+    functionThreshold: 8
+    constructorThreshold: 9
+    ignoreDefaultParameters: true
+    ignoreAnnotated: ['Composable']
+  TooManyFunctions:
+    thresholdInFiles: 25
+    thresholdInClasses: 20
+    thresholdInInterfaces: 20
+    thresholdInObjects: 20
+    ignorePrivate: true
+    # A class implementing an interface can't choose how many functions it has; the interface is counted itself.
+    ignoreOverridden: true
+  CyclomaticComplexMethod:
+    ignoreAnnotated: ['Composable']
+
+naming:
+  MatchingDeclarationName:
+    # XxxNavigation.kt holds a route object plus its navigation extension functions,
+    # which is the convention used by Google's "Now in Android" sample.
+    excludes: ['**/navigation/**']
+  FunctionNaming:
+    # @Composable functions are PascalCase by Compose convention (e.g. ChatScreen()).
+    ignoreAnnotated: ['Composable']
+  TopLevelPropertyNaming:
+    constantPattern: '[A-Z][A-Za-z0-9_]*'
+
+style:
+  MagicNumber:
+    # Sizes like 16.dp in UI code are design values, not hidden logic.
+    ignoreAnnotated: ['Composable', 'Preview']
+    ignorePropertyDeclaration: true
+    ignoreCompanionObjectPropertyDeclaration: true
+    # Test data is full of literal numbers on purpose. KMP test folders (V3) are named *Test, not test.
+    excludes: ['**/test/**', '**/androidTest/**', '**/*Test/kotlin/**']
+  UnusedPrivateMember:
+    ignoreAnnotated: ['Preview']
+  ReturnCount:
+    max: 3
+  ForbiddenComment:
+    # CLAUDE.md: no TODOs in production code.
+    comments: ['TODO:', 'FIXME:', 'STOPSHIP:', 'TODO']
+  WildcardImport:
+    active: true

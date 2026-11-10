@@ -20,6 +20,10 @@ jobs:
   internal-track:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # The Android/KMP Gradle build lives in mobile/ (V3 monorepo); artifact paths below stay repo-relative.
+    defaults:
+      run:
+        working-directory: mobile
     env:
       ANDROID_PUBLISHER_CREDENTIALS: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
     steps:
@@ -54,8 +58,8 @@ jobs:
 
       - name: Release notes from conventional commits
         run: |
-          ./gradlew :app:generateReleaseNotes
-          cat app/src/main/play/release-notes/en-US/default.txt
+          ./gradlew :androidApp:generateReleaseNotes
+          cat androidApp/src/main/play/release-notes/en-US/default.txt
 
       - name: Build and upload to the internal track
         env:
@@ -64,4 +68,4 @@ jobs:
           POCKETMIND_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           POCKETMIND_VERSION_TAG: ${{ github.ref_name }}
         # --no-parallel: release KSP tasks once raced in parallel builds (PROGRESS.md, BLOCKERS).
-        run: ./gradlew :app:publishReleaseBundle --no-parallel
+        run: ./gradlew :androidApp:publishReleaseBundle --no-parallel

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shared UI strings (Compose Multiplatform). Texts copied unchanged from v2 feature:onboarding. -->
+<resources>
+    <string name="app_name">PocketMind</string>
+    <string name="about_what_title">An AI assistant that lives on your phone</string>
+    <string name="about_what_body">Chat, summarize PDFs, ask questions about documents and translate — all powered by a language model running on this phone.</string>
+    <string name="about_privacy_title">Private by design</string>
+    <string name="about_privacy_body">No account. No cloud. No analytics. Your chats never leave this phone. The only internet use is the one-time model download.</string>
+    <string name="about_disclaimer_title">Answers can be wrong</string>
+    <string name="about_disclaimer_body">Small on-device models make mistakes and can sound confident when they are wrong. Check important facts, and do not rely on PocketMind for medical, legal or financial decisions.</string>
+</resources>

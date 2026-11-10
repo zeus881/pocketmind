@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Shared UI strings (Compose Multiplatform). Texts copied unchanged from v2 feature:onboarding. -->
+<resources>
+    <string name="app_name">PocketMind</string>
+    <string name="about_what_title">ਤੁਹਾਡੇ ਫ਼ੋਨ ਵਿੱਚ ਰਹਿਣ ਵਾਲਾ AI ਸਹਾਇਕ</string>
+    <string name="about_what_body">ਚੈਟ ਕਰੋ, PDF ਦਾ ਸਾਰ ਬਣਾਓ, ਦਸਤਾਵੇਜ਼ਾਂ ਬਾਰੇ ਸਵਾਲ ਪੁੱਛੋ ਅਤੇ ਅਨੁਵਾਦ ਕਰੋ — ਸਭ ਕੁਝ ਇਸੇ ਫ਼ੋਨ ਉੱਤੇ ਚੱਲਣ ਵਾਲੇ ਭਾਸ਼ਾ ਮਾਡਲ ਨਾਲ।</string>
+    <string name="about_privacy_title">ਸ਼ੁਰੂ ਤੋਂ ਹੀ ਨਿੱਜੀ</string>
+    <string name="about_privacy_body">ਨਾ ਖਾਤਾ। ਨਾ ਕਲਾਊਡ। ਨਾ ਕੋਈ ਵਿਸ਼ਲੇਸ਼ਣ। ਤੁਹਾਡੀਆਂ ਚੈਟਾਂ ਕਦੇ ਇਸ ਫ਼ੋਨ ਤੋਂ ਬਾਹਰ ਨਹੀਂ ਜਾਂਦੀਆਂ। ਇੰਟਰਨੈੱਟ ਸਿਰਫ਼ ਇੱਕ ਵਾਰ ਮਾਡਲ ਡਾਊਨਲੋਡ ਕਰਨ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।</string>
+    <string name="about_disclaimer_title">ਜਵਾਬ ਗ਼ਲਤ ਹੋ ਸਕਦੇ ਹਨ</string>
+    <string name="about_disclaimer_body">ਫ਼ੋਨ ਉੱਤੇ ਚੱਲਣ ਵਾਲੇ ਛੋਟੇ ਮਾਡਲ ਗ਼ਲਤੀਆਂ ਕਰਦੇ ਹਨ ਅਤੇ ਗ਼ਲਤ ਹੋਣ ਵੇਲੇ ਵੀ ਪੱਕੇ ਲੱਗ ਸਕਦੇ ਹਨ। ਜ਼ਰੂਰੀ ਗੱਲਾਂ ਦੀ ਜਾਂਚ ਕਰੋ, ਅਤੇ ਡਾਕਟਰੀ, ਕਾਨੂੰਨੀ ਜਾਂ ਪੈਸੇ ਦੇ ਫ਼ੈਸਲਿਆਂ ਲਈ PocketMind ਉੱਤੇ ਭਰੋਸਾ ਨਾ ਕਰੋ।</string>
+</resources>

@@ -16,6 +16,10 @@ jobs:
   record:
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    # The Android/KMP Gradle build lives in mobile/ (V3 monorepo); artifact paths below stay repo-relative.
+    defaults:
+      run:
+        working-directory: mobile
     steps:
       - uses: actions/checkout@v7
 
@@ -34,7 +38,7 @@ jobs:
       - uses: actions/upload-artifact@v7
         with:
           name: golden-screenshots
-          path: "**/src/test/screenshots/*.png"
+          path: "mobile/**/src/test/screenshots/*.png"
 
       - name: Commit the recorded images to this branch
         run: |

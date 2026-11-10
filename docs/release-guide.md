@@ -22,10 +22,10 @@ Who: the owner (Sanjay). What: how a new version gets to users safely, and how t
 1. Make sure `main`/`v2` is green in CI.
 2. Pick the version (`vMAJOR.MINOR.PATCH`, optionally `-beta.N`). The versionCode is computed from the tag
    (`AppVersion` in build-logic), so it always increases.
-3. Preview the notes: `./gradlew :app:generateReleaseNotes` and read
-   `app/src/main/play/release-notes/en-US/default.txt` (at most 500 characters, built from `feat:`/`fix:`/`perf:`
+3. Preview the notes: `cd mobile && ./gradlew :androidApp:generateReleaseNotes` and read
+   `mobile/androidApp/src/main/play/release-notes/en-US/default.txt` (at most 500 characters, built from `feat:`/`fix:`/`perf:`
    commits since the previous tag). Edit commit messages before tagging, not the file afterwards: the workflow
-   writes the file again. For Hindi, add `app/src/main/play/release-notes/hi-IN/default.txt` by hand; otherwise
+   writes the file again. For Hindi, add `mobile/androidApp/src/main/play/release-notes/hi-IN/default.txt` by hand; otherwise
    Play shows the English text.
 4. `git tag v2.0.0 && git push origin v2.0.0`.
    - `release.yml` → GitHub Release with the signed AAB + APK (for direct installs).
