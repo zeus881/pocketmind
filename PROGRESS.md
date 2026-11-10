@@ -17,6 +17,7 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 |---|---|---|---|
 | 1 Monorepo, KMP skeleton, CI | DONE | 402 tests, 0 failures (Linux/WSL); logic coverage 84.17 % (gate 84) | see "Phase 1 notes" |
 | 2a Shared data layer (Room KMP, DataStore KMP) | DONE | 402 tests, 0 failures (Linux/WSL) + 3 iOS tests (CI); logic coverage 84.09 % | see "Phase 2a notes"; iOS build green on CI |
+| 2b Shared AI (tools, engine contract, documents/RAG logic) | DONE | 419 tests, 0 failures (Linux/WSL); logic coverage 84.15 % | see "Phase 2b notes"; iOS tests on CI |
 
 **GitHub (2026-11-10):** public repo https://github.com/zeus881/pocketmind; branches main, v2, v3 and tag v2-final pushed.
 Commit email changed to sanjaykumarr99009@gmail.com in the whole history before the first push (old history kept in a
@@ -69,6 +70,20 @@ the goldens are stale and Windows-rendered. "Record screenshots" now commits Lin
   Koin arrives with the shared UI (phase 2c), so the Android app never runs two DI frameworks at once.
 - Not yet done (planned for 2d/2e): creating the database file and the DataStore file on iOS (paths, Data
   Protection) — they are only needed once iOS screens exist.
+
+### Phase 2b notes (2026-11-10)
+- `shared:tools` (pure KMP): java.math → **bignum 0.3.10** (Apache-2.0, API read with javap from its JVM jar, sha1
+  matched Maven Central), java.time → **kotlinx-datetime 0.8.0**, Math → kotlin.math. 12 tool tests unchanged in
+  their expected values; they run on the JVM and the iOS simulator.
+- `shared:ai` (KMP Android + iOS): LlmEngine/EngineState/SamplingParams/InferenceSettings, EngineMath (now public),
+  TokenEstimator, HistoryTrimmer, LlmTask, Summarizer, Translator, PromptTemplates, TextChunker, PageText,
+  VectorMath, VectorStore, GroundedPrompt. `AppResult`/`ErrorKind` + Flow helpers → `shared:core`.
+- `VectorMath` without java.nio; `VectorMathNioTest` proves byte-identical output to v2 (stored embeddings stay valid).
+- KMP Android modules now have host tests (`testAndroidHostTest`, part of the root `testDebugUnitTest`).
+- Hilt providers outside the modules E2E tests replace: `LlmTaskModule`, `DocumentTasksModule`.
+- **Kept for later:** LiteRT-LM stays 0.19.0 (verified on the phone); 0.19.1 exists — update only with a device
+  check (manual step). PDF text extraction on iOS (PDFKit) comes with the iOS platform services (2d/2e).
+- **To verify on device** (no behaviour change expected): chat with tools, PDF summary, Ask-your-PDF citations.
 
 
 ## v2 status (branch `v2`, plan: V2_PLAN.md, approved 2026-11-02)
