@@ -44,7 +44,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.ErrorState
@@ -53,13 +52,14 @@ import com.sanjay.pocketmind.core.designsystem.component.readableWidth
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.feature.models.component.ModelActions
 import com.sanjay.pocketmind.feature.models.component.ModelCard
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * Stateful model manager screen. Asks for the notification permission (Android 13+) before
  * the first download so the progress notification can be shown; the download works either way.
  */
 @Composable
-fun ModelsScreen(onBack: (() -> Unit)?, viewModel: ModelsViewModel = hiltViewModel()) {
+fun ModelsScreen(onBack: (() -> Unit)?, viewModel: ModelsViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current

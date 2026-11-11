@@ -8,7 +8,6 @@ import android.os.SystemClock
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_WEAK
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
@@ -44,9 +43,9 @@ import com.sanjay.pocketmind.ui.LockScreen
 import com.sanjay.pocketmind.ui.PocketMindAppUi
 import com.sanjay.pocketmind.ui.UpdateReadyBar
 import com.sanjay.pocketmind.widget.PocketMindWidget
-import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 /**
  * The only Activity. With Compose + Navigation we use a "single-activity" app: screens are
@@ -60,15 +59,14 @@ import kotlinx.coroutines.launch
  * screen's ViewModel, so an answer being generated or a PDF being summarized was lost. While
  * locked, the content underneath is hidden from TalkBack and can't be touched.
  */
-@AndroidEntryPoint
 class MainActivity : FragmentActivity() {
-    private val viewModel: MainActivityViewModel by viewModels()
+    private val viewModel: MainActivityViewModel by viewModel()
 
-    @Inject lateinit var updates: InAppUpdates
+    private val updates: InAppUpdates by inject()
 
-    @Inject lateinit var review: InAppReview
+    private val review: InAppReview by inject()
 
-    @Inject lateinit var answers: AnswerEvents
+    private val answers: AnswerEvents by inject()
 
     /** Play's update dialog; its result needs no handling (Play reports progress through [updates]). */
     private val updateDialog = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) {}

@@ -7,11 +7,6 @@ import com.google.ai.edge.litertlm.EmbeddingEngineConfig
 import com.google.ai.edge.litertlm.EmbeddingOptions
 import com.google.ai.edge.litertlm.ExperimentalApi
 import com.google.ai.edge.litertlm.InputData
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.sync.Mutex
@@ -28,11 +23,7 @@ import kotlinx.coroutines.withContext
  * - `normalize = true` returns unit-length vectors, so cosine similarity = dot product.
  */
 @OptIn(ExperimentalApi::class)
-@Singleton
-class LiteRtLmEmbedder @Inject constructor(
-    @ApplicationContext context: Context,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
-) : TextEmbedder {
+class LiteRtLmEmbedder(context: Context, private val io: CoroutineDispatcher) : TextEmbedder {
 
     private val cacheDir = context.cacheDir.absolutePath
     private val lock = Mutex()

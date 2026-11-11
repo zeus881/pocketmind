@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.data.models.ModelRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,11 +25,8 @@ data class OnboardingUiState(
  * First-launch flow. Shows the recommended model for this phone's RAM and remembers (in
  * DataStore) that onboarding was completed, so it never shows again.
  */
-@HiltViewModel
-class OnboardingViewModel @Inject constructor(
-    private val models: ModelRepository,
-    private val settings: SettingsDataSource,
-) : ViewModel() {
+class OnboardingViewModel(private val models: ModelRepository, private val settings: SettingsDataSource) :
+    ViewModel() {
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()

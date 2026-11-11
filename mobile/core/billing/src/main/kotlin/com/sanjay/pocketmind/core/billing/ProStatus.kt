@@ -1,10 +1,7 @@
 package com.sanjay.pocketmind.core.billing
 
 import android.app.Activity
-import com.sanjay.pocketmind.core.common.dispatchers.ApplicationScope
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -83,11 +80,10 @@ interface BillingGateway {
     fun setOnPurchasesUpdated(listener: (List<PurchaseRecord>) -> Unit)
 }
 
-@Singleton
-internal class PlayProStatus @Inject constructor(
+internal class PlayProStatus(
     private val gateway: BillingGateway,
     private val settings: SettingsDataSource,
-    @ApplicationScope private val scope: CoroutineScope,
+    private val scope: CoroutineScope,
 ) : ProStatus {
     /** What Play said this session (null = not asked yet: the cached answer counts until then). */
     private val confirmed = MutableStateFlow<Boolean?>(null)

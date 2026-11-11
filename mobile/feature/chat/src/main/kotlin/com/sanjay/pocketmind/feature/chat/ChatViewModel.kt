@@ -24,8 +24,6 @@ import com.sanjay.pocketmind.data.chat.ChatModel
 import com.sanjay.pocketmind.data.chat.ChatPhotos
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import com.sanjay.pocketmind.data.chat.PersonaRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
@@ -64,8 +62,7 @@ import timber.log.Timber
  * cost hundreds of disk writes per answer.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class ChatViewModel @Inject constructor(
+class ChatViewModel(
     private val repository: ChatRepository,
     private val photos: ChatPhotos,
     private val model: ChatModel,

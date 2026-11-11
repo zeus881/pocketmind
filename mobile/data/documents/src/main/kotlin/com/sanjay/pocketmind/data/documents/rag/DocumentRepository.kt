@@ -1,8 +1,6 @@
 package com.sanjay.pocketmind.data.documents.rag
 
 import android.net.Uri
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.common.time.Clock
@@ -16,8 +14,6 @@ import com.sanjay.pocketmind.core.llm.TextEmbedder
 import com.sanjay.pocketmind.data.documents.PdfTextExtractor
 import com.sanjay.pocketmind.data.documents.TextChunker
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -48,15 +44,14 @@ class Answer(val sources: List<SourceChunk>, val text: Flow<String>)
  *                        ─▶ grounded prompt "[p. N] chunk…" + rules ─▶ chat model ─▶ answer with [p. N]
  * ```
  */
-@Singleton
-class DocumentRepository @Inject constructor(
+class DocumentRepository(
     private val extractor: PdfTextExtractor,
     private val embedder: TextEmbedder,
     private val embeddingModel: EmbeddingModelSource,
     private val task: LlmTask,
     private val dao: DocumentDao,
     private val clock: Clock,
-    @Dispatcher(PmDispatchers.Default) private val cpu: CoroutineDispatcher,
+    private val cpu: CoroutineDispatcher,
 ) {
     fun observeDocuments(): Flow<List<IndexedDocument>> = dao.observeAll().map { list ->
         list.map { IndexedDocument(it.id, it.name, it.pageCount, it.chunkCount) }

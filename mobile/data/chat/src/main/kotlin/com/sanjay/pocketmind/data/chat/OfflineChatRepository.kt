@@ -26,8 +26,6 @@ import com.sanjay.pocketmind.core.model.TurnRole
 import com.sanjay.pocketmind.core.tools.LocalTool
 import com.sanjay.pocketmind.core.tools.ToolSchema
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -49,9 +47,8 @@ import timber.log.Timber
  *
  * `@Singleton` because the session bookkeeping must be shared by every screen.
  */
-@Singleton
 @Suppress("LongParameterList") // Hilt-injected collaborators, one per concern (storage, model, summaries, …)
-internal class OfflineChatRepository @Inject constructor(
+internal class OfflineChatRepository(
     private val chatDao: ChatDao,
     private val messageDao: MessageDao,
     private val engine: LlmEngine,

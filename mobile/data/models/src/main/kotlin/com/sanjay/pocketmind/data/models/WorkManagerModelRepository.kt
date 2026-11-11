@@ -10,8 +10,6 @@ import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import androidx.work.workDataOf
 import com.sanjay.pocketmind.core.billing.ProStatus
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
@@ -21,8 +19,6 @@ import com.sanjay.pocketmind.core.llm.ModelFiles
 import com.sanjay.pocketmind.core.model.ModelKind
 import com.sanjay.pocketmind.data.models.work.ModelDownloadWorker
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,9 +32,8 @@ import kotlinx.coroutines.flow.flowOn
  * the truth about what is downloaded. Storing a separate "status" column would only create a
  * second truth that could disagree (e.g. after the app is killed mid-download).
  */
-@Singleton
 @Suppress("LongParameterList") // Hilt-injected collaborators, one per concern
-internal class WorkManagerModelRepository @Inject constructor(
+internal class WorkManagerModelRepository(
     private val workManager: WorkManager,
     private val catalog: ModelCatalog,
     private val files: ModelFiles,
@@ -46,7 +41,7 @@ internal class WorkManagerModelRepository @Inject constructor(
     private val settings: SettingsDataSource,
     private val engine: LlmEngine,
     private val verifier: ModelVerifier,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
+    private val io: CoroutineDispatcher,
     private val pro: ProStatus,
 ) : ModelRepository {
 

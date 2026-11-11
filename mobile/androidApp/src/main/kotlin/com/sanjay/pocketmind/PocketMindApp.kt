@@ -1,50 +1,55 @@
 package com.sanjay.pocketmind
 
 import android.app.Application
-import androidx.hilt.work.HiltWorkerFactory
 import androidx.lifecycle.ProcessLifecycleOwner
-import androidx.work.Configuration
 import com.sanjay.pocketmind.core.billing.ProStatus
 import com.sanjay.pocketmind.core.common.diagnostics.CrashLog
-import com.sanjay.pocketmind.core.common.dispatchers.ApplicationScope
+import com.sanjay.pocketmind.core.common.dispatchers.PmQualifiers
 import com.sanjay.pocketmind.core.llm.LlmEngine
-import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
+import com.sanjay.pocketmind.di.pocketMindModules
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import org.koin.android.ext.android.inject
+import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.koin.core.context.startKoin
+import org.koin.core.context.stopKoin
+import org.koin.core.module.Module
 import timber.log.Timber
 
 /**
  * The Application object: Android creates exactly one per app process, before any screen.
  *
- * - `@HiltAndroidApp` generates the app-wide dependency container.
- * - `Configuration.Provider` lets WorkManager create our workers through Hilt
- *   ([HiltWorkerFactory]), so `ModelDownloadWorker` can get its dependencies injected.
- *   (WorkManager's automatic start-up is disabled in the manifest for this to work.)
+ * - It starts Koin, the app-wide dependency container (V3; v2 used Hilt). [koinModules] is `open` so
+ *   end-to-end tests can swap the engine, database and Play modules for fakes.
+ * - `workManagerFactory()` lets WorkManager create our workers through Koin, so `ModelDownloadWorker` gets its
+ *   dependencies. (WorkManager's automatic start-up is disabled in the manifest for this to work.)
  */
-@HiltAndroidApp
-class PocketMindApp :
-    Application(),
-    Configuration.Provider {
+open class PocketMindApp : Application() {
 
-    @Inject lateinit var llmEngine: LlmEngine
+    private val llmEngine: LlmEngine by inject()
 
-    @Inject @ApplicationScope
-    lateinit var appScope: CoroutineScope
+    private val appScope: CoroutineScope by inject(PmQualifiers.AppScope)
 
-    @Inject lateinit var workerFactory: HiltWorkerFactory
+    private val modelKeepAlive: ModelKeepAlive by inject()
 
-    @Inject lateinit var modelKeepAlive: ModelKeepAlive
+    private val crashLog: CrashLog by inject()
 
-    @Inject lateinit var crashLog: CrashLog
+    private val pro: ProStatus by inject()
 
-    @Inject lateinit var pro: ProStatus
-
-    override val workManagerConfiguration: Configuration
-        get() = Configuration.Builder().setWorkerFactory(workerFactory).build()
+    /** Every module of the app (see di/AppModules.kt). */
+    protected open fun koinModules(): List<Module> = pocketMindModules
 
     override fun onCreate() {
         super.onCreate()
+        // Robolectric runs many Application instances in one JVM, and Koin's container is global: start fresh.
+        // In the real app nothing was started yet, so this does nothing.
+        stopKoin()
+        startKoin {
+            androidContext(this@PocketMindApp)
+            workManagerFactory()
+            modules(koinModules())
+        }
         // First: so a crash during start-up is recorded too (kept on the phone; decision 1).
         crashLog.install()
         // Logs only in debug builds. Release builds log nothing, so no chat text can ever

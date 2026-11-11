@@ -9,8 +9,6 @@ import com.sanjay.pocketmind.core.billing.ProStatus
 import com.sanjay.pocketmind.core.common.diagnostics.CrashLog
 import com.sanjay.pocketmind.core.common.diagnostics.DeviceFactsSource
 import com.sanjay.pocketmind.core.common.diagnostics.DiagnosticReport
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.llm.DefaultPrompts
@@ -20,8 +18,6 @@ import com.sanjay.pocketmind.core.model.ThemeMode
 import com.sanjay.pocketmind.core.model.UserSettings
 import com.sanjay.pocketmind.data.chat.UserDataControl
 import com.sanjay.pocketmind.data.models.ModelRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -68,8 +64,7 @@ data class SettingsUiState(
  * Settings screen. Every change is written to DataStore immediately; the chat reads settings
  * before each message, so changes apply to the next answer (GPU/CPU changes reload the model).
  */
-@HiltViewModel
-class SettingsViewModel @Inject constructor(
+class SettingsViewModel(
     private val settings: SettingsDataSource,
     models: ModelRepository,
     private val engine: LlmEngine,
@@ -77,7 +72,7 @@ class SettingsViewModel @Inject constructor(
     private val pro: ProStatus,
     private val crashLog: CrashLog,
     private val deviceFacts: DeviceFactsSource,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
+    private val io: CoroutineDispatcher,
 ) : ViewModel(),
     SettingsActions {
 

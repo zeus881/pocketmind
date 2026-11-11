@@ -43,17 +43,17 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.designsystem.theme.PmSize
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
 private const val PAGE_COUNT = 4
 
 /** First-launch introduction. [onFinished] is called after "Get started" is saved. */
 @Composable
-fun OnboardingScreen(onFinished: () -> Unit, viewModel: OnboardingViewModel = hiltViewModel()) {
+fun OnboardingScreen(onFinished: () -> Unit, viewModel: OnboardingViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { viewModel.finished.collect { onFinished() } }
     OnboardingContent(state = state, onGetStarted = viewModel::finish)

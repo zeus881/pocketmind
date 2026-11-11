@@ -5,7 +5,7 @@ import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 
 /**
- * Protections every module that runs KSP needs (Hilt in Android modules, Room in shared KMP modules).
+ * Protections every module that runs KSP needs (V3: Room in shared KMP modules; in v2 also Hilt).
  *
  * - An intermittent KSP run that produced NO files was stored in the build cache and then restored in
  *   later builds as "FROM-CACHE", giving MissingBinding / "could not be resolved" errors far from the

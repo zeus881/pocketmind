@@ -53,10 +53,6 @@ gradlePlugin {
             id = "pocketmind.android.room"
             implementationClass = "AndroidRoomConventionPlugin"
         }
-        register("hilt") {
-            id = "pocketmind.hilt"
-            implementationClass = "HiltConventionPlugin"
-        }
         register("kmpLibrary") {
             id = "pocketmind.kmp.library"
             implementationClass = "KmpLibraryConventionPlugin"

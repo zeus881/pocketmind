@@ -1,7 +1,5 @@
 package com.sanjay.pocketmind.data.benchmark
 
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.common.time.Clock
 import com.sanjay.pocketmind.core.llm.EngineState
@@ -10,9 +8,10 @@ import com.sanjay.pocketmind.core.llm.LlmEngine
 import com.sanjay.pocketmind.core.llm.SamplingParams
 import com.sanjay.pocketmind.core.model.BenchmarkPromptResult
 import com.sanjay.pocketmind.core.model.BenchmarkResult
-import java.util.UUID
-import java.util.concurrent.atomic.AtomicInteger
-import javax.inject.Inject
+import kotlin.concurrent.atomics.AtomicInt
+import kotlin.concurrent.atomics.ExperimentalAtomicApi
+import kotlin.uuid.ExperimentalUuidApi
+import kotlin.uuid.Uuid
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -42,14 +41,17 @@ sealed interface BenchmarkProgress {
  *
  * Built with `channelFlow` (not `flow`) because a SECOND coroutine (the memory sampler) runs
  * alongside the measurements, and a plain `flow {}` may only emit from its own coroutine.
+ *
+ * V3: shared with iOS. [io] is passed in (Android: Hilt's IO dispatcher), so tests can run instantly.
  */
-class BenchmarkRunner @Inject constructor(
+@OptIn(ExperimentalAtomicApi::class, ExperimentalUuidApi::class)
+class BenchmarkRunner(
     private val engine: LlmEngine,
     private val settingsSource: InferenceSettingsSource,
     private val repository: BenchmarkRepository,
     private val metrics: DeviceMetrics,
     private val clock: Clock,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
+    private val io: CoroutineDispatcher,
 ) {
     fun run(): Flow<BenchmarkProgress> = channelFlow {
         val settings = settingsSource.current()
@@ -58,10 +60,10 @@ class BenchmarkRunner @Inject constructor(
             return@channelFlow
         }
 
-        val peakMb = AtomicInteger(0)
+        val peakMb = AtomicInt(0)
         val sampler = launch(io) {
             while (isActive) {
-                peakMb.accumulateAndGet(metrics.processMemoryMb(), ::maxOf)
+                peakMb.raiseTo(metrics.processMemoryMb())
                 delay(SAMPLE_INTERVAL_MS)
             }
         }
@@ -95,22 +97,30 @@ class BenchmarkRunner @Inject constructor(
             )
         }
         sampler.cancel()
-        peakMb.accumulateAndGet(metrics.processMemoryMb(), ::maxOf)
+        peakMb.raiseTo(metrics.processMemoryMb())
 
         val result = BenchmarkResult(
-            id = UUID.randomUUID().toString(),
+            id = Uuid.random().toString(),
             createdAt = clock.nowMillis(),
             modelId = settings.modelId,
             modelName = settings.modelName,
             backend = ready.backend.label,
             loadMs = ready.loadMs,
             prompts = results,
-            peakMemoryMb = peakMb.get(),
+            peakMemoryMb = peakMb.load(),
             device = metrics.deviceName(),
             androidVersion = metrics.androidVersion(),
         )
         repository.save(result)
         send(BenchmarkProgress.Finished(result))
+    }
+
+    /** Atomic "max": the sampler and the final reading may race; the larger value always wins. */
+    private fun AtomicInt.raiseTo(value: Int) {
+        while (true) {
+            val current = load()
+            if (value <= current || compareAndSet(current, value)) return
+        }
     }
 
     private companion object {

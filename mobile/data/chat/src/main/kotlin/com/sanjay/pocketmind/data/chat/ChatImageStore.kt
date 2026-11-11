@@ -7,14 +7,9 @@ import android.graphics.Matrix
 import android.net.Uri
 import androidx.core.net.toUri
 import androidx.exifinterface.media.ExifInterface
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.IOException
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -73,11 +68,8 @@ object ImageScaling {
     private const val THREE_QUARTER_TURN = 270f
 }
 
-@Singleton
-internal class AndroidChatImageStore @Inject constructor(
-    @ApplicationContext private val context: Context,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
-) : ChatImageStore {
+internal class AndroidChatImageStore(private val context: Context, private val io: CoroutineDispatcher) :
+    ChatImageStore {
 
     private val directory = File(context.filesDir, DIRECTORY)
 

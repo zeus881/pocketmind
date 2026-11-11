@@ -6,8 +6,6 @@ import com.sanjay.pocketmind.core.billing.ProStatus
 import com.sanjay.pocketmind.core.model.Persona
 import com.sanjay.pocketmind.core.model.SavedPrompt
 import com.sanjay.pocketmind.data.chat.PersonaRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -23,9 +21,7 @@ data class PersonasUiState(
 )
 
 /** Manages custom personas and the prompt library. Built-in personas are shown read-only. */
-@HiltViewModel
-class PersonasViewModel @Inject constructor(private val repository: PersonaRepository, private val pro: ProStatus) :
-    ViewModel() {
+class PersonasViewModel(private val repository: PersonaRepository, private val pro: ProStatus) : ViewModel() {
 
     val uiState: StateFlow<PersonasUiState> = combine(
         repository.observePersonas(),

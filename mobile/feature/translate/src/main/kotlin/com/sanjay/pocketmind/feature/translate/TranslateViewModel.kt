@@ -9,8 +9,6 @@ import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.data.documents.Language
 import com.sanjay.pocketmind.data.documents.Languages
 import com.sanjay.pocketmind.data.documents.Translator
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -38,11 +36,8 @@ data class TranslateUiState(
  *
  * The chosen languages are kept in [SavedStateHandle], so they survive process death.
  */
-@HiltViewModel
-class TranslateViewModel @Inject constructor(
-    private val translator: Translator,
-    private val savedState: SavedStateHandle,
-) : ViewModel(),
+class TranslateViewModel(private val translator: Translator, private val savedState: SavedStateHandle) :
+    ViewModel(),
     TranslateActions {
 
     private val _uiState = MutableStateFlow(

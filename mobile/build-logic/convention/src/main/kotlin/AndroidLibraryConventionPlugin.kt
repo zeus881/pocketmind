@@ -54,6 +54,8 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
             dependencies {
                 add("implementation", libs.lib("timber"))
+                // Koin (V3): each module declares its own `module { … }`; the app puts them together.
+                add("implementation", libs.lib("koin-android"))
                 add("testImplementation", libs.lib("junit"))
                 add("testImplementation", libs.lib("mockk"))
                 add("testImplementation", libs.lib("turbine"))

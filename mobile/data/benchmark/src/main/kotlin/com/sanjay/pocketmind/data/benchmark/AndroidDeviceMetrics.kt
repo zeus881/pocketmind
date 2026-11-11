@@ -3,25 +3,8 @@ package com.sanjay.pocketmind.data.benchmark
 import android.os.Build
 import android.os.Debug
 import android.os.SystemClock
-import javax.inject.Inject
 
-/**
- * Hardware facts and timers the benchmark needs. An interface so the runner can be unit-tested
- * with a fake (real memory readings and clocks make tests non-deterministic).
- */
-interface DeviceMetrics {
-    /** Current memory of this app process (PSS) in MB, including the model's native memory. */
-    fun processMemoryMb(): Int
-
-    /** Monotonic time in ms (not affected by the user changing the wall clock). */
-    fun elapsedMs(): Long
-
-    fun deviceName(): String
-
-    fun androidVersion(): String
-}
-
-class AndroidDeviceMetrics @Inject constructor() : DeviceMetrics {
+class AndroidDeviceMetrics : DeviceMetrics {
     /**
      * PSS ("proportional set size") counts this process's private memory plus its fair share of
      * shared pages. It includes the native memory LiteRT-LM allocates for weights and KV cache,

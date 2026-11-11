@@ -30,11 +30,9 @@ import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.ChatSummary
 import com.sanjay.pocketmind.data.chat.ChatRepository
-import dagger.hilt.EntryPoint
-import dagger.hilt.InstallIn
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.first
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.get
 
 /**
  * Home-screen widget: "New chat" plus the three most recent chats.
@@ -46,21 +44,14 @@ import kotlinx.coroutines.flow.first
  *
  * Privacy: with the app lock on, no chat titles appear on the home screen, only "New chat".
  */
-class PocketMindWidget : GlanceAppWidget() {
-
-    /** Widgets aren't created by Hilt, so they fetch their dependencies through an entry point. */
-    @EntryPoint
-    @InstallIn(SingletonComponent::class)
-    interface Dependencies {
-        fun chatRepository(): ChatRepository
-
-        fun settings(): SettingsDataSource
-    }
+class PocketMindWidget :
+    GlanceAppWidget(),
+    KoinComponent {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
-        val deps = EntryPointAccessors.fromApplication(context, Dependencies::class.java)
-        val locked = deps.settings().current().appLockEnabled
-        val recent = if (locked) emptyList() else deps.chatRepository().observeChats("").first().take(RECENT_CHATS)
+        // Widgets aren't created by the DI container, so they look their dependencies up in Koin.
+        val locked = get<SettingsDataSource>().current().appLockEnabled
+        val recent = if (locked) emptyList() else get<ChatRepository>().observeChats("").first().take(RECENT_CHATS)
         provideContent {
             GlanceTheme { WidgetContent(context, recent, locked) }
         }

@@ -9,7 +9,6 @@ import com.sanjay.pocketmind.core.model.Persona
 import com.sanjay.pocketmind.core.model.SavedPrompt
 import com.sanjay.pocketmind.core.model.UserSettings
 import java.util.UUID
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -75,8 +74,7 @@ object BuiltInPersonas {
     fun find(id: String): Persona? = all.firstOrNull { it.id == id }
 }
 
-internal class RoomPersonaRepository @Inject constructor(private val dao: PersonaDao, private val clock: Clock) :
-    PersonaRepository {
+internal class RoomPersonaRepository(private val dao: PersonaDao, private val clock: Clock) : PersonaRepository {
 
     override fun observePersonas(): Flow<List<Persona>> =
         dao.observePersonas().map { custom -> BuiltInPersonas.all + custom.map { it.asModel() } }

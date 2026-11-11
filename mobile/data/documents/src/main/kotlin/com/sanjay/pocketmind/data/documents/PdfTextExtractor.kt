@@ -4,19 +4,14 @@ import android.content.Context
 import android.net.Uri
 import android.provider.OpenableColumns
 import com.sanjay.pocketmind.core.billing.ProStatus
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.io.MemoryUsageSetting
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicBoolean
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
@@ -36,10 +31,9 @@ interface PdfTextExtractor {
  *   RAM, so a large PDF can't push the app out of memory while the 2.6 GB model is loaded.
  * - Scanned PDFs are images without a text layer → NO_TEXT_IN_DOCUMENT (OCR is a v2 idea).
  */
-@Singleton
-class PdfBoxTextExtractor @Inject constructor(
-    @ApplicationContext private val context: Context,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
+class PdfBoxTextExtractor(
+    private val context: Context,
+    private val io: CoroutineDispatcher,
     private val pro: ProStatus,
 ) : PdfTextExtractor {
 

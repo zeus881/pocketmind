@@ -4,22 +4,18 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
 import com.sanjay.pocketmind.core.common.time.Clock
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.PrintWriter
 import java.io.StringWriter
 import java.time.Instant
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * The last crashes, kept ON THE PHONE ONLY (decision 1: no crash SDK, nothing sent automatically).
  * The user can share them in a diagnostic report if they choose to. Stack traces contain code
  * locations, never chat text.
  */
-@Singleton
 class CrashLog internal constructor(private val file: File, private val clock: Clock) {
-    @Inject constructor(@ApplicationContext context: Context, clock: Clock) : this(File(context.filesDir, FILE), clock)
+    constructor(context: Context, clock: Clock) : this(File(context.filesDir, FILE), clock)
 
     /** Records uncaught exceptions, then lets Android handle them as before (the crash dialog). */
     fun install() {
@@ -73,8 +69,7 @@ fun interface DeviceFactsSource {
     fun facts(): DeviceFacts
 }
 
-internal class AndroidDeviceFacts @Inject constructor(@ApplicationContext private val context: Context) :
-    DeviceFactsSource {
+internal class AndroidDeviceFacts(private val context: Context) : DeviceFactsSource {
     override fun facts(): DeviceFacts {
         val memory = ActivityManager.MemoryInfo().also {
             context.getSystemService(ActivityManager::class.java)?.getMemoryInfo(it)

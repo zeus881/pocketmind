@@ -2,9 +2,6 @@ package com.sanjay.pocketmind.data.models
 
 import android.content.Context
 import com.sanjay.pocketmind.core.model.LlmModelInfo
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.serialization.json.Json
 
 /**
@@ -14,8 +11,7 @@ import kotlinx.serialization.json.Json
  * easy to validate in a unit test, and in v2 the same file format could come from a remote
  * config without changing any code.
  */
-@Singleton
-class ModelCatalog @Inject constructor(@ApplicationContext private val context: Context) {
+class ModelCatalog(private val context: Context) {
 
     val models: List<LlmModelInfo> by lazy {
         context.assets.open(ASSET_NAME).bufferedReader().use { parse(it.readText()) }

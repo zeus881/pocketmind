@@ -36,7 +36,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
 import com.sanjay.pocketmind.core.designsystem.component.readableWidth
@@ -45,9 +44,10 @@ import com.sanjay.pocketmind.core.model.Persona
 import com.sanjay.pocketmind.core.model.SavedPrompt
 import com.sanjay.pocketmind.core.model.UserSettings
 import java.util.Locale
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun PersonasScreen(onBack: () -> Unit, viewModel: PersonasViewModel = hiltViewModel()) {
+fun PersonasScreen(onBack: () -> Unit, viewModel: PersonasViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     PersonasContent(
         state = state,

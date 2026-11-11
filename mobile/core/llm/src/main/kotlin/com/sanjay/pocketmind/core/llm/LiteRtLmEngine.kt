@@ -17,18 +17,13 @@ import com.google.ai.edge.litertlm.SamplerConfig
 import com.google.ai.edge.litertlm.ThinkingConfig
 import com.google.ai.edge.litertlm.ToolProvider
 import com.google.ai.edge.litertlm.tool
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.model.ChatTurn
 import com.sanjay.pocketmind.core.model.TurnRole
 import com.sanjay.pocketmind.core.tools.LocalTool
 import com.sanjay.pocketmind.core.tools.ToolRunner
 import com.sanjay.pocketmind.core.tools.ToolSchema
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.util.Collections
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -56,12 +51,8 @@ import timber.log.Timber
  * `@Singleton`: a loaded model uses gigabytes of RAM, so the whole app shares ONE engine.
  */
 @OptIn(ExperimentalApi::class)
-@Singleton
-class LiteRtLmEngine @Inject constructor(
-    @ApplicationContext context: Context,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
-    private val loadGuard: LoadGuard,
-) : LlmEngine {
+class LiteRtLmEngine(context: Context, private val io: CoroutineDispatcher, private val loadGuard: LoadGuard) :
+    LlmEngine {
 
     private val _state = MutableStateFlow<EngineState>(EngineState.Idle)
     override val state: StateFlow<EngineState> = _state.asStateFlow()

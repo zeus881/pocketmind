@@ -57,7 +57,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
@@ -73,6 +72,7 @@ import com.sanjay.pocketmind.core.speech.SpeechError
 import com.sanjay.pocketmind.feature.chat.component.ChatInput
 import com.sanjay.pocketmind.feature.chat.component.MessageList
 import kotlinx.coroutines.delay
+import org.koin.compose.viewmodel.koinViewModel
 /**
  * Stateful wrapper: gets the ViewModel from Hilt, collects its state and events, and passes
  * plain values + callbacks down to the stateless [ChatContent].
@@ -81,7 +81,7 @@ import kotlinx.coroutines.delay
  * content can be previewed and UI-tested with any state, without a ViewModel.
  */
 @Composable
-fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = hiltViewModel()) {
+fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = koinViewModel()) {
     // collectAsStateWithLifecycle stops collecting while the app is in the background.
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }

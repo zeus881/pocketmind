@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.pocketmind.android.library)
-    alias(libs.plugins.pocketmind.hilt)
 }
 
 android {

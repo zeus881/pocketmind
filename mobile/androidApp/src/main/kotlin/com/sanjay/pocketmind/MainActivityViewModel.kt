@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.model.UserSettings
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -36,8 +34,7 @@ sealed interface MainUiState {
  *
  * The ViewModel survives rotation, so rotating the phone never asks for the fingerprint again.
  */
-@HiltViewModel
-class MainActivityViewModel @Inject constructor(settings: SettingsDataSource) : ViewModel() {
+class MainActivityViewModel(settings: SettingsDataSource) : ViewModel() {
 
     private val latestSettings = MutableStateFlow<UserSettings?>(null)
     private val locked = MutableStateFlow(false)

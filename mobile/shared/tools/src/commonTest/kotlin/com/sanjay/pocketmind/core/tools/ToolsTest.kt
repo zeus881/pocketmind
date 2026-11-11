@@ -88,7 +88,7 @@ class ToolsTest {
         override fun search(query: String, limit: Int) =
             recent(limit).filter { it.text.contains(query, ignoreCase = true) }
 
-        override fun delete(id: String) = notes.removeIf { it.id == id }
+        override fun delete(id: String) = notes.removeAll { it.id == id }
     }
 
     @Test

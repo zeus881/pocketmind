@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.pocketmind.android.library)
-    alias(libs.plugins.pocketmind.hilt)
     alias(libs.plugins.kotlin.serialization)
 }
 
@@ -17,8 +16,8 @@ dependencies {
 
     implementation(libs.okhttp)
     implementation(libs.androidx.work.runtime)
-    implementation(libs.androidx.hilt.work)
-    ksp(libs.androidx.hilt.compiler)
+    // ModelDownloadWorker gets its dependencies through Koin's WorkManager factory.
+    implementation(libs.koin.androidx.workmanager)
     implementation(libs.kotlinx.serialization.json)
 
     testImplementation(projects.core.testing)

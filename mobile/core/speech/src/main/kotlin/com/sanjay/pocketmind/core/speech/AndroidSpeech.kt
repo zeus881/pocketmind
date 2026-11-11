@@ -9,10 +9,7 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.util.Locale
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -28,9 +25,7 @@ import kotlinx.coroutines.flow.flowOn
  * API that must be used on the main thread; `callbackFlow` turns it into a Flow and `awaitClose`
  * releases it when the collector stops (Stop button, screen closed).
  */
-@Singleton
-internal class AndroidSpeechInput @Inject constructor(@ApplicationContext private val context: Context) :
-    SpeechInput {
+internal class AndroidSpeechInput(private val context: Context) : SpeechInput {
 
     override val isAvailable: Boolean
         get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
@@ -101,9 +96,7 @@ internal class AndroidSpeechInput @Inject constructor(@ApplicationContext privat
  * (`Voice.isNetworkConnectionRequired == false`): a network voice would send the answer's text
  * to a server, which breaks the app's promise.
  */
-@Singleton
-internal class AndroidSpeechOutput @Inject constructor(@ApplicationContext private val context: Context) :
-    SpeechOutput {
+internal class AndroidSpeechOutput(private val context: Context) : SpeechOutput {
 
     private val _speaking = MutableStateFlow<String?>(null)
     override val speaking: StateFlow<String?> = _speaking.asStateFlow()

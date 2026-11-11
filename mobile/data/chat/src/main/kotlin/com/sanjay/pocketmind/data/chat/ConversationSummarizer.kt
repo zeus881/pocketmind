@@ -4,7 +4,6 @@ import com.sanjay.pocketmind.core.llm.LlmEngine
 import com.sanjay.pocketmind.core.llm.SamplingParams
 import com.sanjay.pocketmind.core.model.ChatTurn
 import com.sanjay.pocketmind.core.model.TurnRole
-import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.toList
 import timber.log.Timber
@@ -33,7 +32,7 @@ fun interface ConversationSummarizer {
  * It uses its own short session with precise sampling (low temperature): summaries must be
  * faithful, not creative. The chat's own session is rebuilt right afterwards by the caller.
  */
-class LlmConversationSummarizer @Inject constructor(private val engine: LlmEngine) : ConversationSummarizer {
+class LlmConversationSummarizer(private val engine: LlmEngine) : ConversationSummarizer {
 
     @Suppress("TooGenericExceptionCaught") // native generation can fail in many ways; we fall back
     override suspend fun summarize(previousSummary: String?, turns: List<ChatTurn>): String? {

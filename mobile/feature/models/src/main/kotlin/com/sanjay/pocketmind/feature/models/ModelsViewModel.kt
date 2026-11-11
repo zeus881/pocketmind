@@ -8,8 +8,6 @@ import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.model.ModelKind
 import com.sanjay.pocketmind.data.models.ModelRepository
 import com.sanjay.pocketmind.data.models.ModelState
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,11 +41,8 @@ sealed interface ModelsEvent {
 }
 
 /** Model manager screen: catalog + live download state + RAM recommendation. */
-@HiltViewModel
-class ModelsViewModel @Inject constructor(
-    private val repository: ModelRepository,
-    private val settings: SettingsDataSource,
-) : ViewModel() {
+class ModelsViewModel(private val repository: ModelRepository, private val settings: SettingsDataSource) :
+    ViewModel() {
 
     private val _events = Channel<ModelsEvent>(Channel.BUFFERED)
     val events: Flow<ModelsEvent> = _events.receiveAsFlow()

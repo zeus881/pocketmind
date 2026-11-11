@@ -7,8 +7,6 @@ import com.sanjay.pocketmind.core.model.DeletedChat
 import com.sanjay.pocketmind.core.model.Folder
 import com.sanjay.pocketmind.data.chat.ChatRepository
 import com.sanjay.pocketmind.data.chat.FolderRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
@@ -54,11 +52,8 @@ sealed interface HistoryEvent {
  * instead of running a database query for every keystroke.
  */
 @OptIn(ExperimentalCoroutinesApi::class)
-@HiltViewModel
-class HistoryViewModel @Inject constructor(
-    private val repository: ChatRepository,
-    private val folderRepository: FolderRepository,
-) : ViewModel() {
+class HistoryViewModel(private val repository: ChatRepository, private val folderRepository: FolderRepository) :
+    ViewModel() {
 
     private val query = MutableStateFlow("")
     private val selectedFolder = MutableStateFlow<String?>(null)

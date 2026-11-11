@@ -1,10 +1,7 @@
 package com.sanjay.pocketmind.core.llm
 
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * Protects the app from a "crash loop" caused by native code while loading a model.
@@ -32,11 +29,9 @@ import javax.inject.Singleton
  * Plain files instead of DataStore: the write must be synchronous and finished BEFORE the
  * native call — an async write could be lost in the very crash we want to record.
  */
-@Singleton
 class LoadGuard internal constructor(private val dir: File, private val exitReasons: ExitReasonSource) {
 
-    @Inject
-    constructor(@ApplicationContext context: Context, exitReasons: ExitReasonSource) :
+    constructor(context: Context, exitReasons: ExitReasonSource) :
         this(File(context.filesDir, DIR_NAME), exitReasons)
 
     private val marker get() = File(dir, MARKER_NAME)

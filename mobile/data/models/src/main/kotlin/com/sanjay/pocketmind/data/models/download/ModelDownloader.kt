@@ -1,7 +1,5 @@
 package com.sanjay.pocketmind.data.models.download
 
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.ModelFiles
@@ -15,7 +13,6 @@ import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
@@ -40,10 +37,10 @@ import timber.log.Timber
  * ```
  * The SHA-256 is computed WHILE writing, so there is no second 2.6 GB read at the end.
  */
-class ModelDownloader @Inject constructor(
+class ModelDownloader(
     private val client: OkHttpClient,
     private val files: ModelFiles,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
+    private val io: CoroutineDispatcher,
 ) {
     /** Called with (bytes on disk, total bytes) at most every [PROGRESS_INTERVAL_MS]. */
     fun interface ProgressListener {

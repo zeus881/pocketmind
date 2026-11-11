@@ -6,7 +6,6 @@ import com.sanjay.pocketmind.core.database.entity.FolderEntity
 import com.sanjay.pocketmind.core.database.entity.asModel
 import com.sanjay.pocketmind.core.model.Folder
 import java.util.UUID
-import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -22,8 +21,7 @@ interface FolderRepository {
     suspend fun deleteFolder(id: String)
 }
 
-internal class RoomFolderRepository @Inject constructor(private val dao: FolderDao, private val clock: Clock) :
-    FolderRepository {
+internal class RoomFolderRepository(private val dao: FolderDao, private val clock: Clock) : FolderRepository {
     override fun observeFolders(): Flow<List<Folder>> = dao.observeAll().map { list -> list.map { it.asModel() } }
 
     override suspend fun createFolder(name: String): String? {

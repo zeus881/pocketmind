@@ -11,8 +11,6 @@ import com.google.android.play.core.install.model.UpdateAvailability
 import com.google.android.play.core.ktx.isFlexibleUpdateAllowed
 import com.google.android.play.core.ktx.requestAppUpdateInfo
 import com.google.android.play.core.ktx.requestCompleteUpdate
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -39,8 +37,7 @@ enum class UpdateState {
  * Installed from GitHub or Android Studio (no Play Store entry)? Every call simply fails, and the
  * failure is ignored: updates then come from wherever the app came from.
  */
-@Singleton
-class InAppUpdates @Inject constructor(private val manager: AppUpdateManager) {
+class InAppUpdates(private val manager: AppUpdateManager) {
     private val _state = MutableStateFlow(UpdateState.NONE)
     val state: StateFlow<UpdateState> = _state.asStateFlow()
 

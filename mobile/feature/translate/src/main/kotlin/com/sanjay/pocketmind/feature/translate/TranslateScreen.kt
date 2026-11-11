@@ -44,7 +44,6 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.readableWidth
@@ -53,9 +52,10 @@ import com.sanjay.pocketmind.data.documents.Language
 import com.sanjay.pocketmind.data.documents.Languages
 import java.util.Locale
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun TranslateScreen(viewModel: TranslateViewModel = hiltViewModel()) {
+fun TranslateScreen(viewModel: TranslateViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     TranslateContent(state, viewModel)
 }

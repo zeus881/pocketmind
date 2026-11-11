@@ -9,7 +9,7 @@ import org.gradle.kotlin.dsl.project
 
 /**
  * Everything a `feature:*` module (one screen or one group of screens) needs:
- * Android library + Compose + Hilt + type-safe navigation + the shared design system.
+ * Android library + Compose + Koin ViewModels + type-safe navigation + the shared design system.
  *
  * Note what is NOT here: no feature module ever depends on another feature module.
  * Screens talk to each other only through navigation callbacks wired up in `:app`.
@@ -19,7 +19,6 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
         with(target) {
             pluginManager.apply("pocketmind.android.library")
             pluginManager.apply("pocketmind.android.compose")
-            pluginManager.apply("pocketmind.hilt")
             // Type-safe navigation routes are @Serializable Kotlin objects.
             pluginManager.apply("org.jetbrains.kotlin.plugin.serialization")
             // Screenshot tests: recordRoborazziDebug / verifyRoborazziDebug (see core:testing Screenshots.kt).
@@ -33,8 +32,8 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
                 add("implementation", project(":core:common"))
                 add("implementation", project(":shared:designsystem"))
 
-                // hiltViewModel(): gets a Hilt-injected ViewModel inside a composable.
-                add("implementation", libs.lib("androidx-hilt-lifecycle-viewmodel-compose"))
+                // koinViewModel(): gets a Koin-built ViewModel inside a composable (V3; v2 used Hilt).
+                add("implementation", libs.lib("koin-androidx-compose"))
                 add("implementation", libs.lib("androidx-lifecycle-runtime-compose"))
                 add("implementation", libs.lib("androidx-lifecycle-viewmodel-compose"))
                 add("implementation", libs.lib("androidx-navigation-compose"))

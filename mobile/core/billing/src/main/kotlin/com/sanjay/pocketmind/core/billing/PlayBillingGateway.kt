@@ -15,9 +15,6 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.acknowledgePurchase
 import com.android.billingclient.api.queryProductDetails
 import com.android.billingclient.api.queryPurchasesAsync
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
@@ -29,8 +26,7 @@ import timber.log.Timber
  * in the Play Store app; PocketMind sends nothing of its own (decision 5). Without a Play Store every
  * call answers "unavailable" and the app keeps working in the free version.
  */
-@Singleton
-internal class PlayBillingGateway @Inject constructor(@ApplicationContext context: Context) : BillingGateway {
+internal class PlayBillingGateway(context: Context) : BillingGateway {
     private var onUpdated: (List<PurchaseRecord>) -> Unit = {}
 
     private val client: BillingClient = BillingClient.newBuilder(context)

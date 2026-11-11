@@ -8,8 +8,6 @@ import com.sanjay.pocketmind.data.benchmark.BenchmarkProgress
 import com.sanjay.pocketmind.data.benchmark.BenchmarkReport
 import com.sanjay.pocketmind.data.benchmark.BenchmarkRepository
 import com.sanjay.pocketmind.data.benchmark.BenchmarkRunner
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -38,11 +36,8 @@ sealed interface BenchmarkEvent {
     data class Share(val text: String) : BenchmarkEvent
 }
 
-@HiltViewModel
-class BenchmarkViewModel @Inject constructor(
-    private val runner: BenchmarkRunner,
-    private val repository: BenchmarkRepository,
-) : ViewModel() {
+class BenchmarkViewModel(private val runner: BenchmarkRunner, private val repository: BenchmarkRepository) :
+    ViewModel() {
 
     private val progress = MutableStateFlow<BenchmarkProgress?>(null)
     private var job: Job? = null

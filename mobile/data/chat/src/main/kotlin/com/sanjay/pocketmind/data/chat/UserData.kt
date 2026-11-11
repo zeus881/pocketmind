@@ -2,8 +2,6 @@ package com.sanjay.pocketmind.data.chat
 
 import android.content.Context
 import android.net.Uri
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.common.time.Clock
@@ -17,13 +15,11 @@ import com.sanjay.pocketmind.core.database.entity.PromptEntity
 import com.sanjay.pocketmind.core.database.entity.asModel
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.model.UserSettings
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
 import java.io.IOException
 import java.time.Instant
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -48,13 +44,13 @@ interface UserDataControl {
     suspend fun deleteAll()
 }
 
-internal class AndroidUserDataControl @Inject constructor(
-    @ApplicationContext private val context: Context,
+internal class AndroidUserDataControl(
+    private val context: Context,
     private val database: UserDataStore,
     private val settings: SettingsDataSource,
     private val images: ChatImageStore,
     private val clock: Clock,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
+    private val io: CoroutineDispatcher,
 ) : UserDataControl {
 
     override suspend fun exportAll(uri: Uri): AppResult<Unit> = withContext(io) {

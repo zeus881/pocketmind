@@ -13,7 +13,6 @@ plugins {
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ksp) apply false
-    alias(libs.plugins.hilt) apply false
     alias(libs.plugins.room) apply false
     alias(libs.plugins.androidx.baselineprofile) apply false
     alias(libs.plugins.aboutlibraries) apply false
@@ -54,8 +53,7 @@ kover {
             excludes {
                 // Generated code (Hilt, Room, Compose compiler, serialization) is not ours to test.
                 classes(
-                    "*Hilt_*", "*_HiltModules*", "*_Factory*", "*_MembersInjector", "*_Provide*Factory*",
-                    "dagger.*", "hilt_aggregated_deps.*", "*_GeneratedInjector",
+                    "*_Factory*",
                     "*_Impl", "*_Impl$*", "*_AutoMigration_*",
                     "*ComposableSingletons*", "*.BuildConfig", "*\$\$serializer",
                     // System entry points bound by the launcher / System UI, verified on a device

@@ -8,8 +8,6 @@ import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.data.documents.PdfTextExtractor
 import com.sanjay.pocketmind.data.documents.Summarizer
 import com.sanjay.pocketmind.data.documents.SummaryProgress
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,11 +37,7 @@ sealed interface SummarizeUiState {
  * The whole pipeline is one coroutine Job, so "Cancel" (or leaving the screen) stops it at once,
  * including the model generation in progress.
  */
-@HiltViewModel
-class SummarizeViewModel @Inject constructor(
-    private val extractor: PdfTextExtractor,
-    private val summarizer: Summarizer,
-) : ViewModel() {
+class SummarizeViewModel(private val extractor: PdfTextExtractor, private val summarizer: Summarizer) : ViewModel() {
 
     private val _uiState = MutableStateFlow<SummarizeUiState>(SummarizeUiState.Idle)
     val uiState: StateFlow<SummarizeUiState> = _uiState.asStateFlow()

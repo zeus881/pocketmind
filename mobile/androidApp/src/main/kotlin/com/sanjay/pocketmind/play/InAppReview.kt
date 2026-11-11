@@ -6,8 +6,6 @@ import com.google.android.play.core.ktx.requestReview
 import com.google.android.play.core.review.ReviewManager
 import com.sanjay.pocketmind.core.common.time.Clock
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 
@@ -27,8 +25,7 @@ object ReviewPolicy {
 }
 
 /** Google Play's In-App Review card, shown in the app by the Play Store app (no data of ours is sent). */
-@Singleton
-class InAppReview @Inject constructor(
+class InAppReview(
     private val manager: ReviewManager,
     private val settings: SettingsDataSource,
     private val clock: Clock,

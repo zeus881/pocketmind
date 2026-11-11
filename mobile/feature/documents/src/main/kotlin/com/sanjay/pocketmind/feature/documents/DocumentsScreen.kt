@@ -22,11 +22,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.designsystem.component.readableWidth
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * Documents tab with two tools: "Summarize" (phase 6) and "Ask" (on-device RAG, phase 7).
@@ -40,8 +40,8 @@ fun DocumentsScreen(
     onOpenModels: () -> Unit,
     /** A PDF shared from another app: summarized once when the screen opens. */
     sharedPdfUri: String? = null,
-    summarizeViewModel: SummarizeViewModel = hiltViewModel(),
-    askViewModel: AskViewModel = hiltViewModel(),
+    summarizeViewModel: SummarizeViewModel = koinViewModel(),
+    askViewModel: AskViewModel = koinViewModel(),
 ) {
     val summarizeState by summarizeViewModel.uiState.collectAsStateWithLifecycle()
     val askState by askViewModel.uiState.collectAsStateWithLifecycle()

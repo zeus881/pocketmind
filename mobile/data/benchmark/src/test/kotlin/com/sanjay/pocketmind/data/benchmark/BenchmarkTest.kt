@@ -7,7 +7,6 @@ import com.sanjay.pocketmind.core.llm.SamplingParams
 import com.sanjay.pocketmind.core.model.BenchmarkPromptResult
 import com.sanjay.pocketmind.core.model.BenchmarkResult
 import com.sanjay.pocketmind.core.testing.FakeLlmEngine
-import java.time.ZoneOffset
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,6 +14,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.TimeZone
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -114,7 +114,7 @@ class BenchmarkReportTest {
 
     @Test
     fun reportContainsAllNumbersInUsFormat() {
-        val text = BenchmarkReport.format(result, ZoneOffset.UTC)
+        val text = BenchmarkReport.format(result, TimeZone.UTC)
         assertTrue(text.contains("1970-01-01 00:00"))
         assertTrue(text.contains("Google Pixel 9"))
         assertTrue(text.contains("Model load: 8.40 s"))
@@ -125,7 +125,7 @@ class BenchmarkReportTest {
 
     @Test
     fun estimatesAreMarked() {
-        val text = BenchmarkReport.format(result, ZoneOffset.UTC)
+        val text = BenchmarkReport.format(result, TimeZone.UTC)
         assertTrue(text.contains("48.3 tok/s*"))
         assertTrue(text.contains("* estimated"))
     }

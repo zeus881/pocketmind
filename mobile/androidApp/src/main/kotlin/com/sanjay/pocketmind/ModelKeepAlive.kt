@@ -2,11 +2,8 @@ package com.sanjay.pocketmind
 
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.sanjay.pocketmind.core.common.dispatchers.ApplicationScope
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.llm.LlmEngine
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -27,11 +24,10 @@ import timber.log.Timber
  * Observes `ProcessLifecycleOwner`, which reports the app as a whole (all activities), so a
  * rotation or moving between our own screens never counts as "leaving".
  */
-@Singleton
-class ModelKeepAlive @Inject constructor(
+class ModelKeepAlive(
     private val engine: LlmEngine,
     private val settings: SettingsDataSource,
-    @ApplicationScope private val scope: CoroutineScope,
+    private val scope: CoroutineScope,
 ) : DefaultLifecycleObserver {
 
     private var pendingUnload: Job? = null

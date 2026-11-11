@@ -1,10 +1,7 @@
 package com.sanjay.pocketmind.core.llm
 
 import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.File
-import javax.inject.Inject
-import javax.inject.Singleton
 
 /**
  * The on-disk layout of downloaded models, in one place:
@@ -18,11 +15,9 @@ import javax.inject.Singleton
  * A file only ever gets the final name after its SHA-256 matched, so "the final file exists"
  * means "the model is complete and correct".
  */
-@Singleton
 class ModelFiles internal constructor(private val root: File) {
 
-    @Inject
-    constructor(@ApplicationContext context: Context) : this(File(context.filesDir, "models"))
+    constructor(context: Context) : this(File(context.filesDir, "models"))
 
     fun directory(modelId: String): File = File(root, modelId)
 

@@ -7,15 +7,11 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import androidx.core.graphics.withSave
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.model.Message
 import com.sanjay.pocketmind.core.model.TurnRole
-import dagger.hilt.android.qualifiers.ApplicationContext
 import java.io.IOException
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -34,10 +30,7 @@ interface ChatExporter {
  * The text formats are pure ([ChatMarkdown], [PdfPagination]) and unit-tested; this class only
  * does the writing, on the IO dispatcher.
  */
-internal class AndroidChatExporter @Inject constructor(
-    @ApplicationContext private val context: Context,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
-) : ChatExporter {
+internal class AndroidChatExporter(private val context: Context, private val io: CoroutineDispatcher) : ChatExporter {
     override suspend fun writeMarkdown(uri: Uri, title: String, messages: List<Message>): AppResult<Unit> =
         write(uri) { it.write(ChatMarkdown.build(title, messages).toByteArray(Charsets.UTF_8)) }
 

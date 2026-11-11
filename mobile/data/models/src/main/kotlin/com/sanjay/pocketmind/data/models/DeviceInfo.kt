@@ -4,8 +4,6 @@ import android.app.ActivityManager
 import android.content.Context
 import android.os.StatFs
 import com.sanjay.pocketmind.core.llm.ModelFiles
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 import kotlin.math.ceil
 
 /** Hardware facts that decide which models a phone can run. An interface so tests can fake it. */
@@ -17,10 +15,7 @@ interface DeviceInfo {
     fun freeStorageBytes(): Long
 }
 
-class AndroidDeviceInfo @Inject constructor(
-    @ApplicationContext private val context: Context,
-    private val modelFiles: ModelFiles,
-) : DeviceInfo {
+class AndroidDeviceInfo(private val context: Context, private val modelFiles: ModelFiles) : DeviceInfo {
 
     /**
      * `totalMem` excludes memory reserved by the kernel and hardware, so an "8 GB" phone

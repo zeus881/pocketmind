@@ -4,8 +4,6 @@ import android.app.ActivityManager
 import android.app.ApplicationExitInfo
 import android.content.Context
 import android.os.Build
-import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
 
 /**
  * Answers one question: "did the previous run of this app end in a crash?"
@@ -24,8 +22,7 @@ fun interface ExitReasonSource {
  * the GPU driver, say), an ANR, a low-memory kill, the user swiping it away, and so on.
  * Before Android 11 there is no such record, so the answer is "unknown".
  */
-internal class AndroidExitReasonSource @Inject constructor(@ApplicationContext private val context: Context) :
-    ExitReasonSource {
+internal class AndroidExitReasonSource(private val context: Context) : ExitReasonSource {
     override fun previousProcessCrashed(): Boolean? {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
         // pid 0 = any of our processes; maxNum 1 = only the most recent exit.

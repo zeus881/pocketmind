@@ -41,7 +41,6 @@ import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
@@ -53,9 +52,10 @@ import com.sanjay.pocketmind.data.benchmark.BenchmarkProgress
 import java.text.DateFormat
 import java.util.Date
 import java.util.Locale
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun BenchmarkScreen(onBack: () -> Unit, viewModel: BenchmarkViewModel = hiltViewModel()) {
+fun BenchmarkScreen(onBack: () -> Unit, viewModel: BenchmarkViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     val context = LocalContext.current

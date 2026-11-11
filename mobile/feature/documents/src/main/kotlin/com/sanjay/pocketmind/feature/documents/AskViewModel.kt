@@ -11,8 +11,6 @@ import com.sanjay.pocketmind.data.documents.rag.DocumentRepository
 import com.sanjay.pocketmind.data.documents.rag.IndexProgress
 import com.sanjay.pocketmind.data.documents.rag.IndexedDocument
 import com.sanjay.pocketmind.data.documents.rag.SourceChunk
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,8 +41,7 @@ data class AskUiState(
 }
 
 /** "Ask your PDF": index PDFs, pick one, ask questions, get answers with page citations. */
-@HiltViewModel
-class AskViewModel @Inject constructor(private val repository: DocumentRepository) : ViewModel() {
+class AskViewModel(private val repository: DocumentRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AskUiState())
     val uiState: StateFlow<AskUiState> = _uiState.asStateFlow()

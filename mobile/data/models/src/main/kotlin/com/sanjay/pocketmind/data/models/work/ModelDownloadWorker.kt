@@ -10,7 +10,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.ForegroundInfo
 import androidx.work.WorkInfo
@@ -29,8 +28,6 @@ import com.sanjay.pocketmind.data.models.ModelCatalog
 import com.sanjay.pocketmind.data.models.ModelRecommender
 import com.sanjay.pocketmind.data.models.R
 import com.sanjay.pocketmind.data.models.download.ModelDownloader
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
 import kotlinx.coroutines.CancellationException
 import timber.log.Timber
 
@@ -43,13 +40,13 @@ import timber.log.Timber
  * - retries with backoff after network errors, and
  * - survives the app being killed or the phone rebooting (jobs are persisted).
  *
- * `@HiltWorker` + `@AssistedInject`: WorkManager creates workers itself and passes Context and
- * WorkerParameters ("assisted" arguments); Hilt fills in our own dependencies.
+ * WorkManager creates workers itself and passes Context and WorkerParameters. V3: Koin's worker factory
+ * (`workerOf(::ModelDownloadWorker)` in modelsDataModule, `workManagerFactory()` at app start) fills in our own
+ * dependencies; in v2 Hilt did that with assisted injection.
  */
-@HiltWorker
-class ModelDownloadWorker @AssistedInject constructor(
-    @Assisted context: Context,
-    @Assisted params: WorkerParameters,
+class ModelDownloadWorker(
+    context: Context,
+    params: WorkerParameters,
     private val catalog: ModelCatalog,
     private val downloader: ModelDownloader,
     private val deviceInfo: DeviceInfo,

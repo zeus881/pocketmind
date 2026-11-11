@@ -56,7 +56,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
 import com.sanjay.pocketmind.core.designsystem.component.readableWidth
@@ -67,9 +66,10 @@ import com.sanjay.pocketmind.core.model.UserSettings
 import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.roundToInt
+import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
-fun SettingsScreen(navigation: SettingsNavigation, viewModel: SettingsViewModel = hiltViewModel()) {
+fun SettingsScreen(navigation: SettingsNavigation, viewModel: SettingsViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val resources = LocalResources.current

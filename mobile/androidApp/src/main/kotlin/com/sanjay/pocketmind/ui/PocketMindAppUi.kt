@@ -10,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -42,6 +41,7 @@ import com.sanjay.pocketmind.feature.translate.navigation.translateScreen
 import com.sanjay.pocketmind.navigation.LicensesRoute
 import com.sanjay.pocketmind.navigation.TopLevelDestination
 import com.sanjay.pocketmind.navigation.licensesScreen
+import org.koin.compose.viewmodel.koinViewModel
 
 /**
  * The app's outer frame: the navigation for the five tabs + the NavHost that swaps screens.
@@ -148,7 +148,7 @@ fun PocketMindAppUi(
  */
 @Composable
 private fun HistoryChatDetail(chatId: String?, onOpenModels: () -> Unit) {
-    val viewModel: ChatViewModel = hiltViewModel(key = "history-detail")
+    val viewModel: ChatViewModel = koinViewModel(key = "history-detail")
     LaunchedEffect(chatId) { viewModel.openChat(chatId) }
     ChatScreen(onOpenModels = onOpenModels, viewModel = viewModel)
 }

@@ -1,12 +1,9 @@
 package com.sanjay.pocketmind.data.models
 
-import com.sanjay.pocketmind.core.common.dispatchers.Dispatcher
-import com.sanjay.pocketmind.core.common.dispatchers.PmDispatchers
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.llm.LoadGuard
 import com.sanjay.pocketmind.core.llm.ModelFiles
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
@@ -22,11 +19,11 @@ import kotlinx.coroutines.withContext
  * phone's GPU driver, not the file — but we still clear the record, because the user just asked
  * us to make this model usable again.
  */
-class ModelVerifier @Inject constructor(
+class ModelVerifier(
     private val catalog: ModelCatalog,
     private val files: ModelFiles,
     private val loadGuard: LoadGuard,
-    @Dispatcher(PmDispatchers.IO) private val io: CoroutineDispatcher,
+    private val io: CoroutineDispatcher,
 ) {
     /** The model's file is being deleted or replaced: crash records for it no longer apply. */
     fun forgetCrashes(modelId: String) = loadGuard.clear(files.finalFile(modelId).path)

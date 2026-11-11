@@ -33,11 +33,7 @@ import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.pdmodel.PDPage
 import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
 import com.tom_roush.pdfbox.pdmodel.font.PDType1Font
-import dagger.hilt.android.testing.HiltAndroidRule
-import dagger.hilt.android.testing.HiltAndroidTest
-import dagger.hilt.android.testing.HiltTestApplication
 import java.io.File
-import javax.inject.Inject
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -45,6 +41,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.koin.core.context.GlobalContext
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
@@ -54,28 +51,24 @@ import org.robolectric.annotation.Config
  * repositories and Room; only what needs a phone or the network is replaced (TestModules.kt).
  * Runs on the JVM with Robolectric, so CI needs no emulator.
  */
-@HiltAndroidTest
 @RunWith(RobolectricTestRunner::class)
 // A normal phone screen (Robolectric's default is 320 x 470 dp, where lists run off-screen).
-@Config(application = HiltTestApplication::class, qualifiers = "w411dp-h891dp-xxhdpi")
+@Config(application = TestPocketMindApp::class, qualifiers = "w411dp-h891dp-xxhdpi")
 class EndToEndTest {
-    @get:Rule(order = 0)
-    val hilt = HiltAndroidRule(this)
-
-    @get:Rule(order = 1)
+    @get:Rule
     val compose = createEmptyComposeRule()
 
-    @Inject lateinit var engine: FakeLlmEngine
+    // The app's own Koin container (TestPocketMindApp started it with the fakes from TestModules.kt).
+    private val engine: FakeLlmEngine get() = GlobalContext.get().get()
 
-    @Inject lateinit var settings: SettingsDataSource
+    private val settings: SettingsDataSource get() = GlobalContext.get().get()
 
-    @Inject lateinit var models: FakeModels
+    private val models: FakeModels get() = GlobalContext.get().get()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     @Before
     fun setUp() {
-        hilt.inject()
         // As if the user already allowed notifications: Robolectric's permission dialog never answers.
         shadowOf(context as Application).grantPermissions(Manifest.permission.POST_NOTIFICATIONS)
     }

@@ -11,14 +11,11 @@ import com.sanjay.pocketmind.core.tools.NoteStore
 import com.sanjay.pocketmind.core.tools.NotesTool
 import com.sanjay.pocketmind.core.tools.UnitConverterTool
 import java.util.UUID
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlin.time.Instant
 import kotlinx.coroutines.runBlocking
 
 /** The tools a chat can offer the model. All of them run on the phone. */
-@Singleton
-class ChatTools @Inject internal constructor(noteDao: NoteDao, clock: Clock) {
+class ChatTools internal constructor(noteDao: NoteDao, clock: Clock) {
     val all: List<LocalTool> = listOf(
         CalculatorTool(),
         DateTimeTool(now = { Instant.fromEpochMilliseconds(clock.nowMillis()) }),
