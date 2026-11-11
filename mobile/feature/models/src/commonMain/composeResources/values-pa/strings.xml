@@ -24,7 +24,7 @@
     <string name="feature_models_delete_body">ਇਸ ਨਾਲ %1$s ਥਾਂ ਖਾਲੀ ਹੋਵੇਗੀ। ਤੁਸੀਂ ਇਸਨੂੰ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਡਾਊਨਲੋਡ ਕਰ ਸਕਦੇ ਹੋ।</string>
     <string name="feature_models_needs_ram">ਇਸ ਮਾਡਲ ਲਈ ਫ਼ੋਨ ਵਿੱਚ ਘੱਟੋ-ਘੱਟ %1$d GB RAM ਚਾਹੀਦੀ ਹੈ।</string>
     <string name="feature_models_waiting_network">Wi-Fi ਦੀ ਉਡੀਕ ਹੋ ਰਹੀ ਹੈ…</string>
-    <string name="feature_models_progress">%2$s ਵਿੱਚੋਂ %1$s (%3$d%%)</string>
+    <string name="feature_models_progress">%2$s ਵਿੱਚੋਂ %1$s (%3$d%)</string>
     <string name="feature_models_failed_storage">ਲੋੜੀਂਦੀ ਖਾਲੀ ਥਾਂ ਨਹੀਂ ਹੈ।</string>
     <string name="feature_models_failed_checksum">ਡਾਊਨਲੋਡ ਦੌਰਾਨ ਫ਼ਾਈਲ ਖ਼ਰਾਬ ਹੋ ਗਈ ਅਤੇ ਮਿਟਾ ਦਿੱਤੀ ਗਈ। ਕਿਰਪਾ ਕਰਕੇ ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ।</string>
     <string name="feature_models_failed_network">ਡਾਊਨਲੋਡ ਰੁਕ ਗਿਆ: ਆਪਣਾ ਕਨੈਕਸ਼ਨ ਜਾਂਚੋ।</string>

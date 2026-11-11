@@ -24,7 +24,7 @@
     <string name="feature_models_delete_body">This frees %1$s. You can download it again later.</string>
     <string name="feature_models_needs_ram">This phone needs at least %1$d GB of RAM for this model.</string>
     <string name="feature_models_waiting_network">Waiting for Wi-Fi…</string>
-    <string name="feature_models_progress">%1$s of %2$s (%3$d%%)</string>
+    <string name="feature_models_progress">%1$s of %2$s (%3$d%)</string>
     <string name="feature_models_failed_storage">Not enough free storage.</string>
     <string name="feature_models_failed_checksum">The file was damaged during download and was deleted. Please try again.</string>
     <string name="feature_models_failed_network">Download stopped: check your connection.</string>

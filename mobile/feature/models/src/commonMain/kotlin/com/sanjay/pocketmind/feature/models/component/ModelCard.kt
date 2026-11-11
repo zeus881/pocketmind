@@ -27,7 +27,6 @@ import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.ModelKind
 import com.sanjay.pocketmind.data.models.ModelState
 import com.sanjay.pocketmind.data.models.ModelStatus
-import com.sanjay.pocketmind.feature.models.R
 import com.sanjay.pocketmind.feature.models.resources.Res
 import com.sanjay.pocketmind.feature.models.resources.feature_models_cancel
 import com.sanjay.pocketmind.feature.models.resources.feature_models_delete
