@@ -150,6 +150,8 @@ tasks.register("testDebugUnitTest") {
         ":data:chat:testAndroidHostTest",
         ":feature:benchmark:testAndroidHostTest",
         ":feature:history:testAndroidHostTest",
+        ":feature:personas:testAndroidHostTest",
+        ":core:billing:testAndroidHostTest",
     )
 }
 
@@ -157,7 +159,7 @@ tasks.register("testDebugUnitTest") {
 // CI runs `./gradlew verifyRoborazziDebug` (screenshots.yml: recordRoborazziDebug). Android modules have those
 // tasks; a KMP feature module's Roborazzi tasks are named after its host-test compilation instead
 // (…RoborazziAndroidHostTest). Root tasks with the CI names keep one command covering both kinds of module.
-val kmpScreenshotModules = listOf(":feature:benchmark", ":feature:history")
+val kmpScreenshotModules = listOf(":feature:benchmark", ":feature:history", ":feature:personas")
 tasks.register("verifyRoborazziDebug") {
     description = "Verifies the screenshots of KMP feature modules (Android modules have their own task)."
     dependsOn(kmpScreenshotModules.map { "$it:verifyRoborazziAndroidHostTest" })

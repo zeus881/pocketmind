@@ -17,7 +17,7 @@ class FakeProStatus(pro: Boolean = false) : ProStatus {
         refreshes++
     }
 
-    override suspend fun buy(activity: Activity): BuyResult {
+    override suspend fun buy(host: Activity): BuyResult {
         if (isPro.value) return BuyResult.ALREADY_OWNED
         isPro.value = true
         return BuyResult.STARTED

@@ -1,14 +1,17 @@
 plugins {
-    alias(libs.plugins.pocketmind.android.feature)
+    alias(libs.plugins.pocketmind.kmp.feature)
 }
 
-android {
-    namespace = "com.sanjay.pocketmind.feature.personas"
+// feature:personas (V3) — personas and saved prompts, shared by Android and iOS.
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.data.chat)
+            implementation(projects.core.billing) // new custom personas are a Pro feature
+        }
+    }
 }
 
-dependencies {
-    implementation(projects.data.chat)
-    implementation(projects.core.billing) // new custom personas are a Pro feature
-
-    testImplementation(projects.core.testing)
+compose.resources {
+    packageOfResClass = "com.sanjay.pocketmind.feature.personas.resources"
 }
