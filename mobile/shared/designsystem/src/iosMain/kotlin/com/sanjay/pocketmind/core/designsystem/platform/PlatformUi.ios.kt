@@ -7,6 +7,7 @@ import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSDateFormatterMediumStyle
 import platform.Foundation.NSDateFormatterShortStyle
+import platform.Foundation.NSRelativeDateTimeFormatter
 import platform.Foundation.dateWithTimeIntervalSince1970
 import platform.UIKit.UIActivityViewController
 import platform.UIKit.popoverPresentationController
@@ -30,7 +31,12 @@ actual fun formatDateTime(epochMillis: Long): String {
         dateStyle = NSDateFormatterMediumStyle
         timeStyle = NSDateFormatterShortStyle
     }
-    return formatter.stringFromDate(NSDate.dateWithTimeIntervalSince1970(epochMillis / MILLIS_PER_SECOND))
+    return formatter.stringFromDate(epochMillis.toNSDate())
 }
+
+actual fun formatRelativeTime(epochMillis: Long): String =
+    NSRelativeDateTimeFormatter().localizedStringForDate(epochMillis.toNSDate(), relativeToDate = NSDate())
+
+private fun Long.toNSDate(): NSDate = NSDate.dateWithTimeIntervalSince1970(this / MILLIS_PER_SECOND)
 
 private const val MILLIS_PER_SECOND = 1000.0

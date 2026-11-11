@@ -57,6 +57,9 @@ compose-multiplatform-icons = "1.7.3"
 # artifacts depend on androidx.lifecycle 2.11.0 / androidx.navigation 2.10.0, i.e. the same classes the app uses.
 jb-lifecycle = "2.11.0"
 jb-navigation = "2.10.0"
+# Multiplatform Material 3 adaptive (window size classes); on Android it resolves to androidx adaptive 1.3.0,
+# the version the Compose BOM already gives the app (Maven Central, 2026-11-11).
+jb-compose-material3-adaptive = "1.3.0"
 # Icons were frozen at 1.7.8 and removed from the Compose BOM, so they are pinned separately.
 compose-material-icons = "1.7.8"
 
@@ -156,6 +159,7 @@ jb-compose-components-resources = { module = "org.jetbrains.compose.components:c
 jb-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jb-lifecycle" }
 jb-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jb-lifecycle" }
 jb-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "jb-navigation" }
+jb-compose-material3-adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "jb-compose-material3-adaptive" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "bignum" }

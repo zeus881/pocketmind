@@ -1,6 +1,5 @@
 package com.sanjay.pocketmind.feature.history
 
-import android.text.format.DateUtils
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -53,8 +52,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -66,9 +63,39 @@ import com.sanjay.pocketmind.core.designsystem.component.EmptyState
 import com.sanjay.pocketmind.core.designsystem.component.ErrorState
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
 import com.sanjay.pocketmind.core.designsystem.component.readableWidth
+import com.sanjay.pocketmind.core.designsystem.platform.formatRelativeTime
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.ChatSummary
 import com.sanjay.pocketmind.core.model.Folder
+import com.sanjay.pocketmind.feature.history.resources.Res
+import com.sanjay.pocketmind.feature.history.resources.feature_history_all_chats
+import com.sanjay.pocketmind.feature.history.resources.feature_history_cancel
+import com.sanjay.pocketmind.feature.history.resources.feature_history_clear_search
+import com.sanjay.pocketmind.feature.history.resources.feature_history_delete
+import com.sanjay.pocketmind.feature.history.resources.feature_history_delete_folder
+import com.sanjay.pocketmind.feature.history.resources.feature_history_deleted
+import com.sanjay.pocketmind.feature.history.resources.feature_history_empty_body
+import com.sanjay.pocketmind.feature.history.resources.feature_history_empty_title
+import com.sanjay.pocketmind.feature.history.resources.feature_history_error
+import com.sanjay.pocketmind.feature.history.resources.feature_history_folder_options
+import com.sanjay.pocketmind.feature.history.resources.feature_history_more
+import com.sanjay.pocketmind.feature.history.resources.feature_history_move_to_folder
+import com.sanjay.pocketmind.feature.history.resources.feature_history_new_folder
+import com.sanjay.pocketmind.feature.history.resources.feature_history_no_folder
+import com.sanjay.pocketmind.feature.history.resources.feature_history_no_results
+import com.sanjay.pocketmind.feature.history.resources.feature_history_pin
+import com.sanjay.pocketmind.feature.history.resources.feature_history_pinned
+import com.sanjay.pocketmind.feature.history.resources.feature_history_rename
+import com.sanjay.pocketmind.feature.history.resources.feature_history_rename_folder
+import com.sanjay.pocketmind.feature.history.resources.feature_history_save
+import com.sanjay.pocketmind.feature.history.resources.feature_history_search
+import com.sanjay.pocketmind.feature.history.resources.feature_history_title
+import com.sanjay.pocketmind.feature.history.resources.feature_history_undo
+import com.sanjay.pocketmind.feature.history.resources.feature_history_unpin
+import com.sanjay.pocketmind.feature.history.resources.feature_history_untitled
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /** Stateful history screen: wires the ViewModel to [HistoryContent] and shows the Undo snackbar. */
@@ -80,15 +107,14 @@ fun HistoryScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    val resources = LocalResources.current
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is HistoryEvent.ChatDeleted -> {
                     val result = snackbarHostState.showSnackbar(
-                        message = resources.getString(R.string.feature_history_deleted),
-                        actionLabel = resources.getString(R.string.feature_history_undo),
+                        message = getString(Res.string.feature_history_deleted),
+                        actionLabel = getString(Res.string.feature_history_undo),
                         duration = SnackbarDuration.Long,
                     )
                     if (result == SnackbarResult.ActionPerformed) viewModel.undoDelete(event.deleted)
@@ -141,7 +167,7 @@ fun HistoryContent(
 
     Scaffold(
         modifier = modifier,
-        topBar = { TopAppBar(title = { Text(stringResource(R.string.feature_history_title)) }) },
+        topBar = { TopAppBar(title = { Text(stringResource(Res.string.feature_history_title)) }) },
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
         Column(
@@ -164,18 +190,18 @@ fun HistoryContent(
                 when (val list = state.list) {
                     ListState.Loading -> LoadingState()
 
-                    ListState.Error -> ErrorState(stringResource(R.string.feature_history_error), actions.onRetry)
+                    ListState.Error -> ErrorState(stringResource(Res.string.feature_history_error), actions.onRetry)
 
                     is ListState.Content -> when {
                         list.chats.isEmpty() && state.query.isBlank() -> EmptyState(
                             icon = Icons.Outlined.History,
-                            title = stringResource(R.string.feature_history_empty_title),
-                            body = stringResource(R.string.feature_history_empty_body),
+                            title = stringResource(Res.string.feature_history_empty_title),
+                            body = stringResource(Res.string.feature_history_empty_body),
                         )
 
                         list.chats.isEmpty() -> EmptyState(
                             icon = Icons.Outlined.SearchOff,
-                            title = stringResource(R.string.feature_history_no_results, state.query),
+                            title = stringResource(Res.string.feature_history_no_results, state.query),
                         )
 
                         else -> LazyColumn(Modifier.fillMaxSize()) {
@@ -201,7 +227,7 @@ fun HistoryContent(
         null -> Unit
 
         is HistoryDialog.RenameChat -> NameDialog(
-            title = stringResource(R.string.feature_history_rename),
+            title = stringResource(Res.string.feature_history_rename),
             initial = open.summary.chat.title,
             onConfirm = { actions.onRename(open.summary.chat.id, it) },
             onDismiss = { dialog = null },
@@ -219,14 +245,14 @@ fun HistoryContent(
         )
 
         is HistoryDialog.NewFolder -> NameDialog(
-            title = stringResource(R.string.feature_history_new_folder),
+            title = stringResource(Res.string.feature_history_new_folder),
             initial = "",
             onConfirm = { actions.onCreateFolder(it, open.moveChatId) },
             onDismiss = { dialog = null },
         )
 
         is HistoryDialog.RenameFolder -> NameDialog(
-            title = stringResource(R.string.feature_history_rename_folder),
+            title = stringResource(Res.string.feature_history_rename_folder),
             initial = open.folder.name,
             onConfirm = { actions.onRenameFolder(open.folder.id, it) },
             onDismiss = { dialog = null },
@@ -239,14 +265,14 @@ private fun SearchField(query: String, onQueryChange: (String) -> Unit) {
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChange,
-        placeholder = { Text(stringResource(R.string.feature_history_search)) },
+        placeholder = { Text(stringResource(Res.string.feature_history_search)) },
         leadingIcon = { Icon(Icons.Outlined.Search, contentDescription = null) },
         trailingIcon = {
             if (query.isNotEmpty()) {
                 IconButton(onClick = { onQueryChange("") }) {
                     Icon(
                         Icons.Outlined.Clear,
-                        contentDescription = stringResource(R.string.feature_history_clear_search),
+                        contentDescription = stringResource(Res.string.feature_history_clear_search),
                     )
                 }
             }
@@ -284,7 +310,7 @@ private fun FolderBar(
         FilterChip(
             selected = selected == null,
             onClick = { onSelect(null) },
-            label = { Text(stringResource(R.string.feature_history_all_chats)) },
+            label = { Text(stringResource(Res.string.feature_history_all_chats)) },
         )
         folders.forEach { folder ->
             FilterChip(selected = folder.id == selectedId, onClick = {
@@ -293,7 +319,7 @@ private fun FolderBar(
         }
         AssistChip(
             onClick = onNew,
-            label = { Text(stringResource(R.string.feature_history_new_folder)) },
+            label = { Text(stringResource(Res.string.feature_history_new_folder)) },
             leadingIcon = { Icon(Icons.Outlined.Add, contentDescription = null) },
         )
         if (selected != null) {
@@ -302,19 +328,19 @@ private fun FolderBar(
                 IconButton(onClick = { menuOpen = true }) {
                     Icon(
                         Icons.Outlined.MoreVert,
-                        contentDescription = stringResource(R.string.feature_history_folder_options, selected.name),
+                        contentDescription = stringResource(Res.string.feature_history_folder_options, selected.name),
                     )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.feature_history_rename_folder)) },
+                        text = { Text(stringResource(Res.string.feature_history_rename_folder)) },
                         onClick = {
                             menuOpen = false
                             onRename(selected)
                         },
                     )
                     DropdownMenuItem(
-                        text = { Text(stringResource(R.string.feature_history_delete_folder)) },
+                        text = { Text(stringResource(Res.string.feature_history_delete_folder)) },
                         onClick = {
                             menuOpen = false
                             onDelete(selected.id)
@@ -337,11 +363,11 @@ private fun ChatRow(
 ) {
     var menuOpen by remember { mutableStateOf(false) }
     val chat = summary.chat
-    val title = chat.title.ifBlank { stringResource(R.string.feature_history_untitled) }
+    val title = chat.title.ifBlank { stringResource(Res.string.feature_history_untitled) }
     ListItem(
         modifier = modifier.clickable(onClick = { actions.onOpenChat(chat.id) }),
         leadingContent = if (chat.pinned) {
-            { Icon(Icons.Outlined.PushPin, contentDescription = stringResource(R.string.feature_history_pinned)) }
+            { Icon(Icons.Outlined.PushPin, contentDescription = stringResource(Res.string.feature_history_pinned)) }
         } else {
             null
         },
@@ -349,29 +375,29 @@ private fun ChatRow(
         supportingContent = summary.lastMessage?.let { last ->
             { Text(highlighted(last, query), maxLines = 2, overflow = TextOverflow.Ellipsis) }
         },
-        overlineContent = { Text(DateUtils.getRelativeTimeSpanString(chat.updatedAt).toString()) },
+        overlineContent = { Text(formatRelativeTime(chat.updatedAt)) },
         trailingContent = {
             Box {
                 IconButton(onClick = { menuOpen = true }) {
                     Icon(
                         Icons.Outlined.MoreVert,
-                        contentDescription = stringResource(R.string.feature_history_more, title),
+                        contentDescription = stringResource(Res.string.feature_history_more, title),
                     )
                 }
                 DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    MenuItem(if (chat.pinned) R.string.feature_history_unpin else R.string.feature_history_pin) {
+                    MenuItem(if (chat.pinned) Res.string.feature_history_unpin else Res.string.feature_history_pin) {
                         menuOpen = false
                         actions.onSetPinned(chat.id, !chat.pinned)
                     }
-                    MenuItem(R.string.feature_history_move_to_folder) {
+                    MenuItem(Res.string.feature_history_move_to_folder) {
                         menuOpen = false
                         onMove()
                     }
-                    MenuItem(R.string.feature_history_rename) {
+                    MenuItem(Res.string.feature_history_rename) {
                         menuOpen = false
                         onRename()
                     }
-                    MenuItem(R.string.feature_history_delete) {
+                    MenuItem(Res.string.feature_history_delete) {
                         menuOpen = false
                         actions.onDelete(chat.id)
                     }
@@ -382,8 +408,8 @@ private fun ChatRow(
 }
 
 @Composable
-private fun MenuItem(labelRes: Int, onClick: () -> Unit) {
-    DropdownMenuItem(text = { Text(stringResource(labelRes)) }, onClick = onClick)
+private fun MenuItem(label: StringResource, onClick: () -> Unit) {
+    DropdownMenuItem(text = { Text(stringResource(label)) }, onClick = onClick)
 }
 
 /** Bold + tinted search words (by word start, like the search itself). */
@@ -407,11 +433,11 @@ private fun MoveDialog(
     onNewFolder: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val options = listOf<Pair<String?, String>>(null to stringResource(R.string.feature_history_no_folder)) +
+    val options = listOf<Pair<String?, String>>(null to stringResource(Res.string.feature_history_no_folder)) +
         folders.map { it.id to it.name }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.feature_history_move_to_folder)) },
+        title = { Text(stringResource(Res.string.feature_history_move_to_folder)) },
         text = {
             Column(Modifier.selectableGroup()) {
                 options.forEach { (id, name) ->
@@ -428,9 +454,9 @@ private fun MoveDialog(
             }
         },
         confirmButton = {
-            TextButton(onClick = onNewFolder) { Text(stringResource(R.string.feature_history_new_folder)) }
+            TextButton(onClick = onNewFolder) { Text(stringResource(Res.string.feature_history_new_folder)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.feature_history_cancel)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.feature_history_cancel)) } },
     )
 }
 
@@ -449,8 +475,8 @@ private fun NameDialog(title: String, initial: String, onConfirm: (String) -> Un
                     onDismiss()
                 },
                 enabled = text.isNotBlank(),
-            ) { Text(stringResource(R.string.feature_history_save)) }
+            ) { Text(stringResource(Res.string.feature_history_save)) }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.feature_history_cancel)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.feature_history_cancel)) } },
     )
 }

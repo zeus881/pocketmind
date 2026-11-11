@@ -1,6 +1,7 @@
 package com.sanjay.pocketmind.core.designsystem.platform
 
 import android.content.Intent
+import android.text.format.DateUtils
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -22,3 +23,5 @@ actual fun rememberTextSharer(): (text: String, title: String) -> Unit {
 
 actual fun formatDateTime(epochMillis: Long): String =
     DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(epochMillis))
+
+actual fun formatRelativeTime(epochMillis: Long): String = DateUtils.getRelativeTimeSpanString(epochMillis).toString()

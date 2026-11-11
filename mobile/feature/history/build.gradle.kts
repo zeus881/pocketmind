@@ -1,14 +1,20 @@
 plugins {
-    alias(libs.plugins.pocketmind.android.feature)
+    alias(libs.plugins.pocketmind.kmp.feature)
 }
 
-android {
-    namespace = "com.sanjay.pocketmind.feature.history"
+// feature:history (V3) — the chat list, search, pins and folders, shared by Android and iOS.
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.data.chat)
+            // Two-pane History + chat on wide screens (window size classes), multiplatform.
+            implementation(libs.jb.compose.material3.adaptive)
+        }
+    }
 }
 
-dependencies {
-    implementation(projects.data.chat)
-    implementation(libs.compose.material3.adaptive) // two-pane History + chat on wide screens
-
-    testImplementation(projects.core.testing)
+compose.resources {
+    packageOfResClass = "com.sanjay.pocketmind.feature.history.resources"
+    // Public: the app's end-to-end test finds screens by these strings.
+    publicResClass = true
 }

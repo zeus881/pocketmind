@@ -18,3 +18,9 @@ expect fun rememberTextSharer(): (text: String, title: String) -> Unit
  * (medium date + short time, the same style v2 used on Android).
  */
 expect fun formatDateTime(epochMillis: Long): String
+
+/**
+ * How long ago [epochMillis] was, in the phone's language: "5 minutes ago", "Yesterday", or a date for older
+ * times. Android keeps v2's wording (DateUtils); iOS uses the system's NSRelativeDateTimeFormatter.
+ */
+expect fun formatRelativeTime(epochMillis: Long): String

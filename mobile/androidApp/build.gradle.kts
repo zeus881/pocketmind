@@ -153,6 +153,8 @@ dependencies {
     debugImplementation(libs.leakcanary.android)
 
     testImplementation(projects.core.testing)
+    // Strings of the shared (KMP) screens, read the way those screens read them (EndToEndTest).
+    testImplementation(libs.jb.compose.components.resources)
     testImplementation(libs.turbine)
     testImplementation(libs.androidx.datastore.preferences)
     testImplementation(libs.robolectric)

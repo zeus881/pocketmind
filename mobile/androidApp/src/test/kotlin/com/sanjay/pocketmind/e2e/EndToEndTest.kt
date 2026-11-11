@@ -25,7 +25,10 @@ import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.testing.FakeLlmEngine
 import com.sanjay.pocketmind.feature.chat.R as ChatR
 import com.sanjay.pocketmind.feature.documents.R as DocumentsR
-import com.sanjay.pocketmind.feature.history.R as HistoryR
+import com.sanjay.pocketmind.feature.history.resources.Res as HistoryRes
+import com.sanjay.pocketmind.feature.history.resources.feature_history_delete
+import com.sanjay.pocketmind.feature.history.resources.feature_history_more
+import com.sanjay.pocketmind.feature.history.resources.feature_history_undo
 import com.sanjay.pocketmind.feature.models.R as ModelsR
 import com.sanjay.pocketmind.feature.onboarding.R as OnboardingR
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
@@ -35,6 +38,8 @@ import com.tom_roush.pdfbox.pdmodel.PDPageContentStream
 import com.tom_roush.pdfbox.pdmodel.font.PDType1Font
 import java.io.File
 import kotlinx.coroutines.runBlocking
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -74,6 +79,9 @@ class EndToEndTest {
     }
 
     private fun text(id: Int, vararg args: Any) = context.getString(id, *args)
+
+    /** A string of a shared (KMP) screen: Compose resources, read the way the screen reads it. */
+    private fun text(res: StringResource, vararg args: Any) = runBlocking { getString(res, *args) }
 
     /** Waits for [nodes]; on timeout the failure shows what WAS on screen (the semantics tree). */
     private fun ComposeTestRule.waitFor(nodes: () -> SemanticsNodeInteractionCollection) {
@@ -131,10 +139,10 @@ class EndToEndTest {
             compose.clickText(text(AppR.string.nav_history))
             val title = "How do drones fly"
             compose.waitForText(title)
-            compose.clickDescription(text(HistoryR.string.feature_history_more, title))
-            compose.clickText(text(HistoryR.string.feature_history_delete))
-            compose.waitForText(text(HistoryR.string.feature_history_undo))
-            compose.clickText(text(HistoryR.string.feature_history_undo))
+            compose.clickDescription(text(HistoryRes.string.feature_history_more, title))
+            compose.clickText(text(HistoryRes.string.feature_history_delete))
+            compose.waitForText(text(HistoryRes.string.feature_history_undo))
+            compose.clickText(text(HistoryRes.string.feature_history_undo))
             compose.waitForText(title)
             scenario.onActivity { } // still running: nothing crashed on the way
         }
