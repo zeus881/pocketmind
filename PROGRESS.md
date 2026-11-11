@@ -18,6 +18,7 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 1 Monorepo, KMP skeleton, CI | DONE | 402 tests, 0 failures (Linux/WSL); logic coverage 84.17 % (gate 84) | see "Phase 1 notes" |
 | 2a Shared data layer (Room KMP, DataStore KMP) | DONE | 402 tests, 0 failures (Linux/WSL) + 3 iOS tests (CI); logic coverage 84.09 % | see "Phase 2a notes"; iOS build green on CI |
 | 2b Shared AI (tools, engine contract, documents/RAG logic) | DONE | 419 tests, 0 failures (Linux/WSL); logic coverage 84.15 % | see "Phase 2b notes"; iOS tests on CI |
+| 2c UI port to Compose Multiplatform | IN PROGRESS | step 1 done: 428 tests, 0 failures; coverage 84.37 % | see "Phase 2c notes" |
 
 **GitHub (2026-11-10):** public repo https://github.com/zeus881/pocketmind; branches main, v2, v3 and tag v2-final pushed.
 Commit email changed to sanjaykumarr99009@gmail.com in the whole history before the first push (old history kept in a
@@ -84,6 +85,27 @@ the goldens are stale and Windows-rendered. "Record screenshots" now commits Lin
 - **Kept for later:** LiteRT-LM stays 0.19.0 (verified on the phone); 0.19.1 exists — update only with a device
   check (manual step). PDF text extraction on iOS (PDFKit) comes with the iOS platform services (2d/2e).
 - **To verify on device** (no behaviour change expected): chat with tools, PDF summary, Ask-your-PDF citations.
+
+### Phase 2c notes (2026-11-10/11)
+- **Step 1 done — prerequisites for shared screens:**
+  - `shared:designsystem` (Compose Multiplatform; v2 core:designsystem moved; wallpaper colours expect/actual;
+    "Retry" as a Compose resource). Convention plugin `pocketmind.kmp.compose`; KMP host tests include Android
+    resources and run Robolectric on SDK 36 (`robolectric.properties`). Kover ignores generated `*.resources`.
+  - Benchmark logic in `shared:ai` (UUID → kotlin.uuid, AtomicInteger → kotlin atomics, String.format →
+    `formatFixed` in shared:core with tests); report text unchanged.
+  - **Hilt → Koin 4.2.2** for the whole Android app (17 Hilt modules, 44 injected classes, 11 ViewModels,
+    worker, widget, E2E tests). Scopes kept exactly (former @Singleton → `single`, unscoped → `factory`, from the
+    diff). `KoinGraphTest` (`Module.verify`) replaces Hilt's compile-time check. E2E tests run on
+    `TestPocketMindApp` with one module of fakes (Koin's `allowOverride` default = true, checked in bytecode).
+    Hilt's KSP processing is gone; Room keeps the KSP safety rules.
+  - Fixed on the way: a JVM-only `removeIf` in shared test code (iOS CI), Gradle's own `javax.inject` use in
+    build-logic (restored after the mechanical strip), a broken secondary constructor (CrashLog).
+- **Mistake recorded:** a "workflow only" commit (f2d2cfc) also captured staged `git mv` renames with their old
+  contents; CI failed until 7d0cff2. Rule now: commit single files with `git commit -- <path>`.
+- **Step 2 (next):** feature modules become KMP modules one by one (screens + ViewModels in commonMain,
+  strings as Compose resources, platform pickers/share/biometric behind small interfaces); composeApp hosts the
+  shared navigation for iOS. Deviation from the spec layout: features stay separate modules under
+  `mobile/feature/*` (now KMP) instead of one composeApp module, which keeps v2's enforced dependency rules.
 
 
 ## v2 status (branch `v2`, plan: V2_PLAN.md, approved 2026-11-02)
