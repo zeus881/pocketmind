@@ -1,0 +1,53 @@
+# Records the golden screenshots ON LINUX (the CI machine) and commits them to the branch it ran on.
+# Fonts are rendered slightly differently on Windows, macOS and Linux, so the images CI compares
+# against must come from CI itself. Run it from the Actions tab: "Record screenshots" → "Run workflow"
+# → pick the branch. Only PNGs under src/test/screenshots/ are committed; they are also uploaded as an
+# artifact. Note: a push made with GITHUB_TOKEN does not start CI again, so re-run CI (or push) afterwards.
+name: Record screenshots
+
+on:
+  workflow_dispatch:
+
+# contents: write lets this job push the recorded images; it can't change anything else.
+permissions:
+  contents: write
+
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    # The Android/KMP Gradle build lives in mobile/ (V3 monorepo); artifact paths below stay repo-relative.
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            17
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      - name: Record
+        run: ./gradlew recordRoborazziDebug
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: golden-screenshots
+          path: "mobile/**/src/test/screenshots/*.png"
+
+      - name: Commit the recorded images to this branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- ':(glob)**/src/test/screenshots/*.png'
+          if git diff --cached --quiet; then
+            echo "The recorded images match the committed ones; nothing to commit."
+            exit 0
+          fi
+          git commit -m "test: re-record golden screenshots on Linux CI"
+          git push
