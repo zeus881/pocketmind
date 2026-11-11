@@ -13,6 +13,10 @@ kotlin {
             // MarkdownText: the one Markdown renderer every screen uses (multiplatform).
             api(libs.markdown.renderer.m3)
         }
+        androidMain.dependencies {
+            // rememberNotificationPermissionLauncher: the system permission dialog (Android 13+).
+            implementation(libs.androidx.activity.compose)
+        }
     }
 }
 

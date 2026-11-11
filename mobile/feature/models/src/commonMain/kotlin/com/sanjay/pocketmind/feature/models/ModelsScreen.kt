@@ -1,10 +1,5 @@
 package com.sanjay.pocketmind.feature.models
 
-import android.Manifest
-import android.os.Build
-import android.text.format.Formatter
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,9 +32,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -49,9 +41,27 @@ import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.ErrorState
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
 import com.sanjay.pocketmind.core.designsystem.component.readableWidth
+import com.sanjay.pocketmind.core.designsystem.platform.rememberFileSizeFormatter
+import com.sanjay.pocketmind.core.designsystem.platform.rememberNotificationPermissionLauncher
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.feature.models.component.ModelActions
 import com.sanjay.pocketmind.feature.models.component.ModelCard
+import com.sanjay.pocketmind.feature.models.resources.Res
+import com.sanjay.pocketmind.feature.models.resources.feature_models_back
+import com.sanjay.pocketmind.feature.models.resources.feature_models_chat_section
+import com.sanjay.pocketmind.feature.models.resources.feature_models_device_ram
+import com.sanjay.pocketmind.feature.models.resources.feature_models_embedding_section
+import com.sanjay.pocketmind.feature.models.resources.feature_models_error_generic
+import com.sanjay.pocketmind.feature.models.resources.feature_models_error_storage
+import com.sanjay.pocketmind.feature.models.resources.feature_models_mobile_data
+import com.sanjay.pocketmind.feature.models.resources.feature_models_mobile_data_hint
+import com.sanjay.pocketmind.feature.models.resources.feature_models_offline_note
+import com.sanjay.pocketmind.feature.models.resources.feature_models_recommended_for_you
+import com.sanjay.pocketmind.feature.models.resources.feature_models_title
+import com.sanjay.pocketmind.feature.models.resources.feature_models_verify_damaged
+import com.sanjay.pocketmind.feature.models.resources.feature_models_verify_ok
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 /**
@@ -62,13 +72,13 @@ import org.koin.compose.viewmodel.koinViewModel
 fun ModelsScreen(onBack: (() -> Unit)?, viewModel: ModelsViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    val context = LocalContext.current
-    val resources = LocalResources.current
+    val fileSize = rememberFileSizeFormatter()
     var askedNotifications by rememberSaveable { mutableStateOf(false) }
     var pendingDownload by rememberSaveable { mutableStateOf<String?>(null) }
 
     // The system permission dialog returns here; we download whatever the user answered.
-    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+    // Null when there is nothing to ask (Android before 13, iOS).
+    val askNotifications = rememberNotificationPermissionLauncher {
         pendingDownload?.let(viewModel::download)
         pendingDownload = null
     }
@@ -78,19 +88,19 @@ fun ModelsScreen(onBack: (() -> Unit)?, viewModel: ModelsViewModel = koinViewMod
             when (event) {
                 is ModelsEvent.Error -> snackbar.showSnackbar(
                     when (event.kind) {
-                        ErrorKind.NOT_ENOUGH_STORAGE -> resources.getString(
-                            R.string.feature_models_error_storage,
-                            Formatter.formatShortFileSize(context, event.neededBytes),
+                        ErrorKind.NOT_ENOUGH_STORAGE -> getString(
+                            Res.string.feature_models_error_storage,
+                            fileSize(event.neededBytes),
                         )
 
-                        ErrorKind.CHECKSUM_MISMATCH -> resources.getString(R.string.feature_models_verify_damaged)
+                        ErrorKind.CHECKSUM_MISMATCH -> getString(Res.string.feature_models_verify_damaged)
 
-                        else -> resources.getString(R.string.feature_models_error_generic)
+                        else -> getString(Res.string.feature_models_error_generic)
                     },
                 )
 
                 is ModelsEvent.Verified -> snackbar.showSnackbar(
-                    resources.getString(R.string.feature_models_verify_ok, event.displayName),
+                    getString(Res.string.feature_models_verify_ok, event.displayName),
                 )
             }
         }
@@ -98,10 +108,10 @@ fun ModelsScreen(onBack: (() -> Unit)?, viewModel: ModelsViewModel = koinViewMod
 
     val actions = ModelActions(
         onDownload = { id ->
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && !askedNotifications) {
+            if (askNotifications != null && !askedNotifications) {
                 askedNotifications = true
                 pendingDownload = id
-                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                askNotifications()
             } else {
                 viewModel.download(id)
             }
@@ -127,11 +137,11 @@ fun ModelsContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.feature_models_title)) },
+                title = { Text(stringResource(Res.string.feature_models_title)) },
                 navigationIcon = {
                     if (onBack != null) {
                         IconButton(onClick = onBack) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.feature_models_back))
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.feature_models_back))
                         }
                     }
                 },
@@ -149,7 +159,7 @@ fun ModelsContent(
 
             // The catalog ships in the APK, so this is near-impossible; still, never a blank screen.
             state.loadFailed -> ErrorState(
-                message = stringResource(R.string.feature_models_error_generic),
+                message = stringResource(Res.string.feature_models_error_generic),
                 onRetry = {},
                 modifier = modifier,
             )
@@ -161,7 +171,7 @@ fun ModelsContent(
             ) {
                 item { DeviceCard(state) }
                 item { MobileDataRow(state.allowMobileData, onAllowMobileData) }
-                item { SectionHeader(stringResource(R.string.feature_models_chat_section)) }
+                item { SectionHeader(stringResource(Res.string.feature_models_chat_section)) }
                 items(state.chatModels, key = { it.info.id }) { model ->
                     ModelCard(
                         model,
@@ -171,7 +181,7 @@ fun ModelsContent(
                     )
                 }
                 if (state.embeddingModels.isNotEmpty()) {
-                    item { SectionHeader(stringResource(R.string.feature_models_embedding_section)) }
+                    item { SectionHeader(stringResource(Res.string.feature_models_embedding_section)) }
                     items(state.embeddingModels, key = { it.info.id }) { model ->
                         ModelCard(
                             model,
@@ -192,14 +202,14 @@ private fun DeviceCard(state: ModelsUiState) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(PmSpacing.l), verticalArrangement = Arrangement.spacedBy(PmSpacing.xs)) {
             Text(
-                stringResource(R.string.feature_models_device_ram, state.deviceRamGb),
+                stringResource(Res.string.feature_models_device_ram, state.deviceRamGb),
                 style = MaterialTheme.typography.titleMedium,
             )
             if (recommended != null) {
-                Text(stringResource(R.string.feature_models_recommended_for_you, recommended))
+                Text(stringResource(Res.string.feature_models_recommended_for_you, recommended))
             }
             Text(
-                stringResource(R.string.feature_models_offline_note),
+                stringResource(Res.string.feature_models_offline_note),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -218,9 +228,9 @@ private fun MobileDataRow(checked: Boolean, onChange: (Boolean) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f)) {
-            Text(stringResource(R.string.feature_models_mobile_data), style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(Res.string.feature_models_mobile_data), style = MaterialTheme.typography.bodyLarge)
             Text(
-                stringResource(R.string.feature_models_mobile_data_hint),
+                stringResource(Res.string.feature_models_mobile_data_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

@@ -29,8 +29,13 @@ import com.sanjay.pocketmind.feature.history.resources.Res as HistoryRes
 import com.sanjay.pocketmind.feature.history.resources.feature_history_delete
 import com.sanjay.pocketmind.feature.history.resources.feature_history_more
 import com.sanjay.pocketmind.feature.history.resources.feature_history_undo
-import com.sanjay.pocketmind.feature.models.R as ModelsR
-import com.sanjay.pocketmind.feature.onboarding.R as OnboardingR
+import com.sanjay.pocketmind.feature.models.resources.Res as ModelsRes
+import com.sanjay.pocketmind.feature.models.resources.feature_models_back
+import com.sanjay.pocketmind.feature.models.resources.feature_models_download
+import com.sanjay.pocketmind.feature.models.resources.feature_models_in_use
+import com.sanjay.pocketmind.feature.onboarding.resources.Res as OnboardingRes
+import com.sanjay.pocketmind.feature.onboarding.resources.feature_onboarding_get_started
+import com.sanjay.pocketmind.feature.onboarding.resources.feature_onboarding_next
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.pdmodel.PDPage
@@ -113,20 +118,20 @@ class EndToEndTest {
     fun `first run - onboarding, download, chat, history, delete and undo`() {
         ActivityScenario.launch(MainActivity::class.java).use { scenario ->
             // Onboarding: Next until "I understand — get started".
-            val getStarted = text(OnboardingR.string.feature_onboarding_get_started)
+            val getStarted = text(OnboardingRes.string.feature_onboarding_get_started)
             repeat(ONBOARDING_PAGES) {
                 if (compose.onAllNodesWithText(getStarted).fetchSemanticsNodes().isEmpty()) {
-                    compose.clickText(text(OnboardingR.string.feature_onboarding_next))
+                    compose.clickText(text(OnboardingRes.string.feature_onboarding_next))
                 }
             }
             compose.clickText(getStarted)
 
             // The model manager opens on top of the chat: download (instant here) and go back.
-            compose.waitForText(text(ModelsR.string.feature_models_download))
-            compose.clickText(text(ModelsR.string.feature_models_download))
-            compose.waitForText(text(ModelsR.string.feature_models_in_use))
+            compose.waitForText(text(ModelsRes.string.feature_models_download))
+            compose.clickText(text(ModelsRes.string.feature_models_download))
+            compose.waitForText(text(ModelsRes.string.feature_models_in_use))
             assertEquals(1, models.downloadCalls)
-            compose.clickDescription(text(ModelsR.string.feature_models_back))
+            compose.clickDescription(text(ModelsRes.string.feature_models_back))
 
             // Chat: the screen must notice the new model (the bug this test found), then answer.
             compose.waitFor { compose.onAllNodes(hasSetTextAction()) }

@@ -24,3 +24,18 @@ expect fun formatDateTime(epochMillis: Long): String
  * times. Android keeps v2's wording (DateUtils); iOS uses the system's NSRelativeDateTimeFormatter.
  */
 expect fun formatRelativeTime(epochMillis: Long): String
+
+/**
+ * Formats a byte count the way the phone shows file sizes ("2.6 GB"). A composable that returns a function
+ * because Android's formatter needs a Context, while callers also use it in event handlers (snackbars).
+ */
+@Composable
+expect fun rememberFileSizeFormatter(): (bytes: Long) -> String
+
+/**
+ * Asks for permission to show download-progress notifications, then calls [onAnswered] whatever the user chose.
+ * Returns null when no question is needed: Android before 13 (always allowed) and iOS (no download notifications
+ * yet; the iOS downloader comes in V3 phase 2d), so the caller simply goes ahead.
+ */
+@Composable
+expect fun rememberNotificationPermissionLauncher(onAnswered: () -> Unit): (() -> Unit)?

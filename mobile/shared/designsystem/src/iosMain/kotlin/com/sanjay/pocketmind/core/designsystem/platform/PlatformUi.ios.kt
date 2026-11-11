@@ -3,6 +3,8 @@ package com.sanjay.pocketmind.core.designsystem.platform
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.uikit.LocalUIViewController
+import platform.Foundation.NSByteCountFormatter
+import platform.Foundation.NSByteCountFormatterCountStyleFile
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
 import platform.Foundation.NSDateFormatterMediumStyle
@@ -40,3 +42,11 @@ actual fun formatRelativeTime(epochMillis: Long): String =
 private fun Long.toNSDate(): NSDate = NSDate.dateWithTimeIntervalSince1970(this / MILLIS_PER_SECOND)
 
 private const val MILLIS_PER_SECOND = 1000.0
+
+@Composable
+actual fun rememberFileSizeFormatter(): (bytes: Long) -> String = remember {
+    { bytes -> NSByteCountFormatter.stringFromByteCount(bytes, NSByteCountFormatterCountStyleFile) }
+}
+
+@Composable
+actual fun rememberNotificationPermissionLauncher(onAnswered: () -> Unit): (() -> Unit)? = null

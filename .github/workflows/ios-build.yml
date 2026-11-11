@@ -46,7 +46,8 @@ jobs:
               :shared:designsystem:compileKotlinIosSimulatorArm64 \
               :data:chat:compileKotlinIosSimulatorArm64 :feature:benchmark:compileKotlinIosSimulatorArm64 \
               :feature:history:compileKotlinIosSimulatorArm64 :core:billing:compileKotlinIosSimulatorArm64 \
-              :feature:personas:compileKotlinIosSimulatorArm64 2>&1 | tee "$RUNNER_TEMP/ios-tests.log"; then
+              :feature:personas:compileKotlinIosSimulatorArm64 :feature:onboarding:compileKotlinIosSimulatorArm64 \
+              :feature:models:compileKotlinIosSimulatorArm64 2>&1 | tee "$RUNNER_TEMP/ios-tests.log"; then
             # Compiler errors and crashes leave no test report; copy Gradle's own error lines into annotations.
             grep -E "^e: |What went wrong|FAILED|Exception|Signal|Crashed|Undefined symbols" -A2 "$RUNNER_TEMP/ios-tests.log" \
               | head -40 | while IFS= read -r line; do echo "::error::$line"; done
