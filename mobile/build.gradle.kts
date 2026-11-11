@@ -147,7 +147,22 @@ tasks.register("testDebugUnitTest") {
         ":shared:data:testAndroidHostTest",
         ":shared:ai:testAndroidHostTest",
         ":shared:designsystem:testAndroidHostTest",
+        ":feature:benchmark:testAndroidHostTest",
     )
+}
+
+// ---------- Screenshot tests in KMP modules ----------
+// CI runs `./gradlew verifyRoborazziDebug` (screenshots.yml: recordRoborazziDebug). Android modules have those
+// tasks; a KMP feature module's Roborazzi tasks are named after its host-test compilation instead
+// (…RoborazziAndroidHostTest). Root tasks with the CI names keep one command covering both kinds of module.
+val kmpScreenshotModules = listOf(":feature:benchmark")
+tasks.register("verifyRoborazziDebug") {
+    description = "Verifies the screenshots of KMP feature modules (Android modules have their own task)."
+    dependsOn(kmpScreenshotModules.map { "$it:verifyRoborazziAndroidHostTest" })
+}
+tasks.register("recordRoborazziDebug") {
+    description = "Records the screenshots of KMP feature modules (Android modules have their own task)."
+    dependsOn(kmpScreenshotModules.map { "$it:recordRoborazziAndroidHostTest" })
 }
 
 // ---------- Design-token guard ----------

@@ -1,6 +1,5 @@
 package com.sanjay.pocketmind.feature.benchmark
 
-import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -34,51 +33,64 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.sanjay.pocketmind.core.common.format.formatFixed
 import com.sanjay.pocketmind.core.common.result.ErrorKind
 import com.sanjay.pocketmind.core.designsystem.component.EmptyState
 import com.sanjay.pocketmind.core.designsystem.component.LoadingState
 import com.sanjay.pocketmind.core.designsystem.component.readableWidth
+import com.sanjay.pocketmind.core.designsystem.platform.formatDateTime
+import com.sanjay.pocketmind.core.designsystem.platform.rememberTextSharer
 import com.sanjay.pocketmind.core.designsystem.theme.PmSpacing
 import com.sanjay.pocketmind.core.model.BenchmarkResult
 import com.sanjay.pocketmind.data.benchmark.BenchmarkProgress
-import java.text.DateFormat
-import java.util.Date
-import java.util.Locale
+import com.sanjay.pocketmind.feature.benchmark.resources.Res
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_back
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_cancel
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_delete
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_empty_body
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_empty_title
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_error
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_error_no_model
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_intro
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_loading
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_metric_load
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_metric_memory
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_metric_speed
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_metric_ttft
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_run
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_running_prompt
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_share
+import com.sanjay.pocketmind.feature.benchmark.resources.feature_benchmark_title
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun BenchmarkScreen(onBack: () -> Unit, viewModel: BenchmarkViewModel = koinViewModel()) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
-    val context = LocalContext.current
-    val resources = LocalResources.current
+    val share = rememberTextSharer()
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
                 is BenchmarkEvent.Share -> {
-                    // Android's share sheet: the user chooses where the text goes. We send nothing ourselves.
-                    val send = Intent(Intent.ACTION_SEND)
-                        .setType("text/plain")
-                        .putExtra(Intent.EXTRA_TEXT, event.text)
-                    val title = resources.getString(R.string.feature_benchmark_share)
-                    context.startActivity(Intent.createChooser(send, title))
+                    // The platform share sheet: the user chooses where the text goes. We send nothing ourselves.
+                    share(event.text, getString(Res.string.feature_benchmark_share))
                 }
 
                 is BenchmarkEvent.Error -> snackbar.showSnackbar(
-                    resources.getString(
+                    getString(
                         if (event.kind == ErrorKind.NO_MODEL) {
-                            R.string.feature_benchmark_error_no_model
+                            Res.string.feature_benchmark_error_no_model
                         } else {
-                            R.string.feature_benchmark_error
+                            Res.string.feature_benchmark_error
                         },
                     ),
                 )
@@ -111,10 +123,10 @@ fun BenchmarkContent(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.feature_benchmark_title)) },
+                title = { Text(stringResource(Res.string.feature_benchmark_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.feature_benchmark_back))
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(Res.string.feature_benchmark_back))
                     }
                 },
             )
@@ -137,8 +149,8 @@ fun BenchmarkContent(
                 state.runs.isEmpty() -> item {
                     EmptyState(
                         icon = Icons.Outlined.Speed,
-                        title = stringResource(R.string.feature_benchmark_empty_title),
-                        body = stringResource(R.string.feature_benchmark_empty_body),
+                        title = stringResource(Res.string.feature_benchmark_empty_title),
+                        body = stringResource(Res.string.feature_benchmark_empty_body),
                         modifier = Modifier.padding(top = PmSpacing.xxl),
                     )
                 }
@@ -153,24 +165,24 @@ fun BenchmarkContent(
 private fun RunCard(state: BenchmarkUiState, onRun: () -> Unit, onCancel: () -> Unit) {
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(PmSpacing.l), verticalArrangement = Arrangement.spacedBy(PmSpacing.s)) {
-            Text(stringResource(R.string.feature_benchmark_intro), style = MaterialTheme.typography.bodyMedium)
+            Text(stringResource(Res.string.feature_benchmark_intro), style = MaterialTheme.typography.bodyMedium)
             val progress = state.progress
             if (progress == null) {
-                Button(onClick = onRun) { Text(stringResource(R.string.feature_benchmark_run)) }
+                Button(onClick = onRun) { Text(stringResource(Res.string.feature_benchmark_run)) }
             } else {
                 LinearProgressIndicator(Modifier.fillMaxWidth())
                 val label = when (progress) {
                     is BenchmarkProgress.RunningPrompt -> stringResource(
-                        R.string.feature_benchmark_running_prompt,
+                        Res.string.feature_benchmark_running_prompt,
                         progress.index,
                         progress.total,
                         progress.name,
                     )
 
-                    else -> stringResource(R.string.feature_benchmark_loading)
+                    else -> stringResource(Res.string.feature_benchmark_loading)
                 }
                 Text(label, modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite })
-                OutlinedButton(onClick = onCancel) { Text(stringResource(R.string.feature_benchmark_cancel)) }
+                OutlinedButton(onClick = onCancel) { Text(stringResource(Res.string.feature_benchmark_cancel)) }
             }
         }
     }
@@ -178,7 +190,7 @@ private fun RunCard(state: BenchmarkUiState, onRun: () -> Unit, onCancel: () -> 
 
 @Composable
 private fun ResultCard(run: BenchmarkResult, onShare: (BenchmarkResult) -> Unit, onDelete: (BenchmarkResult) -> Unit) {
-    val date = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT).format(Date(run.createdAt))
+    val date = formatDateTime(run.createdAt)
     Card(Modifier.fillMaxWidth()) {
         Column(Modifier.padding(PmSpacing.l), verticalArrangement = Arrangement.spacedBy(PmSpacing.xs)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -187,18 +199,19 @@ private fun ResultCard(run: BenchmarkResult, onShare: (BenchmarkResult) -> Unit,
                     Text(date, style = MaterialTheme.typography.bodySmall)
                 }
                 IconButton(onClick = { onShare(run) }) {
-                    Icon(Icons.Outlined.Share, stringResource(R.string.feature_benchmark_share))
+                    Icon(Icons.Outlined.Share, stringResource(Res.string.feature_benchmark_share))
                 }
                 IconButton(onClick = { onDelete(run) }) {
-                    Icon(Icons.Outlined.Delete, stringResource(R.string.feature_benchmark_delete))
+                    Icon(Icons.Outlined.Delete, stringResource(Res.string.feature_benchmark_delete))
                 }
             }
-            val speed = String.format(Locale.US, "%.1f tok/s", run.averageDecodeTokensPerSecond)
-            val ttft = String.format(Locale.US, "%.2f s", run.averageTimeToFirstTokenMs / MS)
-            Metric(R.string.feature_benchmark_metric_speed, speed)
-            Metric(R.string.feature_benchmark_metric_ttft, ttft)
-            Metric(R.string.feature_benchmark_metric_load, String.format(Locale.US, "%.1f s", run.loadMs / MS))
-            Metric(R.string.feature_benchmark_metric_memory, "${run.peakMemoryMb} MB")
+            // Fixed "." decimals on every phone, like v2's Locale.US: these numbers are compared across devices.
+            val speed = "${run.averageDecodeTokensPerSecond.formatFixed(1)} tok/s"
+            val ttft = "${(run.averageTimeToFirstTokenMs / MS).formatFixed(2)} s"
+            Metric(Res.string.feature_benchmark_metric_speed, speed)
+            Metric(Res.string.feature_benchmark_metric_ttft, ttft)
+            Metric(Res.string.feature_benchmark_metric_load, "${(run.loadMs / MS).formatFixed(1)} s")
+            Metric(Res.string.feature_benchmark_metric_memory, "${run.peakMemoryMb} MB")
             Text(
                 run.device,
                 style = MaterialTheme.typography.bodySmall,
@@ -209,9 +222,9 @@ private fun ResultCard(run: BenchmarkResult, onShare: (BenchmarkResult) -> Unit,
 }
 
 @Composable
-private fun Metric(labelRes: Int, value: String) {
+private fun Metric(label: StringResource, value: String) {
     Row(Modifier.fillMaxWidth()) {
-        Text(stringResource(labelRes), modifier = Modifier.weight(1f))
+        Text(stringResource(label), modifier = Modifier.weight(1f))
         Text(value, style = MaterialTheme.typography.bodyLarge)
     }
 }

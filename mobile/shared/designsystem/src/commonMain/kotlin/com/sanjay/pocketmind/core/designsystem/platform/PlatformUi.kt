@@ -1,0 +1,20 @@
+package com.sanjay.pocketmind.core.designsystem.platform
+
+import androidx.compose.runtime.Composable
+
+/**
+ * Opens the platform's own share sheet with [text] (Android: the "Share" chooser; iOS: UIActivityViewController).
+ * [title] is the chooser heading on Android; iOS shows no title.
+ *
+ * Why a composable that returns a function: both platforms need something only the UI has (Android an Activity
+ * context, iOS the current UIViewController), so the screen "remembers" a sharer while it is composed and calls it
+ * from an event handler. The app itself never sends the text anywhere: the user picks the destination.
+ */
+@Composable
+expect fun rememberTextSharer(): (text: String, title: String) -> Unit
+
+/**
+ * [epochMillis] as a date and time in the phone's language and format, e.g. "11 Nov 2026, 14:05"
+ * (medium date + short time, the same style v2 used on Android).
+ */
+expect fun formatDateTime(epochMillis: Long): String

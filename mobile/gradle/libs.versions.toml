@@ -53,6 +53,10 @@ compose-multiplatform = "1.12.2"
 compose-multiplatform-material3 = "1.9.0"
 # The last JetBrains material-icons release (Maven Central, 2026-11-10); on Android it resolves to AndroidX icons.
 compose-multiplatform-icons = "1.7.3"
+# JetBrains' multiplatform builds of AndroidX lifecycle and navigation (Maven Central, 2026-11-11). On Android their
+# artifacts depend on androidx.lifecycle 2.11.0 / androidx.navigation 2.10.0, i.e. the same classes the app uses.
+jb-lifecycle = "2.11.0"
+jb-navigation = "2.10.0"
 # Icons were frozen at 1.7.8 and removed from the Compose BOM, so they are pinned separately.
 compose-material-icons = "1.7.8"
 
@@ -146,6 +150,9 @@ jb-compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose
 jb-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "compose-multiplatform-material3" }
 jb-compose-material-icons-extended = { module = "org.jetbrains.compose.material:material-icons-extended", version.ref = "compose-multiplatform-icons" }
 jb-compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose-multiplatform" }
+jb-lifecycle-runtime-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-runtime-compose", version.ref = "jb-lifecycle" }
+jb-lifecycle-viewmodel-compose = { module = "org.jetbrains.androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "jb-lifecycle" }
+jb-navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "jb-navigation" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlinx-datetime = { module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime" }
 bignum = { module = "com.ionspin.kotlin:bignum", version.ref = "bignum" }
@@ -214,3 +221,4 @@ pocketmind-kmp-library = { id = "pocketmind.kmp.library" }
 pocketmind-kmp-android-library = { id = "pocketmind.kmp.android.library" }
 pocketmind-kmp-room = { id = "pocketmind.kmp.room" }
 pocketmind-kmp-compose = { id = "pocketmind.kmp.compose" }
+pocketmind-kmp-feature = { id = "pocketmind.kmp.feature" }

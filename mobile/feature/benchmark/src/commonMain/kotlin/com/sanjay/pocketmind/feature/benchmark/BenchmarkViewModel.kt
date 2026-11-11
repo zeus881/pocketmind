@@ -32,7 +32,7 @@ data class BenchmarkUiState(
 sealed interface BenchmarkEvent {
     data class Error(val kind: ErrorKind) : BenchmarkEvent
 
-    /** Opens the Android share sheet with this text. */
+    /** Opens the platform share sheet (Android chooser, iOS activity sheet) with this text. */
     data class Share(val text: String) : BenchmarkEvent
 }
 
