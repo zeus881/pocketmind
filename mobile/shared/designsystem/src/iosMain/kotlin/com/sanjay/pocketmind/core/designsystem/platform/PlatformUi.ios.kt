@@ -9,6 +9,7 @@ import platform.Foundation.NSDateFormatterMediumStyle
 import platform.Foundation.NSDateFormatterShortStyle
 import platform.Foundation.dateWithTimeIntervalSince1970
 import platform.UIKit.UIActivityViewController
+import platform.UIKit.popoverPresentationController
 
 @Composable
 actual fun rememberTextSharer(): (text: String, title: String) -> Unit {

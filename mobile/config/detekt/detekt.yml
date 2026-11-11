@@ -19,6 +19,9 @@ complexity:
     ignorePrivate: true
     # A class implementing an interface can't choose how many functions it has; the interface is counted itself.
     ignoreOverridden: true
+    # One test class per class under test, one function per case: test classes are long on purpose. Detekt's own
+    # default skips test/ and androidTest/; KMP test folders (V3) are named *Test (androidHostTest, commonTest, …).
+    excludes: ['**/test/**', '**/androidTest/**', '**/*Test/kotlin/**']
   CyclomaticComplexMethod:
     ignoreAnnotated: ['Composable']
 

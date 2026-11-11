@@ -147,6 +147,7 @@ tasks.register("testDebugUnitTest") {
         ":shared:data:testAndroidHostTest",
         ":shared:ai:testAndroidHostTest",
         ":shared:designsystem:testAndroidHostTest",
+        ":data:chat:testAndroidHostTest",
         ":feature:benchmark:testAndroidHostTest",
     )
 }

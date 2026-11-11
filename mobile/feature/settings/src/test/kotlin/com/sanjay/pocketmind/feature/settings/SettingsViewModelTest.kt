@@ -1,6 +1,5 @@
 package com.sanjay.pocketmind.feature.settings
 
-import android.net.Uri
 import com.sanjay.pocketmind.core.common.diagnostics.CrashLog
 import com.sanjay.pocketmind.core.common.diagnostics.DeviceFacts
 import com.sanjay.pocketmind.core.common.diagnostics.DeviceFactsSource
@@ -65,7 +64,7 @@ class SettingsViewModelTest {
         var exportResult: AppResult<Unit> = AppResult.Success(Unit)
         var deletes = 0
 
-        override suspend fun exportAll(uri: Uri) = exportResult
+        override suspend fun exportAll(uri: String) = exportResult
 
         override suspend fun deleteAll() {
             deletes++
@@ -111,11 +110,11 @@ class SettingsViewModelTest {
 
     @Test
     fun exportAndDeleteReportTheirResult() = runTest {
-        viewModel.exportAllData(mockk())
+        viewModel.exportAllData("content://export")
         assertEquals(SettingsEvent.DataExported, viewModel.events.first())
 
         userData.exportResult = AppResult.Failure(ErrorKind.FILE_UNREADABLE)
-        viewModel.exportAllData(mockk())
+        viewModel.exportAllData("content://export")
         assertEquals(SettingsEvent.ExportFailed, viewModel.events.first())
 
         viewModel.deleteAllData()

@@ -73,6 +73,9 @@ bignum = "0.3.10"
 litertlm = "0.19.0"
 okhttp = "5.5.1"
 timber = "5.0.1"
+# V3: multiplatform logging for shared code (Apache-2.0; Maven Central 2026-11-11). On Android it is forwarded to
+# Timber, so the debug log file keeps every line.
+kermit = "2.2.0"
 pdfbox-android = "2.0.27.0"
 markdown-renderer = "0.46.0"
 leakcanary = "2.14"
@@ -162,6 +165,7 @@ litertlm-android = { module = "com.google.ai.edge.litertlm:litertlm-android", ve
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 okhttp-mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "okhttp" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
 pdfbox-android = { module = "com.tom-roush:pdfbox-android", version.ref = "pdfbox-android" }
 # V3: the multiplatform coordinate (Android + iOS variants checked); v2 used the -android artifact directly.
 markdown-renderer-m3 = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown-renderer" }

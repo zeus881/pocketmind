@@ -1,6 +1,5 @@
 package com.sanjay.pocketmind.feature.chat
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -352,7 +351,7 @@ class ChatViewModel(
     }
 
     /** Writes the visible conversation to [uri] (picked with the system "Save as" screen). */
-    fun export(uri: Uri, format: ExportFormat) {
+    fun export(uri: String, format: ExportFormat) {
         val state = uiState.value
         if (state.messages.isEmpty()) return
         viewModelScope.launch {

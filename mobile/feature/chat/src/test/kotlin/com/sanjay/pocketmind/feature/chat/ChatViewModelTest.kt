@@ -1,6 +1,5 @@
 package com.sanjay.pocketmind.feature.chat
 
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
@@ -16,7 +15,6 @@ import com.sanjay.pocketmind.core.speech.SpeechEvent
 import com.sanjay.pocketmind.core.testing.MainDispatcherRule
 import com.sanjay.pocketmind.data.chat.ChatExporter
 import com.sanjay.pocketmind.data.chat.PersonaRepository
-import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -42,8 +40,7 @@ class ChatViewModelTest {
 
     private val exporter = FakeExporter()
 
-    /** android.net.Uri has no real implementation in JVM tests; the fake exporter never reads it. */
-    private val anyUri: Uri = mockk()
+    private val anyUri = "content://export"
 
     private val personas = object : PersonaRepository {
         val list = listOf(Persona("builtin:coder", "Coder", "code", 0.2f, builtIn = true))
@@ -279,12 +276,12 @@ class ChatViewModelTest {
         val written = mutableListOf<Pair<String, Int>>()
         var result: AppResult<Unit> = AppResult.Success(Unit)
 
-        override suspend fun writeMarkdown(uri: Uri, title: String, messages: List<Message>): AppResult<Unit> {
+        override suspend fun writeMarkdown(uri: String, title: String, messages: List<Message>): AppResult<Unit> {
             written += "md:$title" to messages.size
             return result
         }
 
-        override suspend fun writePdf(uri: Uri, title: String, messages: List<Message>): AppResult<Unit> {
+        override suspend fun writePdf(uri: String, title: String, messages: List<Message>): AppResult<Unit> {
             written += "pdf:$title" to messages.size
             return result
         }

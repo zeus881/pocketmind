@@ -91,10 +91,10 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = koinViewMode
 
     // The system "Save as" screen: the user picks where; we only get permission for that one file.
     val saveMarkdown = rememberLauncherForActivityResult(CreateDocument(ExportFormat.MARKDOWN.mimeType)) { uri ->
-        uri?.let { viewModel.export(it, ExportFormat.MARKDOWN) }
+        uri?.let { viewModel.export(it.toString(), ExportFormat.MARKDOWN) }
     }
     val savePdf = rememberLauncherForActivityResult(CreateDocument(ExportFormat.PDF.mimeType)) { uri ->
-        uri?.let { viewModel.export(it, ExportFormat.PDF) }
+        uri?.let { viewModel.export(it.toString(), ExportFormat.PDF) }
     }
 
     // Voice input: the recognizer listens in the phone's language; the microphone permission is

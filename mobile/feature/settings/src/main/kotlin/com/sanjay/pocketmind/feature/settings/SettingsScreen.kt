@@ -248,7 +248,7 @@ private fun ProSection(state: SettingsUiState, vm: SettingsActions) {
 @Composable
 private fun YourData(vm: SettingsActions) {
     val saveZip = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/zip")) { uri ->
-        uri?.let(vm::exportAllData)
+        uri?.let { vm.exportAllData(it.toString()) }
     }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
     NavRow(

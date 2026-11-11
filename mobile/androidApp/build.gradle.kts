@@ -134,6 +134,8 @@ dependencies {
     // WorkManager factory that builds ModelDownloadWorker.
     implementation(libs.koin.androidx.compose)
     implementation(libs.koin.androidx.workmanager)
+    // Shared (KMP) code logs with Kermit; TimberLogWriter sends it through Timber (debug builds only).
+    implementation(libs.kermit)
     implementation(libs.androidx.work.runtime)
     implementation(libs.aboutlibraries.compose.m3)
     // Home-screen widget (Jetpack Glance: widgets written like Compose).

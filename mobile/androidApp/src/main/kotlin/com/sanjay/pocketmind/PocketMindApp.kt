@@ -2,6 +2,7 @@ package com.sanjay.pocketmind
 
 import android.app.Application
 import androidx.lifecycle.ProcessLifecycleOwner
+import co.touchlab.kermit.Logger
 import com.sanjay.pocketmind.core.billing.ProStatus
 import com.sanjay.pocketmind.core.common.diagnostics.CrashLog
 import com.sanjay.pocketmind.core.common.dispatchers.PmQualifiers
@@ -53,7 +54,9 @@ open class PocketMindApp : Application() {
         // First: so a crash during start-up is recorded too (kept on the phone; decision 1).
         crashLog.install()
         // Logs only in debug builds. Release builds log nothing, so no chat text can ever
-        // leak into the phone's system log (privacy promise).
+        // leak into the phone's system log (privacy promise). Shared code logs with Kermit, which would
+        // write to Logcat on its own: send it through Timber in EVERY build, so this one switch decides.
+        Logger.setLogWriters(TimberLogWriter)
         if (BuildConfig.DEBUG) {
             Timber.plant(Timber.DebugTree())
             Timber.plant(FileLogTree(java.io.File(filesDir, "debug.log")))

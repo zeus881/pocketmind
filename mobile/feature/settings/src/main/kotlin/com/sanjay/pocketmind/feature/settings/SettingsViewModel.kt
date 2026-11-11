@@ -1,7 +1,6 @@
 package com.sanjay.pocketmind.feature.settings
 
 import android.app.Activity
-import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sanjay.pocketmind.core.billing.BuyResult
@@ -123,7 +122,7 @@ class SettingsViewModel(
     /** One-off results of the data actions, shown as a snackbar. */
     val events: Flow<SettingsEvent> = _events.receiveAsFlow()
 
-    override fun exportAllData(uri: Uri) {
+    override fun exportAllData(uri: String) {
         viewModelScope.launch {
             val result = userData.exportAll(uri)
             _events.send(if (result is AppResult.Success) SettingsEvent.DataExported else SettingsEvent.ExportFailed)
