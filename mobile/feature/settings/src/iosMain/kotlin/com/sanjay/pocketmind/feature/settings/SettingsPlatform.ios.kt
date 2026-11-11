@@ -11,6 +11,7 @@ import androidx.compose.ui.uikit.LocalUIViewController
 import com.sanjay.pocketmind.core.billing.PurchaseHost
 import com.sanjay.pocketmind.feature.settings.resources.Res
 import com.sanjay.pocketmind.feature.settings.resources.feature_settings_language
+import kotlinx.cinterop.ExperimentalForeignApi
 import org.jetbrains.compose.resources.stringResource
 import platform.Foundation.NSURL
 import platform.LocalAuthentication.LAContext
@@ -22,6 +23,8 @@ import platform.UIKit.UIApplicationOpenSettingsURLString
 internal actual fun currentPurchaseHost(): PurchaseHost? = LocalUIViewController.current
 
 /** Face ID / Touch ID OR the device passcode ("device owner authentication"), like Android's weak + credential. */
+// error = null passes a C pointer (no details needed); Kotlin/Native marks that interop ExperimentalForeignApi.
+@OptIn(ExperimentalForeignApi::class)
 @Composable
 internal actual fun rememberAppLockAvailable(): Boolean = remember {
     LAContext().canEvaluatePolicy(LAPolicyDeviceOwnerAuthentication, error = null)

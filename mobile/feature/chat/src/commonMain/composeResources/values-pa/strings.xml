@@ -8,7 +8,7 @@
     <string name="feature_chat_regenerate">ਜਵਾਬ ਦੁਬਾਰਾ ਬਣਾਓ</string>
     <string name="feature_chat_retry">ਦੁਬਾਰਾ ਕੋਸ਼ਿਸ਼ ਕਰੋ</string>
     <string name="feature_chat_thinking">ਸੋਚ ਰਿਹਾ ਹੈ…</string>
-    <string name="feature_chat_stats">%1$.1f tok/s · %2$s</string>
+    <string name="feature_chat_stats">%1$s tok/s · %2$s</string>
     <string name="feature_chat_status_stopped">ਰੋਕਿਆ ਗਿਆ</string>
     <string name="feature_chat_status_failed">ਜਵਾਬ ਨਹੀਂ ਬਣ ਸਕਿਆ</string>
     <string name="feature_chat_loading_model">ਮਾਡਲ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ… ਪਹਿਲੀ ਵਾਰ 20 ਸਕਿੰਟ ਤੱਕ ਲੱਗ ਸਕਦੇ ਹਨ।</string>

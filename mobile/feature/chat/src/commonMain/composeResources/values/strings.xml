@@ -8,7 +8,7 @@
     <string name="feature_chat_regenerate">Regenerate answer</string>
     <string name="feature_chat_retry">Retry</string>
     <string name="feature_chat_thinking">Thinking…</string>
-    <string name="feature_chat_stats">%1$.1f tok/s · %2$s</string>
+    <string name="feature_chat_stats">%1$s tok/s · %2$s</string>
     <string name="feature_chat_status_stopped">Stopped</string>
     <string name="feature_chat_status_failed">Answer failed</string>
     <string name="feature_chat_loading_model">Loading the model… the first time can take up to 20 seconds.</string>

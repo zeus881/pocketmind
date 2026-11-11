@@ -7,6 +7,8 @@ android {
 }
 
 dependencies {
+    // V3: SpeechInput/SpeechOutput and SpeechText are shared with iOS (shared:ai); this module is the Android side.
+    api(projects.shared.ai)
     implementation(libs.kotlinx.coroutines.android)
 
     testImplementation(libs.robolectric)

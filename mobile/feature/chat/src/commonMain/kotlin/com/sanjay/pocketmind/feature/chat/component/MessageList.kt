@@ -1,6 +1,5 @@
 package com.sanjay.pocketmind.feature.chat.component
 
-import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -57,17 +56,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.onSizeChanged
-import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.sanjay.pocketmind.core.common.format.formatFixed
 import com.sanjay.pocketmind.core.designsystem.component.MarkdownText
 import com.sanjay.pocketmind.core.designsystem.component.StreamingMarkdownText
 import com.sanjay.pocketmind.core.designsystem.component.rememberPmHaptics
+import com.sanjay.pocketmind.core.designsystem.platform.plainTextClipEntry
 import com.sanjay.pocketmind.core.designsystem.theme.PmBubbleShapes
 import com.sanjay.pocketmind.core.designsystem.theme.PmMotion
 import com.sanjay.pocketmind.core.designsystem.theme.PmSize
@@ -80,8 +79,35 @@ import com.sanjay.pocketmind.core.tools.CalculatorTool
 import com.sanjay.pocketmind.core.tools.DateTimeTool
 import com.sanjay.pocketmind.core.tools.NotesTool
 import com.sanjay.pocketmind.core.tools.UnitConverterTool
-import com.sanjay.pocketmind.feature.chat.R
+import com.sanjay.pocketmind.feature.chat.resources.Res
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_attached_photo
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_cancel
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_copy
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_edit
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_edit_send
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_edit_title
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_jump_latest
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_message_options
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_next_version
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_previous_version
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_read_aloud
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_regenerate
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_stats
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_status_failed
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_status_stopped
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_stop_reading
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_thinking
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_tool_calculator
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_tool_date
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_tool_notes
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_tool_other
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_tool_units
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_tools_used
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_version
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_version_description
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.stringResource
 
 private const val STREAMING_KEY = "streaming"
 
@@ -169,7 +195,7 @@ internal fun MessageList(
                             PhotoThumbnail(
                                 path = path,
                                 size = PmSize.photoInBubble,
-                                contentDescription = stringResource(R.string.feature_chat_attached_photo),
+                                contentDescription = stringResource(Res.string.feature_chat_attached_photo),
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .wrapContentWidth(Alignment.End)
@@ -227,7 +253,7 @@ internal fun MessageList(
             ) {
                 Icon(
                     Icons.Filled.KeyboardArrowDown,
-                    contentDescription = stringResource(R.string.feature_chat_jump_latest),
+                    contentDescription = stringResource(Res.string.feature_chat_jump_latest),
                 )
             }
         }
@@ -253,7 +279,7 @@ private fun UserBubble(text: String, canEdit: Boolean, onEdit: (String) -> Unit,
     val haptics = rememberPmHaptics()
     var menuOpen by remember { mutableStateOf(false) }
     var editing by rememberSaveable { mutableStateOf(false) }
-    val optionsLabel = stringResource(R.string.feature_chat_message_options)
+    val optionsLabel = stringResource(Res.string.feature_chat_message_options)
     Row(modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End) {
         Box {
             Surface(
@@ -279,7 +305,7 @@ private fun UserBubble(text: String, canEdit: Boolean, onEdit: (String) -> Unit,
             }
             DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.feature_chat_edit)) },
+                    text = { Text(stringResource(Res.string.feature_chat_edit)) },
                     enabled = canEdit,
                     onClick = {
                         menuOpen = false
@@ -287,10 +313,10 @@ private fun UserBubble(text: String, canEdit: Boolean, onEdit: (String) -> Unit,
                     },
                 )
                 DropdownMenuItem(
-                    text = { Text(stringResource(R.string.feature_chat_copy)) },
+                    text = { Text(stringResource(Res.string.feature_chat_copy)) },
                     onClick = {
                         menuOpen = false
-                        scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("question", text))) }
+                        scope.launch { clipboard.setClipEntry(plainTextClipEntry("question", text)) }
                     },
                 )
             }
@@ -313,30 +339,30 @@ private fun EditQuestionDialog(initial: String, onSend: (String) -> Unit, onDism
     var value by rememberSaveable { mutableStateOf(initial) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.feature_chat_edit_title)) },
+        title = { Text(stringResource(Res.string.feature_chat_edit_title)) },
         text = { OutlinedTextField(value = value, onValueChange = { value = it }, maxLines = 8) },
         confirmButton = {
             TextButton(onClick = { onSend(value) }, enabled = value.isNotBlank() && value.trim() != initial.trim()) {
-                Text(stringResource(R.string.feature_chat_edit_send))
+                Text(stringResource(Res.string.feature_chat_edit_send))
             }
         },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.feature_chat_cancel)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(Res.string.feature_chat_cancel)) } },
     )
 }
 
 /** "‹ 2 / 3 ›": switch between versions of an edited question or a regenerated answer. */
 @Composable
 private fun VersionSwitcher(info: BranchInfo, enabled: Boolean, onShow: (Int) -> Unit, modifier: Modifier = Modifier) {
-    val description = stringResource(R.string.feature_chat_version_description, info.index + 1, info.count)
+    val description = stringResource(Res.string.feature_chat_version_description, info.index + 1, info.count)
     Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         IconButton(onClick = { onShow(-1) }, enabled = enabled && info.index > 0) {
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                contentDescription = stringResource(R.string.feature_chat_previous_version),
+                contentDescription = stringResource(Res.string.feature_chat_previous_version),
             )
         }
         Text(
-            text = stringResource(R.string.feature_chat_version, info.index + 1, info.count),
+            text = stringResource(Res.string.feature_chat_version, info.index + 1, info.count),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.semantics { contentDescription = description },
@@ -344,7 +370,7 @@ private fun VersionSwitcher(info: BranchInfo, enabled: Boolean, onShow: (Int) ->
         IconButton(onClick = { onShow(1) }, enabled = enabled && info.index < info.count - 1) {
             Icon(
                 Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                contentDescription = stringResource(R.string.feature_chat_next_version),
+                contentDescription = stringResource(Res.string.feature_chat_next_version),
             )
         }
     }
@@ -365,8 +391,8 @@ private fun AssistantAnswer(
         // an empty frame when the streaming answer is swapped for the saved one.
         if (message.text.isNotBlank()) MarkdownText(message.text, immediate = true)
         when (message.status) {
-            MessageStatus.STOPPED -> StatusLabel(stringResource(R.string.feature_chat_status_stopped))
-            MessageStatus.FAILED -> StatusLabel(stringResource(R.string.feature_chat_status_failed))
+            MessageStatus.STOPPED -> StatusLabel(stringResource(Res.string.feature_chat_status_stopped))
+            MessageStatus.FAILED -> StatusLabel(stringResource(Res.string.feature_chat_status_failed))
             MessageStatus.COMPLETE -> Unit
         }
         if (message.toolsUsed.isNotEmpty()) ToolsUsedLabel(message.toolsUsed)
@@ -376,7 +402,8 @@ private fun AssistantAnswer(
             val backend = message.backend
             if (tps != null && backend != null) {
                 Text(
-                    text = stringResource(R.string.feature_chat_stats, tps, backend),
+                    // Compose resources fill in only %s/%d, so the number is formatted here (one decimal, as before).
+                    text = stringResource(Res.string.feature_chat_stats, tps.formatFixed(1), backend),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(start = PmSpacing.s),
@@ -385,9 +412,9 @@ private fun AssistantAnswer(
             if (message.text.isNotBlank()) {
                 // IconButton is 48x48 dp: the minimum touch target for accessibility.
                 IconButton(onClick = {
-                    scope.launch { clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("answer", message.text))) }
+                    scope.launch { clipboard.setClipEntry(plainTextClipEntry("answer", message.text)) }
                 }) {
-                    Icon(Icons.Outlined.ContentCopy, contentDescription = stringResource(R.string.feature_chat_copy))
+                    Icon(Icons.Outlined.ContentCopy, contentDescription = stringResource(Res.string.feature_chat_copy))
                 }
             }
             if (message.text.isNotBlank()) {
@@ -395,14 +422,17 @@ private fun AssistantAnswer(
                     Icon(
                         if (speaking) Icons.Outlined.StopCircle else Icons.AutoMirrored.Outlined.VolumeUp,
                         contentDescription = stringResource(
-                            if (speaking) R.string.feature_chat_stop_reading else R.string.feature_chat_read_aloud,
+                            if (speaking) Res.string.feature_chat_stop_reading else Res.string.feature_chat_read_aloud,
                         ),
                     )
                 }
             }
             if (showRetry) {
                 IconButton(onClick = onRetry) {
-                    Icon(Icons.Outlined.Refresh, contentDescription = stringResource(R.string.feature_chat_regenerate))
+                    Icon(
+                        Icons.Outlined.Refresh,
+                        contentDescription = stringResource(Res.string.feature_chat_regenerate),
+                    )
                 }
             }
         }
@@ -419,7 +449,7 @@ private fun StreamingAnswer(text: String, modifier: Modifier = Modifier) {
     Column(modifier.fillMaxWidth()) {
         if (text.isEmpty()) {
             Text(
-                stringResource(R.string.feature_chat_thinking),
+                stringResource(Res.string.feature_chat_thinking),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -457,7 +487,7 @@ private fun ToolsUsedLabel(tools: List<String>) {
             modifier = Modifier.size(PmSpacing.l),
         )
         Text(
-            text = stringResource(R.string.feature_chat_tools_used, names.joinToString(", ")),
+            text = stringResource(Res.string.feature_chat_tools_used, names.joinToString(", ")),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.padding(start = PmSpacing.xs),
@@ -465,10 +495,10 @@ private fun ToolsUsedLabel(tools: List<String>) {
     }
 }
 
-private fun toolNameRes(name: String): Int = when (name) {
-    CalculatorTool.NAME -> R.string.feature_chat_tool_calculator
-    DateTimeTool.NAME -> R.string.feature_chat_tool_date
-    UnitConverterTool.NAME -> R.string.feature_chat_tool_units
-    NotesTool.NAME -> R.string.feature_chat_tool_notes
-    else -> R.string.feature_chat_tool_other
+private fun toolNameRes(name: String): StringResource = when (name) {
+    CalculatorTool.NAME -> Res.string.feature_chat_tool_calculator
+    DateTimeTool.NAME -> Res.string.feature_chat_tool_date
+    UnitConverterTool.NAME -> Res.string.feature_chat_tool_units
+    NotesTool.NAME -> Res.string.feature_chat_tool_notes
+    else -> Res.string.feature_chat_tool_other
 }

@@ -23,7 +23,8 @@ import com.sanjay.pocketmind.MainActivity
 import com.sanjay.pocketmind.R as AppR
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.testing.FakeLlmEngine
-import com.sanjay.pocketmind.feature.chat.R as ChatR
+import com.sanjay.pocketmind.feature.chat.resources.Res as ChatRes
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_send
 import com.sanjay.pocketmind.feature.documents.resources.Res as DocumentsRes
 import com.sanjay.pocketmind.feature.documents.resources.feature_documents_copy
 import com.sanjay.pocketmind.feature.history.resources.Res as HistoryRes
@@ -137,7 +138,7 @@ class EndToEndTest {
             // Chat: the screen must notice the new model (the bug this test found), then answer.
             compose.waitFor { compose.onAllNodes(hasSetTextAction()) }
             compose.onAllNodes(hasSetTextAction()).onFirst().performTextInput("How do drones fly?")
-            compose.clickDescription(text(ChatR.string.feature_chat_send))
+            compose.clickDescription(text(ChatRes.string.feature_chat_send))
             compose.waitForText("Drones fly with four rotors.", substring = true)
             assertTrue(engine.prompts.single() == "How do drones fly?")
 

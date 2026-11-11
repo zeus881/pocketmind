@@ -3,6 +3,7 @@ package com.sanjay.pocketmind.feature.chat
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.touchlab.kermit.Logger
 import com.sanjay.pocketmind.core.common.flow.throttleLatest
 import com.sanjay.pocketmind.core.common.result.AppResult
 import com.sanjay.pocketmind.core.common.result.ErrorKind
@@ -44,7 +45,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import timber.log.Timber
 
 /**
  * Logic of the chat screen.
@@ -310,7 +310,7 @@ class ChatViewModel(
     } catch (e: CancellationException) {
         throw e
     } catch (e: Exception) {
-        Timber.e(e, "Chat request failed")
+        Logger.e(e) { "Chat request failed" }
         fail(ErrorKind.GENERATION_FAILED)
         null
     }
@@ -469,7 +469,7 @@ class ChatViewModel(
             status = MessageStatus.STOPPED // Stop button, new chat, or the screen was closed
             throw e
         } catch (e: Exception) { // any native/runtime failure from the engine
-            Timber.e(e, "Generation failed")
+            Logger.e(e) { "Generation failed" }
             status = MessageStatus.FAILED
             _events.trySend(ChatEvent.Error(ErrorKind.GENERATION_FAILED))
         } finally {

@@ -1,10 +1,5 @@
 package com.sanjay.pocketmind.feature.chat
 
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -46,17 +41,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalResources
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.liveRegion
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sanjay.pocketmind.core.common.result.ErrorKind
@@ -71,7 +62,44 @@ import com.sanjay.pocketmind.core.model.Persona
 import com.sanjay.pocketmind.core.speech.SpeechError
 import com.sanjay.pocketmind.feature.chat.component.ChatInput
 import com.sanjay.pocketmind.feature.chat.component.MessageList
+import com.sanjay.pocketmind.feature.chat.resources.Res
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_answer_as
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_empty_body
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_empty_title
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_export_failed
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_export_markdown
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_export_pdf
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_exported
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_generation_failed
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_get_model
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_images_not_supported
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_loading_model
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_model_crashed
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_model_damaged
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_model_failed
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_more_options
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_new_chat
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_no_model_body
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_no_model_title
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_open_models
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_persona_default
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_photo_unreadable
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_retry
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_status_ready
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_status_writing
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_suggestion_code
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_suggestion_explain
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_suggestion_ideas
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_suggestion_write
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_tools
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_voice_failed
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_voice_nothing_heard
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_voice_permission
+import com.sanjay.pocketmind.feature.chat.resources.feature_chat_voice_unavailable
 import kotlinx.coroutines.delay
+import org.jetbrains.compose.resources.StringResource
+import org.jetbrains.compose.resources.getString
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 /**
  * Stateful wrapper: gets the ViewModel from Hilt, collects its state and events, and passes
@@ -85,34 +113,20 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = koinViewMode
     // collectAsStateWithLifecycle stops collecting while the app is in the background.
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
-    // LocalResources (not LocalContext) so strings follow configuration changes like language.
-    val resources = LocalResources.current
     val haptics = rememberPmHaptics()
 
     // The system "Save as" screen: the user picks where; we only get permission for that one file.
-    val saveMarkdown = rememberLauncherForActivityResult(CreateDocument(ExportFormat.MARKDOWN.mimeType)) { uri ->
-        uri?.let { viewModel.export(it.toString(), ExportFormat.MARKDOWN) }
-    }
-    val savePdf = rememberLauncherForActivityResult(CreateDocument(ExportFormat.PDF.mimeType)) { uri ->
-        uri?.let { viewModel.export(it.toString(), ExportFormat.PDF) }
-    }
+    // Null where export isn't available yet (iOS, phase 2d): the export menu is then hidden.
+    val saveMarkdown =
+        rememberDocumentSaver(ExportFormat.MARKDOWN.mimeType) { viewModel.export(it, ExportFormat.MARKDOWN) }
+    val savePdf = rememberDocumentSaver(ExportFormat.PDF.mimeType) { viewModel.export(it, ExportFormat.PDF) }
 
-    // Voice input: the recognizer listens in the phone's language; the microphone permission is
-    // asked the first time (Android shows its own dialog).
-    val context = LocalContext.current
-    val languageTag = LocalConfiguration.current.locales[0].toLanguageTag()
-    val micPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted) viewModel.startVoice(languageTag)
-    }
+    // Voice input: the recognizer listens in the app's language; the microphone permission is
+    // asked the first time (Android shows its own dialog; iOS asks when recording starts).
+    val languageTag = Locale.current.toLanguageTag()
+    val startVoice = rememberMicrophonePermission { viewModel.startVoice(languageTag) }
     val onMicClick = {
-        when {
-            state.voice.listening -> viewModel.stopVoice()
-
-            ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) ==
-                PackageManager.PERMISSION_GRANTED -> viewModel.startVoice(languageTag)
-
-            else -> micPermission.launch(Manifest.permission.RECORD_AUDIO)
-        }
+        if (state.voice.listening) viewModel.stopVoice() else startVoice()
     }
 
     LifecycleResumeEffect(Unit) {
@@ -125,15 +139,15 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = koinViewMode
         viewModel.events.collect { event ->
             when (event) {
                 ChatEvent.Exported -> snackbarHostState.showSnackbar(
-                    resources.getString(R.string.feature_chat_exported),
+                    getString(Res.string.feature_chat_exported),
                 )
 
                 is ChatEvent.VoiceProblem -> snackbarHostState.showSnackbar(
-                    resources.getString(event.kind.messageRes()),
+                    getString(event.kind.messageRes()),
                 )
 
                 ChatEvent.PhotoUnreadable -> snackbarHostState.showSnackbar(
-                    resources.getString(R.string.feature_chat_photo_unreadable),
+                    getString(Res.string.feature_chat_photo_unreadable),
                 )
 
                 is ChatEvent.Error -> {
@@ -145,12 +159,12 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = koinViewMode
                     // Only another model can read the photo: offer the model manager.
                     val needsVisionModel = event.kind == ErrorKind.IMAGES_NOT_SUPPORTED
                     val result = snackbarHostState.showSnackbar(
-                        message = resources.getString(event.kind.messageRes()),
+                        message = getString(event.kind.messageRes()),
                         actionLabel = when {
                             fileError -> null
-                            noModel -> resources.getString(R.string.feature_chat_get_model)
-                            needsVisionModel -> resources.getString(R.string.feature_chat_open_models)
-                            else -> resources.getString(R.string.feature_chat_retry)
+                            noModel -> getString(Res.string.feature_chat_get_model)
+                            needsVisionModel -> getString(Res.string.feature_chat_open_models)
+                            else -> getString(Res.string.feature_chat_retry)
                         },
                     )
                     if (result == SnackbarResult.ActionPerformed) {
@@ -178,9 +192,13 @@ fun ChatScreen(onOpenModels: () -> Unit, viewModel: ChatViewModel = koinViewMode
         onPhotoPicked = viewModel::attachPhoto,
         onRemovePhoto = viewModel::removePhoto,
         onToggleTools = viewModel::toggleTools,
-        onExport = { format ->
-            val name = exportFileName(state.title, format)
-            if (format == ExportFormat.MARKDOWN) saveMarkdown.launch(name) else savePdf.launch(name)
+        onExport = if (saveMarkdown == null || savePdf == null) {
+            null
+        } else {
+            { format ->
+                val name = exportFileName(state.title, format)
+                if (format == ExportFormat.MARKDOWN) saveMarkdown(name) else savePdf(name)
+            }
         },
     )
 }
@@ -199,7 +217,8 @@ fun ChatContent(
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onEdit: (messageId: String, newText: String) -> Unit = { _, _ -> },
     onShowVersion: (messageId: String, offset: Int) -> Unit = { _, _ -> },
-    onExport: (ExportFormat) -> Unit = {},
+    /** Null: export isn't available on this platform yet, so the menu is hidden. */
+    onExport: ((ExportFormat) -> Unit)? = {},
     onSelectPersona: (String?) -> Unit = {},
     onMicClick: () -> Unit = {},
     onToggleSpeak: (messageId: String, text: String) -> Unit = { _, _ -> },
@@ -212,7 +231,7 @@ fun ChatContent(
         topBar = {
             TopAppBar(
                 title = {
-                    val newChat = stringResource(R.string.feature_chat_new_chat)
+                    val newChat = stringResource(Res.string.feature_chat_new_chat)
                     Column {
                         Text(
                             text = state.title?.takeIf { it.isNotBlank() } ?: newChat,
@@ -233,10 +252,10 @@ fun ChatContent(
                     IconButton(onClick = onNewChat) {
                         Icon(
                             Icons.Outlined.AddComment,
-                            contentDescription = stringResource(R.string.feature_chat_new_chat),
+                            contentDescription = stringResource(Res.string.feature_chat_new_chat),
                         )
                     }
-                    if (state.messages.isNotEmpty()) ExportMenu(onExport)
+                    if (state.messages.isNotEmpty() && onExport != null) ExportMenu(onExport)
                 },
             )
         },
@@ -252,9 +271,9 @@ fun ChatContent(
             when (state.model) {
                 ModelUi.NoModel -> EmptyState(
                     icon = Icons.Outlined.CloudDownload,
-                    title = stringResource(R.string.feature_chat_no_model_title),
-                    body = stringResource(R.string.feature_chat_no_model_body),
-                    actionLabel = stringResource(R.string.feature_chat_get_model),
+                    title = stringResource(Res.string.feature_chat_no_model_title),
+                    body = stringResource(Res.string.feature_chat_no_model_body),
+                    actionLabel = stringResource(Res.string.feature_chat_get_model),
                     onAction = onOpenModels,
                     modifier = Modifier.weight(1f),
                 )
@@ -265,7 +284,7 @@ fun ChatContent(
                     modifier = Modifier.weight(1f),
                     // A damaged/missing file or a crash can be fixed in the model manager
                     // (check the file, download again, or pick a smaller model).
-                    secondaryActionLabel = stringResource(R.string.feature_chat_open_models)
+                    secondaryActionLabel = stringResource(Res.string.feature_chat_open_models)
                         .takeIf { state.model.reason != FailureReason.INIT_FAILED },
                     onSecondaryAction = onOpenModels,
                 )
@@ -274,7 +293,7 @@ fun ChatContent(
                     if (state.model == ModelUi.Loading) {
                         LinearProgressIndicator(Modifier.fillMaxWidth())
                         Text(
-                            text = stringResource(R.string.feature_chat_loading_model),
+                            text = stringResource(Res.string.feature_chat_loading_model),
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier
                                 .padding(horizontal = PmSpacing.l, vertical = PmSpacing.xs)
@@ -335,26 +354,26 @@ private fun ToolsSwitch(enabled: Boolean, onToggle: () -> Unit) {
     IconToggleButton(checked = enabled, onCheckedChange = { onToggle() }) {
         Icon(
             Icons.Outlined.Calculate,
-            contentDescription = stringResource(R.string.feature_chat_tools),
+            contentDescription = stringResource(Res.string.feature_chat_tools),
             tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }
 
 /** Maps a failure kind to a user-readable message. */
-internal fun ErrorKind.messageRes(): Int = when (this) {
-    ErrorKind.NO_MODEL -> R.string.feature_chat_no_model_title
-    ErrorKind.MODEL_LOAD_FAILED -> R.string.feature_chat_model_failed
-    ErrorKind.FILE_UNREADABLE -> R.string.feature_chat_export_failed
-    ErrorKind.IMAGES_NOT_SUPPORTED -> R.string.feature_chat_images_not_supported
-    else -> R.string.feature_chat_generation_failed
+internal fun ErrorKind.messageRes(): StringResource = when (this) {
+    ErrorKind.NO_MODEL -> Res.string.feature_chat_no_model_title
+    ErrorKind.MODEL_LOAD_FAILED -> Res.string.feature_chat_model_failed
+    ErrorKind.FILE_UNREADABLE -> Res.string.feature_chat_export_failed
+    ErrorKind.IMAGES_NOT_SUPPORTED -> Res.string.feature_chat_images_not_supported
+    else -> Res.string.feature_chat_generation_failed
 }
 
 /** User-readable text for each way the model can fail to load. */
-private fun FailureReason.messageRes(): Int = when (this) {
-    FailureReason.FILE_NOT_FOUND, FailureReason.FILE_DAMAGED -> R.string.feature_chat_model_damaged
-    FailureReason.INIT_FAILED -> R.string.feature_chat_model_failed
-    FailureReason.CRASHED_LAST_TIME -> R.string.feature_chat_model_crashed
+private fun FailureReason.messageRes(): StringResource = when (this) {
+    FailureReason.FILE_NOT_FOUND, FailureReason.FILE_DAMAGED -> Res.string.feature_chat_model_damaged
+    FailureReason.INIT_FAILED -> Res.string.feature_chat_model_failed
+    FailureReason.CRASHED_LAST_TIME -> Res.string.feature_chat_model_crashed
 }
 
 /**
@@ -378,8 +397,8 @@ private fun GenerationStatus(isGenerating: Boolean) {
         wasGenerating = isGenerating
     }
     val text = when {
-        isGenerating -> stringResource(R.string.feature_chat_status_writing)
-        showReady -> stringResource(R.string.feature_chat_status_ready)
+        isGenerating -> stringResource(Res.string.feature_chat_status_writing)
+        showReady -> stringResource(Res.string.feature_chat_status_ready)
         else -> null
     }
     if (text != null) {
@@ -408,10 +427,10 @@ private fun ChatWelcome(
     onSelectPersona: (String?) -> Unit,
 ) {
     val suggestions = listOf(
-        stringResource(R.string.feature_chat_suggestion_explain),
-        stringResource(R.string.feature_chat_suggestion_code),
-        stringResource(R.string.feature_chat_suggestion_ideas),
-        stringResource(R.string.feature_chat_suggestion_write),
+        stringResource(Res.string.feature_chat_suggestion_explain),
+        stringResource(Res.string.feature_chat_suggestion_code),
+        stringResource(Res.string.feature_chat_suggestion_ideas),
+        stringResource(Res.string.feature_chat_suggestion_write),
     )
     Column(
         modifier = Modifier
@@ -424,12 +443,12 @@ private fun ChatWelcome(
     ) {
         PmIllustration(Icons.AutoMirrored.Outlined.Chat)
         Text(
-            stringResource(R.string.feature_chat_empty_title),
+            stringResource(Res.string.feature_chat_empty_title),
             style = MaterialTheme.typography.titleLarge,
             textAlign = TextAlign.Center,
         )
         Text(
-            stringResource(R.string.feature_chat_empty_body),
+            stringResource(Res.string.feature_chat_empty_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -437,7 +456,7 @@ private fun ChatWelcome(
         if (personas.isNotEmpty()) {
             // "Answer as": the default assistant or a persona, for this new chat.
             Text(
-                stringResource(R.string.feature_chat_answer_as),
+                stringResource(Res.string.feature_chat_answer_as),
                 style = MaterialTheme.typography.labelLarge,
                 modifier = Modifier.padding(top = PmSpacing.s),
             )
@@ -448,7 +467,7 @@ private fun ChatWelcome(
                 FilterChip(
                     selected = selectedPersonaId == null,
                     onClick = { onSelectPersona(null) },
-                    label = { Text(stringResource(R.string.feature_chat_persona_default)) },
+                    label = { Text(stringResource(Res.string.feature_chat_persona_default)) },
                 )
                 personas.forEach { persona ->
                     FilterChip(
@@ -476,18 +495,18 @@ private fun ExportMenu(onExport: (ExportFormat) -> Unit) {
     var open by remember { mutableStateOf(false) }
     Box {
         IconButton(onClick = { open = true }) {
-            Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(R.string.feature_chat_more_options))
+            Icon(Icons.Outlined.MoreVert, contentDescription = stringResource(Res.string.feature_chat_more_options))
         }
         DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.feature_chat_export_markdown)) },
+                text = { Text(stringResource(Res.string.feature_chat_export_markdown)) },
                 onClick = {
                     open = false
                     onExport(ExportFormat.MARKDOWN)
                 },
             )
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.feature_chat_export_pdf)) },
+                text = { Text(stringResource(Res.string.feature_chat_export_pdf)) },
                 onClick = {
                     open = false
                     onExport(ExportFormat.PDF)
@@ -509,9 +528,9 @@ internal fun exportFileName(title: String?, format: ExportFormat): String {
 
 private const val MAX_FILE_NAME = 60
 
-private fun SpeechError.messageRes(): Int = when (this) {
-    SpeechError.UNAVAILABLE -> R.string.feature_chat_voice_unavailable
-    SpeechError.PERMISSION -> R.string.feature_chat_voice_permission
-    SpeechError.NOTHING_HEARD -> R.string.feature_chat_voice_nothing_heard
-    SpeechError.FAILED -> R.string.feature_chat_voice_failed
+private fun SpeechError.messageRes(): StringResource = when (this) {
+    SpeechError.UNAVAILABLE -> Res.string.feature_chat_voice_unavailable
+    SpeechError.PERMISSION -> Res.string.feature_chat_voice_permission
+    SpeechError.NOTHING_HEARD -> Res.string.feature_chat_voice_nothing_heard
+    SpeechError.FAILED -> Res.string.feature_chat_voice_failed
 }
