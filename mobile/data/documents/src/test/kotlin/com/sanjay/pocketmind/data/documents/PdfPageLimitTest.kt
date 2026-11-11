@@ -23,14 +23,14 @@ class PdfPageLimitTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     /** A PDF with [pages] empty pages (no text layer). */
-    private fun pdf(pages: Int): Uri {
+    private fun pdf(pages: Int): String {
         PDFBoxResourceLoader.init(context)
         val file = File(context.cacheDir, "pages-$pages.pdf")
         PDDocument().use { document ->
             repeat(pages) { document.addPage(PDPage()) }
             document.save(file)
         }
-        return Uri.fromFile(file)
+        return Uri.fromFile(file).toString()
     }
 
     private fun extractor(pro: Boolean) = PdfBoxTextExtractor(context, Dispatchers.Unconfined, FakeProStatus(pro))
@@ -57,6 +57,6 @@ class PdfPageLimitTest {
     fun `a file that is not a PDF is reported as unreadable`() = runTest {
         val text = File(context.cacheDir, "notes.pdf").apply { writeText("not a pdf") }
 
-        assertEquals(ErrorKind.FILE_UNREADABLE, extractor(pro = true).extract(Uri.fromFile(text)).kind())
+        assertEquals(ErrorKind.FILE_UNREADABLE, extractor(pro = true).extract(Uri.fromFile(text).toString()).kind())
     }
 }

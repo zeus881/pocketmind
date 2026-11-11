@@ -153,6 +153,8 @@ tasks.register("testDebugUnitTest") {
         ":feature:personas:testAndroidHostTest",
         ":feature:onboarding:testAndroidHostTest",
         ":feature:models:testAndroidHostTest",
+        ":feature:documents:testAndroidHostTest",
+        ":feature:translate:testAndroidHostTest",
         ":core:billing:testAndroidHostTest",
     )
 }
@@ -167,6 +169,8 @@ val kmpScreenshotModules = listOf(
     ":feature:personas",
     ":feature:onboarding",
     ":feature:models",
+    ":feature:documents",
+    ":feature:translate",
 )
 tasks.register("verifyRoborazziDebug") {
     description = "Verifies the screenshots of KMP feature modules (Android modules have their own task)."

@@ -40,6 +40,8 @@ class KmpFeatureConventionPlugin : Plugin<Project> {
                     implementation(project(":shared:designsystem"))
                     implementation(libs.lib("koin-core"))
                     implementation(libs.lib("koin-compose-viewmodel"))
+                    // Logging in shared ViewModels (on Android it goes through Timber: debug builds only).
+                    implementation(libs.lib("kermit"))
                     implementation(libs.lib("jb-lifecycle-runtime-compose"))
                     implementation(libs.lib("jb-lifecycle-viewmodel-compose"))
                     implementation(libs.lib("jb-navigation-compose"))

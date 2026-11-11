@@ -15,6 +15,7 @@ dependencies {
 
     // PDF text extraction (an Android port of Apache PDFBox). Runs fully offline.
     implementation(libs.pdfbox.android)
+    implementation(libs.androidx.core.ktx) // String.toUri() for the picked location
 
     testImplementation(projects.core.testing)
     testImplementation(libs.robolectric)

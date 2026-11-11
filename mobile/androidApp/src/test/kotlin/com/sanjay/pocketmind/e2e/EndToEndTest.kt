@@ -24,7 +24,8 @@ import com.sanjay.pocketmind.R as AppR
 import com.sanjay.pocketmind.core.datastore.SettingsDataSource
 import com.sanjay.pocketmind.core.testing.FakeLlmEngine
 import com.sanjay.pocketmind.feature.chat.R as ChatR
-import com.sanjay.pocketmind.feature.documents.R as DocumentsR
+import com.sanjay.pocketmind.feature.documents.resources.Res as DocumentsRes
+import com.sanjay.pocketmind.feature.documents.resources.feature_documents_copy
 import com.sanjay.pocketmind.feature.history.resources.Res as HistoryRes
 import com.sanjay.pocketmind.feature.history.resources.feature_history_delete
 import com.sanjay.pocketmind.feature.history.resources.feature_history_more
@@ -187,7 +188,7 @@ class EndToEndTest {
 
         ActivityScenario.launch<MainActivity>(share).use {
             compose.waitForText("Drones fly with four rotors.", substring = true)
-            val copy = text(DocumentsR.string.feature_documents_copy)
+            val copy = text(DocumentsRes.string.feature_documents_copy)
             compose.waitFor { compose.onAllNodes(androidx.compose.ui.test.hasContentDescription(copy)) }
         }
     }

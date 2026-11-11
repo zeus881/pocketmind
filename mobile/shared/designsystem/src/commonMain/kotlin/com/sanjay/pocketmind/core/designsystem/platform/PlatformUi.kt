@@ -1,17 +1,18 @@
 package com.sanjay.pocketmind.core.designsystem.platform
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.ClipEntry
 
 /**
  * Opens the platform's own share sheet with [text] (Android: the "Share" chooser; iOS: UIActivityViewController).
- * [title] is the chooser heading on Android; iOS shows no title.
+ * [title] is the chooser heading on Android (null: the system default); iOS shows no title.
  *
  * Why a composable that returns a function: both platforms need something only the UI has (Android an Activity
  * context, iOS the current UIViewController), so the screen "remembers" a sharer while it is composed and calls it
  * from an event handler. The app itself never sends the text anywhere: the user picks the destination.
  */
 @Composable
-expect fun rememberTextSharer(): (text: String, title: String) -> Unit
+expect fun rememberTextSharer(): (text: String, title: String?) -> Unit
 
 /**
  * [epochMillis] as a date and time in the phone's language and format, e.g. "11 Nov 2026, 14:05"
@@ -39,3 +40,20 @@ expect fun rememberFileSizeFormatter(): (bytes: Long) -> String
  */
 @Composable
 expect fun rememberNotificationPermissionLauncher(onAnswered: () -> Unit): (() -> Unit)?
+
+/**
+ * A clipboard entry holding plain text, for `LocalClipboard.current.setClipEntry(...)`. Compose's [ClipEntry] is built
+ * differently per platform (Android wraps a ClipData with a [label]; iOS stores the text only).
+ */
+expect fun plainTextClipEntry(label: String, text: String): ClipEntry
+
+/** The name of the language with BCP-47 [code] ("hi" → "Hindi"), in the phone's language, capitalised. */
+expect fun languageDisplayName(code: String): String
+
+/**
+ * Opens the system file picker for ONE PDF and calls [onPicked] with its location as text (Android: a `content://`
+ * URI from the Storage Access Framework, so no storage permission is needed; iOS: a file URL of a copy in the app's
+ * sandbox). Backing out of the picker calls nothing.
+ */
+@Composable
+expect fun rememberPdfPicker(onPicked: (uri: String) -> Unit): () -> Unit

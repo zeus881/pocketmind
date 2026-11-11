@@ -1,7 +1,6 @@
 package com.sanjay.pocketmind.data.documents.rag
 
 import android.content.Context
-import android.net.Uri
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import com.sanjay.pocketmind.core.common.result.AppResult
@@ -133,7 +132,7 @@ class DocumentRepositoryTest {
 
     private fun repository() = DocumentRepository(
         extractor = object : PdfTextExtractor {
-            override suspend fun extract(uri: Uri) = AppResult.Success(ExtractedDocument("drone.pdf", pages))
+            override suspend fun extract(uri: String) = AppResult.Success(ExtractedDocument("drone.pdf", pages))
         },
         embedder = embedder,
         embeddingModel = object : EmbeddingModelSource {
@@ -151,7 +150,7 @@ class DocumentRepositoryTest {
         cpu = UnconfinedTestDispatcher(),
     )
 
-    private val uri = Uri.parse("content://docs/drone.pdf")
+    private val uri = "content://docs/drone.pdf"
 
     @Test
     fun indexingStoresChunksWithVectorsAndReportsProgress() = runTest {
