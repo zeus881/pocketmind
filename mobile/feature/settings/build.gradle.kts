@@ -1,19 +1,26 @@
 plugins {
-    alias(libs.plugins.pocketmind.android.feature)
+    alias(libs.plugins.pocketmind.kmp.feature)
 }
 
-android {
-    namespace = "com.sanjay.pocketmind.feature.settings"
+// feature:settings (V3) — shared by Android and iOS. The few platform pieces (store purchase host, app-lock
+// availability, the "Save as" screen for the data export, the per-app language) are expect/actual functions in
+// SettingsPlatform.kt.
+kotlin {
+    sourceSets {
+        commonMain.dependencies {
+            implementation(projects.shared.ai) // LlmEngine, DefaultPrompts, ModelRepository
+            implementation(projects.data.chat) // export / delete all my data
+            implementation(projects.core.billing)
+        }
+        androidMain.dependencies {
+            implementation(libs.androidx.biometric) // checks whether app lock can be offered
+            implementation(libs.androidx.activity.compose) // LocalActivity, the "Save as" launcher
+        }
+    }
 }
 
-dependencies {
-    implementation(projects.core.datastore)
-    implementation(projects.core.llm)
-    implementation(projects.data.models)
-    implementation(projects.data.chat) // export / delete all my data
-    implementation(projects.core.common)
-    implementation(projects.core.billing)
-    implementation(libs.androidx.biometric) // checks whether app lock can be offered
-
-    testImplementation(projects.core.testing)
+compose.resources {
+    packageOfResClass = "com.sanjay.pocketmind.feature.settings.resources"
+    // Public: the app's end-to-end test finds screens by these strings.
+    publicResClass = true
 }

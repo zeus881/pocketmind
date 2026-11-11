@@ -82,7 +82,7 @@ fun BenchmarkScreen(onBack: () -> Unit, viewModel: BenchmarkViewModel = koinView
             when (event) {
                 is BenchmarkEvent.Share -> {
                     // The platform share sheet: the user chooses where the text goes. We send nothing ourselves.
-                    share(event.text, getString(Res.string.feature_benchmark_share))
+                    share(event.text, getString(Res.string.feature_benchmark_share), null)
                 }
 
                 is BenchmarkEvent.Error -> snackbar.showSnackbar(

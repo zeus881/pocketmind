@@ -46,3 +46,6 @@ fun PocketMindTheme(
  */
 @Composable
 internal expect fun dynamicColorScheme(darkTheme: Boolean): ColorScheme?
+
+/** Whether the phone can give the app its wallpaper colours (Android 12+); the Settings switch is hidden otherwise. */
+expect val dynamicColorAvailable: Boolean

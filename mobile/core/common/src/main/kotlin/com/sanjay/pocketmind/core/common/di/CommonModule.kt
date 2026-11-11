@@ -2,6 +2,7 @@ package com.sanjay.pocketmind.core.common.di
 
 import com.sanjay.pocketmind.core.common.diagnostics.AndroidDeviceFacts
 import com.sanjay.pocketmind.core.common.diagnostics.CrashLog
+import com.sanjay.pocketmind.core.common.diagnostics.CrashReports
 import com.sanjay.pocketmind.core.common.diagnostics.DeviceFactsSource
 import com.sanjay.pocketmind.core.common.dispatchers.PmQualifiers
 import com.sanjay.pocketmind.core.common.time.Clock
@@ -10,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.koin.android.ext.koin.androidContext
+import org.koin.dsl.bind
 import org.koin.dsl.module
 
 /**
@@ -23,6 +25,6 @@ val commonModule = module {
         CoroutineScope(SupervisorJob() + get<CoroutineDispatcher>(PmQualifiers.Cpu))
     }
     factory<Clock> { Clock.SYSTEM }
-    single { CrashLog(androidContext(), get()) }
+    single { CrashLog(androidContext(), get()) } bind CrashReports::class
     factory<DeviceFactsSource> { AndroidDeviceFacts(androidContext()) }
 }

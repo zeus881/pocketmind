@@ -14,7 +14,7 @@ import java.time.Instant
  * The user can share them in a diagnostic report if they choose to. Stack traces contain code
  * locations, never chat text.
  */
-class CrashLog internal constructor(private val file: File, private val clock: Clock) {
+class CrashLog internal constructor(private val file: File, private val clock: Clock) : CrashReports {
     constructor(context: Context, clock: Clock) : this(File(context.filesDir, FILE), clock)
 
     /** Records uncaught exceptions, then lets Android handle them as before (the crash dialog). */
@@ -36,7 +36,7 @@ class CrashLog internal constructor(private val file: File, private val clock: C
 
     /** The recorded crashes, oldest first. */
     @Synchronized
-    fun entries(): List<String> {
+    override fun entries(): List<String> {
         if (!file.exists()) return emptyList()
         return file.readText().split(SEPARATOR).map { it.trim() }.filter { it.isNotEmpty() }
     }
@@ -54,19 +54,6 @@ class CrashLog internal constructor(private val file: File, private val clock: C
         const val KEPT_CRASHES = 3
         const val MAX_TRACE = 8_000
     }
-}
-
-/** Facts about the app and the phone for a diagnostic report. Nothing personal. */
-data class DeviceFacts(
-    val appVersion: String,
-    val androidVersion: String,
-    val sdk: Int,
-    val device: String,
-    val totalRamGb: Int,
-)
-
-fun interface DeviceFactsSource {
-    fun facts(): DeviceFacts
 }
 
 internal class AndroidDeviceFacts(private val context: Context) : DeviceFactsSource {
@@ -88,27 +75,5 @@ internal class AndroidDeviceFacts(private val context: Context) : DeviceFactsSou
 
     private companion object {
         const val GIB = 1024L * 1024 * 1024
-    }
-}
-
-/**
- * The text the user shares ("Share diagnostic report"). It is shown in the share sheet, so the user
- * sees every word before anything leaves the phone; it never contains chats, notes or prompts.
- */
-object DiagnosticReport {
-    fun build(device: DeviceFacts, app: Map<String, String>, crashes: List<String>): String = buildString {
-        appendLine("PocketMind diagnostic report")
-        appendLine("App version: ${device.appVersion}")
-        appendLine("Android: ${device.androidVersion} (API ${device.sdk})")
-        appendLine("Device: ${device.device}, ${device.totalRamGb} GB RAM")
-        app.forEach { (key, value) -> appendLine("$key: $value") }
-        appendLine()
-        if (crashes.isEmpty()) {
-            appendLine("No crashes recorded.")
-        } else {
-            appendLine("Last crashes (${crashes.size}):")
-            crashes.forEach { appendLine(it).appendLine() }
-        }
-        append("This report contains no chats, notes, prompts or documents.")
     }
 }

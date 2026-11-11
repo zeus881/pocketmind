@@ -25,11 +25,12 @@ import platform.UniformTypeIdentifiers.UTTypePDF
 import platform.darwin.NSObject
 
 @Composable
-actual fun rememberTextSharer(): (text: String, title: String?) -> Unit {
+actual fun rememberTextSharer(): (text: String, title: String?, subject: String?) -> Unit {
     // The view controller that hosts this Compose window (public API for library authors, Compose 1.12.2).
     val host = LocalUIViewController.current
     return remember(host) {
-        { text, _ ->
+        // No title on iOS, and its share sheet has no plain-text subject field, so both are ignored.
+        { text, _, _ ->
             val sheet = UIActivityViewController(activityItems = listOf(text), applicationActivities = null)
             // On iPad the sheet is a popover and crashes without an anchor; on iPhone this line does nothing.
             sheet.popoverPresentationController?.sourceView = host.view

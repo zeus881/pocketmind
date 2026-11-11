@@ -139,7 +139,7 @@ private fun SummaryContent(state: SummarizeUiState.Done, onPickPdf: () -> Unit) 
                 scope.launch { clipboard.setClipEntry(plainTextClipEntry("summary", state.summary)) }
             }) { Icon(Icons.Outlined.ContentCopy, stringResource(Res.string.feature_documents_copy)) }
             IconButton(onClick = {
-                share(state.summary, null)
+                share(state.summary, null, null)
             }) { Icon(Icons.Outlined.Share, stringResource(Res.string.feature_documents_share)) }
         }
         Text(

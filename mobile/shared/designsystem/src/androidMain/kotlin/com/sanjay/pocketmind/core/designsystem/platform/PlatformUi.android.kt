@@ -17,13 +17,14 @@ import java.util.Date
 import java.util.Locale
 
 @Composable
-actual fun rememberTextSharer(): (text: String, title: String?) -> Unit {
+actual fun rememberTextSharer(): (text: String, title: String?, subject: String?) -> Unit {
     val context = LocalContext.current
     return remember(context) {
-        { text, title ->
+        { text, title, subject ->
             val send = Intent(Intent.ACTION_SEND)
                 .setType("text/plain")
                 .putExtra(Intent.EXTRA_TEXT, text)
+                .apply { subject?.let { putExtra(Intent.EXTRA_SUBJECT, it) } }
             context.startActivity(Intent.createChooser(send, title))
         }
     }

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="feature_settings_title">Settings</string>
+    <string name="feature_settings_section_model">Model</string>
+    <string name="feature_settings_section_answers">Answers</string>
+    <string name="feature_settings_section_appearance">Appearance</string>
+    <string name="feature_settings_section_downloads">Downloads</string>
+    <string name="feature_settings_section_tools">Tools</string>
+    <string name="feature_settings_model">Model</string>
+    <string name="feature_settings_no_model">No model selected — tap to choose one</string>
+    <string name="feature_settings_gpu">Use the GPU</string>
+    <string name="feature_settings_gpu_hint">Usually faster. Falls back to the CPU automatically if the GPU is not supported.</string>
+    <string name="feature_settings_gpu_active">Currently running on: %1$s</string>
+    <string name="feature_settings_temperature">Creativity (temperature): %1$s</string>
+    <string name="feature_settings_temperature_hint">Low = focused and predictable. High = more varied, more mistakes.</string>
+    <string name="feature_settings_top_k">Top-K: %1$d</string>
+    <string name="feature_settings_top_k_hint">How many likely next words the model chooses from.</string>
+    <string name="feature_settings_system_prompt">System prompt</string>
+    <string name="feature_settings_save">Save</string>
+    <string name="feature_settings_reset">Reset to default</string>
+    <string name="feature_settings_cancel">Cancel</string>
+    <string name="feature_settings_theme_system">Follow system</string>
+    <string name="feature_settings_theme_light">Light</string>
+    <string name="feature_settings_theme_dark">Dark</string>
+    <string name="feature_settings_mobile_data">Allow downloads on mobile data</string>
+    <string name="feature_settings_mobile_data_hint">Models are large. Off = Wi-Fi only.</string>
+    <string name="feature_settings_benchmark">Benchmark</string>
+    <string name="feature_settings_benchmark_hint">Measure speed and memory on this phone</string>
+    <string name="feature_settings_section_privacy">Privacy</string>
+    <string name="feature_settings_app_lock">App lock</string>
+    <string name="feature_settings_app_lock_hint">Ask for your fingerprint, face or screen lock when opening PocketMind</string>
+    <string name="feature_settings_app_lock_unavailable">Set up a screen lock or fingerprint on your phone to use this.</string>
+    <string name="feature_settings_privacy_statement">PocketMind has no account, no analytics and no ads. Chats, documents and settings stay on this phone and are excluded from backups. The only internet connection is the model download from Hugging Face over HTTPS.</string>
+    <string name="feature_settings_licenses">Open-source licences</string>
+    <string name="feature_settings_licenses_hint">Libraries and models used by PocketMind</string>
+    <string name="feature_settings_lock_after">Lock again after leaving the app</string>
+    <string name="feature_settings_lock_immediately">Immediately</string>
+    <plurals name="feature_settings_lock_seconds">
+        <item quantity="one">After %1$d second</item>
+        <item quantity="other">After %1$d seconds</item>
+    </plurals>
+    <plurals name="feature_settings_lock_minutes">
+        <item quantity="one">After %1$d minute</item>
+        <item quantity="other">After %1$d minutes</item>
+    </plurals>
+    <string name="feature_settings_keep_model">Keep the model loaded after leaving the app</string>
+    <string name="feature_settings_keep_model_hint">Longer means no waiting when you come back, but the model keeps using memory meanwhile.</string>
+    <string name="feature_settings_keep_model_none">Unload right away</string>
+    <plurals name="feature_settings_keep_model_minutes">
+        <item quantity="one">For %1$d minute</item>
+        <item quantity="other">For %1$d minutes</item>
+    </plurals>
+    <string name="feature_settings_dynamic_color">Colours from your wallpaper</string>
+    <string name="feature_settings_dynamic_color_hint">Off: use the PocketMind colours.</string>
+    <string name="feature_settings_personas">Personas and prompts</string>
+    <string name="feature_settings_personas_hint">Ways of answering, and prompts you use often</string>
+    <string name="feature_settings_section_data">Your data</string>
+    <string name="feature_settings_export_data">Export all my data</string>
+    <string name="feature_settings_export_data_hint">One ZIP file: chats (Markdown and JSON), notes, personas, prompts, photos and settings. Not encrypted.</string>
+    <string name="feature_settings_delete_data">Delete all my data</string>
+    <string name="feature_settings_delete_data_hint">Chats, notes, personas, prompts, photos and settings. Downloaded models stay.</string>
+    <string name="feature_settings_delete_data_confirm_title">Delete all your data?</string>
+    <string name="feature_settings_delete_data_confirm_body">All chats, notes, personas, saved prompts, attached photos, the PDF index and your settings are deleted from this phone. This can\'t be undone. Downloaded models stay, so you can keep chatting. Export your data first if you want a copy.</string>
+    <string name="feature_settings_delete_data_confirm">Delete everything</string>
+    <string name="feature_settings_data_exported">Your data was exported.</string>
+    <string name="feature_settings_data_export_failed">The export could not be saved. Please try another place.</string>
+    <string name="feature_settings_data_deleted">All your data was deleted.</string>
+    <string name="feature_settings_section_pro">PocketMind Pro</string>
+    <string name="feature_settings_pro_get">Get PocketMind Pro: %1$s</string>
+    <string name="feature_settings_pro_price_unknown">price shown by Google Play</string>
+    <string name="feature_settings_pro_benefits">One-time purchase. Unlocks bigger models, PDFs of any length and your own personas. Voice input and reading aloud stay free.</string>
+    <string name="feature_settings_pro_unlocked">PocketMind Pro is unlocked. Thank you!</string>
+    <string name="feature_settings_pro_restore">Restore purchase</string>
+    <string name="feature_settings_pro_restore_hint">Bought Pro on another phone or after reinstalling? Google Play checks your account.</string>
+    <string name="feature_settings_pro_unavailable">Google Play isn\'t available right now. Check that the Play Store is installed and you are signed in.</string>
+    <string name="feature_settings_pro_restored">PocketMind Pro is unlocked.</string>
+    <string name="feature_settings_pro_not_found">Google Play found no Pro purchase for this account.</string>
+    <string name="feature_settings_diagnostics">Share diagnostic report</string>
+    <string name="feature_settings_diagnostics_hint">App and Android version, phone model and recorded crashes, to help fix a problem. No chats. You choose where it goes.</string>
+    <string name="feature_settings_diagnostics_subject">PocketMind diagnostic report</string>
+    <string name="feature_settings_language">App language</string>
+    <string name="feature_settings_language_system">Same as the phone</string>
+    <!-- Each language is named in its own script, so a user can find theirs whatever the current language. -->
+    <string name="feature_settings_language_en" translatable="false">English</string>
+    <string name="feature_settings_language_hi" translatable="false">हिन्दी</string>
+    <string name="feature_settings_language_pa" translatable="false">ਪੰਜਾਬੀ</string>
+</resources>

@@ -11,6 +11,8 @@ kotlin {
             implementation(libs.kotlinx.serialization.json)
             // AppResult and the Flow helpers (throttleLatest for streaming answers), moved from core:common.
             api(libs.kotlinx.coroutines.core)
+            // PmQualifiers: the Koin names of the dispatchers and the app scope (moved from core:common).
+            api(libs.koin.core)
         }
         commonTest.dependencies {
             implementation(libs.kotlinx.coroutines.test)
