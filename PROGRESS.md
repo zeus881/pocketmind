@@ -18,7 +18,7 @@ Read this file and CLAUDE.md first when a session restarts. Never redo finished 
 | 1 Monorepo, KMP skeleton, CI | DONE | 402 tests, 0 failures (Linux/WSL); logic coverage 84.17 % (gate 84) | see "Phase 1 notes" |
 | 2a Shared data layer (Room KMP, DataStore KMP) | DONE | 402 tests, 0 failures (Linux/WSL) + 3 iOS tests (CI); logic coverage 84.09 % | see "Phase 2a notes"; iOS build green on CI |
 | 2b Shared AI (tools, engine contract, documents/RAG logic) | DONE | 419 tests, 0 failures (Linux/WSL); logic coverage 84.15 % | see "Phase 2b notes"; iOS tests on CI |
-| 2c UI port to Compose Multiplatform | IN PROGRESS | step 1 done: 428 tests, 0 failures; coverage 84.37 % | see "Phase 2c notes" |
+| 2c UI port to Compose Multiplatform | IN PROGRESS | all 9 screens shared; a08ae36: 604 tests, 0 failures, coverage 84.22 %; CI green (Android + iOS); phone check open | see "Phase 2c notes" |
 
 **GitHub (2026-11-10):** public repo https://github.com/zeus881/pocketmind; branches main, v2, v3 and tag v2-final pushed.
 Commit email changed to sanjaykumarr99009@gmail.com in the whole history before the first push (old history kept in a
@@ -102,10 +102,41 @@ the goldens are stale and Windows-rendered. "Record screenshots" now commits Lin
     build-logic (restored after the mechanical strip), a broken secondary constructor (CrashLog).
 - **Mistake recorded:** a "workflow only" commit (f2d2cfc) also captured staged `git mv` renames with their old
   contents; CI failed until 7d0cff2. Rule now: commit single files with `git commit -- <path>`.
-- **Step 2 (next):** feature modules become KMP modules one by one (screens + ViewModels in commonMain,
-  strings as Compose resources, platform pickers/share/biometric behind small interfaces); composeApp hosts the
-  shared navigation for iOS. Deviation from the spec layout: features stay separate modules under
-  `mobile/feature/*` (now KMP) instead of one composeApp module, which keeps v2's enforced dependency rules.
+- **Step 2 done — all 9 feature screens are shared code (2026-11-11):** benchmark e46f31b, history 636d770
+  (+e870278), personas + Pro entitlement 72d61b2, onboarding + models de562b3 (+9827830), documents + translate
+  0c286be, settings 735218a, chat a08ae36. Gate on a08ae36: 604 tests, 0 failures, coverage 84.22 %.
+  - Each screen: `pocketmind.kmp.feature` convention (KMP Android library + Compose + Roborazzi; JetBrains
+    lifecycle 2.11.0 / navigation 2.10.0 / material3-adaptive 1.3.0, koin-compose-viewmodel, Kermit). Strings are
+    Compose resources (en/hi/pa); screenshot goldens unchanged except where the time zone was pinned (benchmark).
+  - Data layer: data:chat is KMP; ModelRepository/ModelStatus/ModelRecommender, PdfTextExtractor (interface),
+    DocumentRepository, SpeechInput/SpeechOutput/SpeechText moved to shared:ai; ProStatus + entitlement rules to
+    core:billing commonMain (`expect PurchaseHost` = Activity / UIViewController); PmQualifiers, DeviceFacts,
+    DiagnosticReport to shared:core (Android CrashLog implements the common `CrashReports`). Files picked by the
+    user are passed as text (content URI / file URL), not `android.net.Uri`. Timber → Kermit in shared code;
+    `TimberLogWriter` routes Kermit to Timber in every build, so release builds still log nothing.
+  - Platform UI helpers (shared:designsystem `platform/`): share sheet (optional title/subject), date, relative
+    time, file size, notification permission, PDF picker, plain-text clipboard entry, language names,
+    `dynamicColorAvailable`. Screen-specific pieces are expect/actual inside the module (SettingsPlatform.kt,
+    ChatPlatform.kt).
+  - **iOS gaps, honest and visible (filled in 2d):** no model download, PDF reading, data export, chat export,
+    photo attachments, voice input or App Store purchase on iOS yet. The iOS actuals return "not available"
+    and the screens hide those controls instead of showing dead buttons.
+  - Bugs caught by tests during the port: "41%%" in the download progress (Android escapes % as %%; screenshot
+    test), the speed label's `%1$.1f` (Compose resources fill only %s/%d; ChatContentTest), a benchmark golden
+    that depended on the recording machine's time zone. Android-only APIs that compiled on Android but not iOS
+    (an unused `R` import, `popoverPresentationController` category import, `ExperimentalForeignApi` opt-in)
+    were caught by the iOS CI job.
+  - **Mistake recorded:** removing an old `src/test` folder also deleted history's 12 golden images (636d770);
+    restored in e870278. Rule: goldens live in `src/test/screenshots`, never remove that folder.
+  - **Mistake recorded:** a `git show ref:path` in Git Bash had its argument rewritten as a Windows path, which
+    committed an EMPTY screenshots.yml to main (2ab4707, fixed in 2819370); with MSYS_NO_PATHCONV set, a worktree
+    path then resolved elsewhere and the commands ran in the main checkout (switched to main briefly; no work
+    lost). Rule: run git with repo-relative paths from the repo, never through a converted absolute path.
+  - Deviations: features stay separate KMP modules under `mobile/feature/*` (not one composeApp module), which
+    keeps v2's enforced dependency rules; ViewModel and screenshot tests stay in androidHostTest (they use the
+    Robolectric test kit in core:testing) instead of commonTest. composeApp hosting the shared navigation for
+    iOS moves to 2e, where the iOS app gets its Koin graph and engine.
+- **Still open for 2c "done":** the Android parity check on the phone from the shared UI.
 
 
 ## v2 status (branch `v2`, plan: V2_PLAN.md, approved 2026-11-02)
